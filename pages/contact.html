@@ -93,8 +93,8 @@
     <!-- PAGE HEADER -->
     <div class="page-header">
       <div class="section-label">Contact</div>
-      <h1>Request a Security Audit</h1>
-      <p>We assess your site, identify vulnerabilities, and deliver a clear written report — no generic proposals, no sales pitch.</p>
+      <h1>Let's Talk</h1>
+      <p>Leave your name and number. We'll call you back within 2 hours — no obligations, no sales pitch.</p>
     </div>
 
     <!-- CONTACT FORM + INFO -->
@@ -104,55 +104,38 @@
         <!-- FORM -->
         <div>
           <div class="section-label" style="margin-bottom: 20px;">Send a Request</div>
-          <form class="contact-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label for="fullname">Full Name</label>
-                <input type="text" id="fullname" name="fullname" required placeholder="Your full name">
-              </div>
-              <div class="form-group">
-                <label for="company-form">Company</label>
-                <input type="text" id="company-form" name="company" required placeholder="Company name">
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="phone-form">Phone</label>
-                <input type="tel" id="phone-form" name="phone" required placeholder="+91 ">
-              </div>
-              <div class="form-group">
-                <label for="email-form">Email</label>
-                <input type="email" id="email-form" name="email" required placeholder="you@company.com">
-              </div>
+          <form class="contact-form" netlify name="enquiry">
+            <div class="form-group">
+              <label for="fullname">Your Name <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="fullname" name="fullname" required placeholder="What should we call you?">
             </div>
 
             <div class="form-group">
-              <label for="service">Service Required</label>
-              <select id="service" name="service" required>
-                <option value="">Select a service</option>
-                <option value="security">Security Services</option>
-                <option value="facilities">Facilities Management</option>
-                <option value="audit">Security Audit Only</option>
-                <option value="surveillance">Intelligent Surveillance Enquiry</option>
-                <option value="multiple">Multiple Services</option>
-              </select>
+              <label for="contact-detail">Phone or Email <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="contact-detail" name="contact" required placeholder="+91 98XXX XXXXX or you@company.com">
             </div>
 
             <div class="form-group">
-              <label for="location-form">Site Address / Location</label>
-              <input type="text" id="location-form" name="location" required placeholder="Site address or area in Bangalore">
+              <label for="message" style="opacity:0.6;">Anything else? <span style="font-weight:400; font-size:12px;">(optional)</span></label>
+              <textarea id="message" name="message" rows="3" placeholder="Site location, service you need, or just say hello."></textarea>
             </div>
 
-            <div class="form-group">
-              <label for="details">Additional Details</label>
-              <textarea id="details" name="details" rows="5" placeholder="Tell us about your facility, specific concerns, or what you'd like us to focus on during the audit."></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-amber">
-              Submit Request
+            <button type="submit" class="btn btn-amber" style="width:100%; justify-content:center; padding: 16px 24px; font-size: 15px;">
+              Send Message
               <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </button>
+
+            <div style="display:flex; align-items:center; gap:12px; margin: 20px 0; color:rgba(255,255,255,0.25); font-size:12px;">
+              <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
+              or
+              <div style="flex:1; height:1px; background:rgba(255,255,255,0.1);"></div>
+            </div>
+
+            <a href="https://wa.me/919008977711?text=Hi%2C%20I%27d%20like%20to%20enquire%20about%20VAGT%20Security%20Services." target="_blank" rel="noopener" class="btn btn-whatsapp" style="width:100%; justify-content:center; padding: 16px 24px; font-size: 15px;">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Chat on WhatsApp
+            </a>
+            <p style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:12px; text-align:center;">We respond within 2 business hours. Your data is never shared.</p>
           </form>
         </div>
 
@@ -219,7 +202,7 @@
 
     <!-- FOOTER -->
     <footer class="site-footer">
-      <div class="footer-copy">© 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
+      <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
       <ul class="footer-nav">
         <li><a href="security.html">Security</a></li>
         <li><a href="facilities.html">Facilities</a></li>

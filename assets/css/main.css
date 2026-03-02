@@ -527,6 +527,8 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .btn-navy:hover { background: var(--navy-600); }
 .btn-ghost { background: transparent; color: var(--white); border: 1.5px solid rgba(255,255,255,0.22); }
 .btn-ghost:hover { border-color: var(--amber); color: var(--amber); }
+.btn-whatsapp { background: #25D366; color: #fff; }
+.btn-whatsapp:hover { background: #1ebe5c; }
 .btn-outline-navy { background: transparent; color: var(--navy); border: 1.5px solid rgba(13,31,60,0.25); }
 .btn-outline-navy:hover { background: var(--navy); color: var(--white); }
 
