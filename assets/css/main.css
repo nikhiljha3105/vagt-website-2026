@@ -776,3 +776,92 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 5px;
 }
 .diff-light .diff-item h4, .diff-light .diff-item h3 { color: var(--navy); }
+
+/* ── HERO SOCIAL PROOF ── */
+.hero-social-proof {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; color: rgba(255,255,255,0.55);
+  margin-bottom: 28px; letter-spacing: 0.2px;
+}
+.proof-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #25D366; flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(37,211,102,0.25);
+}
+
+/* ── CLIENT LOGO GRID ── */
+.client-logo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+.client-logo-tile {
+  background: white;
+  display: flex; align-items: center; justify-content: center;
+  padding: 28px 20px; min-height: 90px;
+  transition: box-shadow 0.2s;
+}
+.client-logo-tile:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.client-logo-tile img {
+  max-height: 52px; max-width: 140px;
+  width: auto; height: auto; object-fit: contain;
+  filter: grayscale(40%); opacity: 0.8;
+  transition: filter 0.25s, opacity 0.25s;
+}
+.client-logo-tile:hover img { filter: grayscale(0%); opacity: 1; }
+.ey-logo {
+  font-family: Arial Black, sans-serif;
+  font-size: 30px; font-weight: 900;
+  color: #2E2E38; letter-spacing: -1px;
+  opacity: 0.8; transition: opacity 0.25s;
+}
+.client-logo-tile:hover .ey-logo { opacity: 1; }
+
+/* ── CTA STRIP ACTIONS (dual buttons) ── */
+.cta-strip-actions {
+  display: flex; flex-direction: column; gap: 12px; align-items: flex-start; flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .cta-strip-actions { flex-direction: row; flex-wrap: wrap; }
+  .client-logo-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── FLOATING WHATSAPP BUTTON ── */
+.whatsapp-float {
+  position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+  background: #25D366; color: white;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px 14px 16px;
+  border-radius: 50px;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.45);
+  text-decoration: none;
+  font-size: 14px; font-weight: 600;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: wa-pulse 2.5s ease-in-out infinite;
+}
+.whatsapp-float:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(37,211,102,0.55);
+  animation: none;
+}
+.whatsapp-float-label { white-space: nowrap; }
+@keyframes wa-pulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(37,211,102,0.45); }
+  50% { box-shadow: 0 4px 28px rgba(37,211,102,0.7), 0 0 0 8px rgba(37,211,102,0.1); }
+}
+@media (max-width: 600px) {
+  .whatsapp-float { bottom: 20px; right: 16px; padding: 12px 16px 12px 14px; }
+  .whatsapp-float-label { display: none; }
+  .whatsapp-float { border-radius: 50%; width: 56px; height: 56px; padding: 0; justify-content: center; }
+}
+
+/* ── REAL LOGO IMAGE IN SIDEBAR ── */
+.logo-img-wrap {
+  width: 44px; height: 44px; border-radius: 8px;
+  background: var(--amber); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.logo-img {
+  width: 38px; height: auto; object-fit: contain;
+}
