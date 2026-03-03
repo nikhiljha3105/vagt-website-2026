@@ -70,7 +70,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .logo-svg { width: 42px; height: 42px; flex-shrink: 0; }
 .logo-text-block { display: flex; flex-direction: column; }
 .logo-wordmark {
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 900;
   letter-spacing: 3px;
   line-height: 1;
@@ -118,9 +118,9 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 /* Nav */
 .sidebar-nav { flex: 1; padding: 14px 0; }
 .nav-group-label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  color: rgba(255,255,255,0.2);
+  color: rgba(245,196,0,0.6);
   text-transform: uppercase;
   letter-spacing: 2px;
   padding: 10px 22px 4px;
@@ -857,11 +857,24 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 
 /* ── REAL LOGO IMAGE IN SIDEBAR ── */
 .logo-img-wrap {
-  width: 44px; height: 44px; border-radius: 8px;
+  width: 52px; height: 52px; border-radius: 8px;
   background: var(--amber); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
 .logo-img {
-  width: 38px; height: auto; object-fit: contain;
+  width: 44px; height: auto; object-fit: contain;
+}
+
+/* ── HERO GUARD ICON (replaces 'g') ── */
+.guard-icon {
+  height: 0.78em;
+  width: auto;
+  display: inline-block;
+  vertical-align: 0.06em;
+  fill: rgba(245,196,0,0.45);
+  transition: fill 0.3s;
+}
+.hero-brand-display:hover .guard-icon {
+  fill: rgba(245,196,0,0.75);
 }
