@@ -145,7 +145,22 @@
         </button>
       </div>
 
-      <section class="section">
+      <!-- ── TAB NAV ── -->
+      <div class="dash-tabs" role="tablist">
+        <button id="tabBtn-complaints" class="dash-tab active" role="tab"
+                onclick="showTab('complaints')" aria-selected="true">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Complaints &amp; Requests
+        </button>
+        <button id="tabBtn-training" class="dash-tab" role="tab"
+                onclick="showTab('training')" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          Training
+        </button>
+      </div>
+
+      <!-- ══ TAB: COMPLAINTS ══ -->
+      <section id="tab-complaints" class="section" role="tabpanel">
         <div class="grid-2-1" style="max-width:960px;">
 
           <!-- LEFT: Submit form -->
@@ -219,6 +234,84 @@
                 </svg>
                 Loading your submissions…
               </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══ TAB: TRAINING ══ -->
+      <section id="tab-training" class="section" role="tabpanel" style="display:none;">
+        <div class="section-head" style="margin-bottom:28px;">
+          <div class="section-label">Training</div>
+          <h2 class="section-title">Client Training Resources</h2>
+          <p class="section-sub">Guides and resources to help you get the most from your VAGT security partnership.</p>
+        </div>
+
+        <div class="training-coming-banner">
+          <strong style="color:var(--navy);">Coming soon.</strong>
+          Training materials are being prepared for your team. You'll be notified by email when content is ready to access.
+        </div>
+
+        <div class="training-grid">
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <div class="training-card-title">Using the Client Portal</div>
+            <div class="training-card-desc">How to raise complaints, track your requests, and communicate with the VAGT team through this portal.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~10 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="training-card-title">Understanding Your Security Plan</div>
+            <div class="training-card-desc">What VAGT provides at your site — guard schedules, patrol routes, escalation procedures, and SLAs.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~15 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a2 2 0 011.72-2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91"/><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </div>
+            <div class="training-card-title">Emergency Contacts & Procedures</div>
+            <div class="training-card-desc">Who to call, when to call, and what happens step-by-step during a security emergency at your site.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~12 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+            <div class="training-card-title">Incident Reporting Guide</div>
+            <div class="training-card-desc">How to document and report security incidents effectively so VAGT can investigate and respond quickly.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~10 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="training-card-title">CCTV & Surveillance Overview</div>
+            <div class="training-card-desc">What your surveillance system covers, data retention policies, and how to request footage when needed.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~15 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
             </div>
           </div>
 
@@ -355,6 +448,16 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
   }
 });
 
+/* ── Dashboard tabs ── */
+function showTab(name) {
+  ['complaints','training'].forEach(function(p) {
+    document.getElementById('tab-' + p).style.display = p === name ? 'block' : 'none';
+    const btn = document.getElementById('tabBtn-' + p);
+    btn.classList.toggle('active', p === name);
+    btn.setAttribute('aria-selected', p === name ? 'true' : 'false');
+  });
+}
+
 /* ── Dashboard ── */
 function showDashboard(client) {
   document.getElementById('loginView').style.display     = 'none';
@@ -362,6 +465,7 @@ function showDashboard(client) {
   document.getElementById('dashGreeting').textContent    = 'Hello, ' + client.name;
   document.getElementById('dashMeta').textContent        =
     client.company + (client.site ? ' · ' + client.site : '');
+  showTab('complaints');
   loadComplaints();
 }
 

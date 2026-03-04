@@ -332,6 +332,11 @@
           <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
           Pay Slips
         </button>
+        <button id="tabBtn-training" class="dash-tab" role="tab"
+                onclick="showTab('training')" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          Training
+        </button>
       </div>
 
       <!-- ══ TAB: ATTENDANCE ══ -->
@@ -453,6 +458,96 @@
               Loading your leave history…
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ══ TAB: TRAINING ══ -->
+      <section id="tab-training" class="section" role="tabpanel" style="display:none;">
+        <div class="section-head" style="margin-bottom:28px;">
+          <div class="section-label">Training</div>
+          <h2 class="section-title">Your Training Modules</h2>
+          <p class="section-sub">Complete these modules to stay certified and ready for duty. New content is added regularly.</p>
+        </div>
+
+        <div class="training-coming-banner">
+          <strong style="color:var(--navy);">Content coming soon.</strong>
+          Training videos and assessments are being prepared. You'll receive an SMS when your first module is ready to start.
+        </div>
+
+        <div class="training-grid">
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="training-card-title">Security Guard Protocols</div>
+            <div class="training-card-desc">Standard operating procedures, patrol duties, incident reporting, and chain of command.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~45 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            </div>
+            <div class="training-card-title">Fire Safety & Emergency Response</div>
+            <div class="training-card-desc">Fire prevention, evacuation procedures, using extinguishers, and assembly point protocols.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~30 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a2 2 0 011.72-2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91"/></svg>
+            </div>
+            <div class="training-card-title">First Aid Basics</div>
+            <div class="training-card-desc">Basic life support, treating minor injuries, recognising emergencies, and when to call for help.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~40 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="training-card-title">Post Orders & Site Rules</div>
+            <div class="training-card-desc">Site-specific rules, post orders, visitor management, and access control policies.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~20 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+            </div>
+            <div class="training-card-title">Equipment Handling</div>
+            <div class="training-card-desc">Walkie-talkies, access control panels, CCTV monitoring basics, and equipment care.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~35 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
+          <div class="training-card coming-soon">
+            <div class="training-card-icon">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div class="training-card-title">Professional Conduct</div>
+            <div class="training-card-desc">Client communication, managing conflict, appearance standards, and teamwork on duty.</div>
+            <div class="training-card-footer">
+              <span class="training-card-duration">~25 min</span>
+              <span class="training-badge-soon">Coming Soon</span>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -788,7 +883,7 @@ function startClock() {
 
 /* ─────────────────── DASHBOARD TABS ─────────────────── */
 function showTab(name) {
-  ['attendance','leave','payslips'].forEach(function(p) {
+  ['attendance','leave','payslips','training'].forEach(function(p) {
     document.getElementById('tab-' + p).style.display = p === name ? 'block' : 'none';
     const btn = document.getElementById('tabBtn-' + p);
     btn.classList.toggle('active', p === name);
