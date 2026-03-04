@@ -1064,3 +1064,170 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   display: inline-flex; align-items: center; gap: 7px;
 }
 .portal-signout svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* ── REGISTRATION: STEP INDICATOR ── */
+.reg-step-indicator {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; margin-top: 22px;
+}
+.rsi-step {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.3);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  transition: background 0.25s, color 0.25s, border-color 0.25s;
+}
+.rsi-step.active { background: var(--amber); color: var(--navy); border-color: var(--amber); }
+.rsi-step.done   { background: rgba(37,211,102,0.2); color: #25D366; border-color: rgba(37,211,102,0.35); }
+.rsi-line {
+  width: 36px; height: 1px;
+  background: rgba(255,255,255,0.1);
+  transition: background 0.25s;
+}
+.rsi-line.done { background: rgba(37,211,102,0.3); }
+.rsi-label-row {
+  display: flex; align-items: flex-start; justify-content: center;
+  gap: 0; margin-top: 8px;
+}
+.rsi-label {
+  width: 28px; text-align: center;
+  font-size: 8.5px; font-weight: 600;
+  color: rgba(255,255,255,0.2); text-transform: uppercase;
+  letter-spacing: 0.5px; line-height: 1.3;
+}
+.rsi-label.active { color: var(--amber); }
+.rsi-label.done   { color: rgba(37,211,102,0.6); }
+/* spacer to align labels with lines */
+.rsi-label-spacer { width: 36px; flex-shrink: 0; }
+
+/* ── PHONE INPUT WITH +91 PREFIX ── */
+.phone-input-wrap {
+  display: flex;
+}
+.phone-prefix {
+  padding: 12px 14px;
+  background: var(--warm-grey);
+  border: 1.5px solid var(--border);
+  border-right: none;
+  font-size: 14px; color: var(--text-mid);
+  font-weight: 600; flex-shrink: 0;
+  line-height: normal;
+}
+.phone-input-wrap input { border-left: none !important; flex: 1; }
+.phone-input-wrap input:focus { border-left: 1.5px solid var(--navy) !important; }
+
+/* ── OTP INPUT ── */
+.otp-input {
+  letter-spacing: 10px !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  text-align: center !important;
+  font-variant-numeric: tabular-nums !important;
+  padding: 14px 10px !important;
+}
+
+/* ── EMPLOYEE ID REVEAL BOX ── */
+.employee-id-box {
+  background: var(--navy);
+  padding: 22px 24px; text-align: center;
+  margin-bottom: 4px;
+}
+.employee-id-box-label {
+  font-size: 9px; font-weight: 700;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase; letter-spacing: 2.5px;
+  margin-bottom: 12px;
+}
+.employee-id-box-value {
+  font-size: 28px; font-weight: 900;
+  color: var(--amber); letter-spacing: 4px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.employee-id-box-note {
+  font-size: 11px; color: rgba(255,255,255,0.35);
+  margin-top: 12px; line-height: 1.6;
+}
+
+/* ── FIELD HINT TEXT ── */
+.field-hint {
+  font-size: 11px; color: var(--text-faint);
+  margin-top: 5px; display: block; line-height: 1.55;
+}
+
+/* ── DASHBOARD TAB NAVIGATION ── */
+.dash-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  padding: 0 56px;
+  background: var(--white);
+  position: sticky; top: 0; z-index: 10;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.dash-tab {
+  padding: 16px 22px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-muted); background: none; border: none;
+  cursor: pointer; position: relative;
+  transition: color 0.15s;
+  display: flex; align-items: center; gap: 8px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.dash-tab svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; opacity: 0.7; }
+.dash-tab:hover { color: var(--navy); }
+.dash-tab.active { color: var(--navy); }
+.dash-tab.active svg { opacity: 1; }
+.dash-tab.active::after {
+  content: ''; position: absolute;
+  bottom: -2px; left: 0; right: 0;
+  height: 2px; background: var(--amber);
+}
+@media (max-width: 900px) {
+  .dash-tabs { padding: 0 16px; }
+  .dash-tab  { padding: 14px 14px; font-size: 12px; }
+}
+
+/* ── LEAVE ITEM ── */
+.leave-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 0; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.leave-item:last-child { border-bottom: none; }
+.leave-item-type {
+  font-size: 14px; font-weight: 700; color: var(--navy);
+  flex: 1; min-width: 120px;
+}
+.leave-item-dates {
+  font-size: 12px; color: var(--text-muted); font-weight: 500;
+}
+
+/* ── PAY SLIP ITEM ── */
+.payslip-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 0; border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.payslip-item:last-child { border-bottom: none; }
+.payslip-period { font-size: 15px; font-weight: 700; color: var(--navy); flex: 1; }
+.payslip-amount { font-size: 14px; font-weight: 600; color: var(--text-mid); min-width: 90px; }
+
+/* ── INFO STRIP (leave balance etc) ── */
+.info-strip {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 2px; margin-bottom: 32px; max-width: 540px;
+}
+.info-strip-cell {
+  background: var(--white); border: 1px solid var(--border);
+  padding: 18px 16px; text-align: center;
+}
+.info-strip-value {
+  font-size: 26px; font-weight: 900; color: var(--navy);
+  letter-spacing: -1px; line-height: 1;
+}
+.info-strip-label {
+  font-size: 10px; font-weight: 600; color: var(--text-muted);
+  margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.3;
+}
