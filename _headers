@@ -1,0 +1,58 @@
+# ══════════════════════════════════════════════════════════════
+# VAGT Security Services — HTTP Security Headers
+# Compatible with: Cloudflare Pages, Netlify, Vercel (via vercel.json)
+#
+# These headers apply at the network layer and are authoritative.
+# The matching <meta http-equiv> tags in each HTML file are a
+# fallback for direct-file access and developer reference.
+# ══════════════════════════════════════════════════════════════
+
+# ── Apply to all paths ──────────────────────────────────────
+/*
+  # Prevent embedding in iframes (clickjacking)
+  X-Frame-Options: DENY
+  # Block MIME-type sniffing
+  X-Content-Type-Options: nosniff
+  # Strict referrer — only send origin, not full URL, on cross-origin requests
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Disable browser features not needed on this site
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), interest-cohort=()
+  # Remove X-XSS-Protection (legacy; disabled to avoid IE quirks)
+  X-XSS-Protection: 0
+  # Content-Security-Policy (applied globally; connect-src covers portal API calls)
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';
+
+# ── Cache-Control: never cache portal or admin pages ────────
+/pages/portal.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/pages/employee-portal.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/pages/client-portal.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/pages/admin-portal.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/pages/admin-employees.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+/pages/admin-complaints.html
+  Cache-Control: no-store, no-cache, must-revalidate
+
+# ── Static assets: safe to cache ────────────────────────────
+/assets/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Documents: no caching, no indexing ──────────────────────
+/assets/docs/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
+
+/assets/brochures/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow

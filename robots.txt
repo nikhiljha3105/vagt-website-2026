@@ -1,0 +1,29 @@
+# VAGT Security Services — robots.txt
+# Public pages are indexable. All portals, admin areas, and
+# internal documents are blocked from search engine crawlers.
+
+User-agent: *
+
+# ── Portal & admin pages ─────────────────────────────────────
+Disallow: /pages/portal.html
+Disallow: /pages/employee-portal.html
+Disallow: /pages/client-portal.html
+Disallow: /pages/admin-portal.html
+Disallow: /pages/admin-employees.html
+Disallow: /pages/admin-complaints.html
+
+# ── Internal documents & brochures ───────────────────────────
+Disallow: /assets/docs/
+Disallow: /assets/brochures/
+
+# ── Allow public pages ───────────────────────────────────────
+Allow: /index.html
+Allow: /pages/about.html
+Allow: /pages/contact.html
+Allow: /pages/security.html
+Allow: /pages/facilities.html
+Allow: /pages/surveillance.html
+Allow: /assets/css/
+Allow: /assets/images/
+
+Sitemap: https://vagtsecurityservices.com/sitemap.xml
