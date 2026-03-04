@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Account | VAGT Security Services</title>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .portal-layout { display: flex; min-height: 100vh; }
+
+    /* Portal Sidebar */
+    .portal-sidebar {
+      width: 240px; min-width: 240px;
+      background: var(--navy);
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 50; overflow-y: auto;
+    }
+    .portal-sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .portal-logo-wrap {
+      width: 80px; height: 36px;
+      background: var(--amber); border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 4px 8px; margin-bottom: 14px;
+    }
+    .portal-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .portal-user-chip {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .portal-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(245,196,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--amber);
+      flex-shrink: 0;
+    }
+    .portal-user-name { font-size: 13px; font-weight: 600; color: var(--white); }
+    .portal-user-role { font-size: 11px; color: rgba(255,255,255,0.35); }
+
+    .portal-nav { flex: 1; padding: 12px 0; }
+    .portal-nav-label {
+      font-size: 9px; font-weight: 700;
+      color: rgba(245,196,0,0.6);
+      text-transform: uppercase; letter-spacing: 2px;
+      padding: 10px 20px 4px;
+    }
+    .portal-nav-link {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 20px;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.55);
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+    .portal-nav-link:hover { background: rgba(255,255,255,0.05); color: var(--white); }
+    .portal-nav-link.active { color: var(--amber); background: rgba(245,196,0,0.07); }
+    .portal-nav-link.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber); }
+    .portal-nav-link svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; opacity: 0.65; }
+    .portal-nav-link.active svg, .portal-nav-link:hover svg { opacity: 1; }
+    .coming-tag { margin-left: auto; font-size: 8px; font-weight: 700; background: rgba(245,196,0,0.12); color: var(--amber); padding: 2px 7px; letter-spacing: 0.5px; text-transform: uppercase; }
+
+    .portal-sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .btn-signout {
+      width: 100%; padding: 9px; font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);
+      border: none; border-radius: 6px; cursor: pointer; font-family: var(--font);
+      transition: color 0.2s, background 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center;
+    }
+    .btn-signout:hover { color: var(--white); background: rgba(255,255,255,0.1); }
+    .btn-signout svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* Main content */
+    .portal-main {
+      margin-left: 240px;
+      flex: 1;
+      background: var(--warm-white);
+      min-height: 100vh;
+    }
+    .portal-topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 36px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .portal-topbar h1 { font-size: 20px; font-weight: 700; color: var(--text); }
+    .topbar-date { font-size: 13px; color: var(--text-faint); }
+
+    .portal-content { padding: 32px 36px; }
+
+    /* Cards */
+    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    .dash-card {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 24px;
+      border: 1px solid var(--border);
+    }
+    .dash-card-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .dash-card-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
+    .dash-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
+    .dash-card-icon {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: var(--amber-soft); display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .dash-card-icon svg { width: 20px; height: 20px; stroke: var(--amber-dark); fill: none; stroke-width: 1.8; }
+
+    .section-card {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .section-card-head {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-card-head h2 { font-size: 15px; font-weight: 700; color: var(--text); }
+    .section-card-body { padding: 24px; }
+
+    .coming-soon-block {
+      text-align: center; padding: 32px 24px;
+      color: var(--text-faint);
+    }
+    .coming-soon-block svg { width: 40px; height: 40px; stroke: var(--border); fill: none; stroke-width: 1.5; margin: 0 auto 12px; display: block; }
+    .coming-soon-block p { font-size: 14px; }
+    .coming-soon-block span { font-size: 12px; color: var(--amber); font-weight: 600; }
+
+    .notice-bar {
+      background: rgba(245,196,0,0.1);
+      border: 1px solid rgba(245,196,0,0.3);
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-bottom: 24px;
+    }
+    .notice-bar svg { width: 18px; height: 18px; stroke: var(--amber-dark); fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 1px; }
+    .notice-bar p { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+
+    @media (max-width: 900px) {
+      .portal-sidebar { transform: translateX(-240px); transition: transform 0.28s ease; }
+      .portal-sidebar.open { transform: translateX(0); }
+      .portal-main { margin-left: 0; }
+      .dash-grid { grid-template-columns: 1fr 1fr; }
+      .portal-content { padding: 20px; }
+      .portal-topbar { padding: 16px 20px; }
+    }
+    @media (max-width: 560px) {
+      .dash-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="portal-layout">
+
+  <!-- Sidebar -->
+  <aside class="portal-sidebar" id="portalSidebar">
+    <div class="portal-sidebar-header">
+      <a href="../index.html" class="portal-logo-wrap">
+        <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT">
+      </a>
+      <div class="portal-user-chip">
+        <div class="portal-avatar" id="user-avatar">—</div>
+        <div>
+          <div class="portal-user-name" id="user-name">Loading…</div>
+          <div class="portal-user-role">VAGT Employee</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="portal-nav">
+      <div class="portal-nav-label">My Account</div>
+      <a href="employee-dashboard.html" class="portal-nav-link active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="#" class="portal-nav-link">
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+        My Details
+        <span class="coming-tag">Soon</span>
+      </a>
+
+      <div class="portal-nav-label">Work</div>
+      <a href="#" class="portal-nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+        <span class="coming-tag">Soon</span>
+      </a>
+      <a href="#" class="portal-nav-link">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Payslips
+        <span class="coming-tag">Soon</span>
+      </a>
+      <a href="#" class="portal-nav-link">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Attendance
+        <span class="coming-tag">Soon</span>
+      </a>
+
+      <div class="portal-nav-label">Company</div>
+      <a href="#" class="portal-nav-link">
+        <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        Announcements
+        <span class="coming-tag">Soon</span>
+      </a>
+    </nav>
+
+    <div class="portal-sidebar-footer">
+      <button class="btn-signout" id="signout-btn">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="portal-main">
+    <div class="portal-topbar">
+      <h1>Good to see you, <span id="greeting-name">—</span></h1>
+      <span class="topbar-date" id="today-date"></span>
+    </div>
+
+    <div class="portal-content">
+
+      <div class="notice-bar">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p>Your full portal is being set up. Payslips, scheduling, and attendance tracking are coming soon. Your account manager will notify you when each feature goes live.</p>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dash-card-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div class="dash-card-label">Account</div>
+          <div class="dash-card-value" id="account-email" style="font-size:14px; word-break:break-all;">—</div>
+          <div class="dash-card-sub">Logged in employee</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="dash-card-label">Upcoming Shifts</div>
+          <div class="dash-card-value">—</div>
+          <div class="dash-card-sub">Scheduling coming soon</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <div class="dash-card-label">Latest Payslip</div>
+          <div class="dash-card-value">—</div>
+          <div class="dash-card-sub">Payslips coming soon</div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-head">
+          <h2>Announcements</h2>
+        </div>
+        <div class="section-card-body">
+          <div class="coming-soon-block">
+            <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
+            <p>No announcements yet.</p>
+            <span>Check back soon.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-card-head">
+          <h2>Need help?</h2>
+        </div>
+        <div class="section-card-body">
+          <p style="font-size:14px; color:var(--text-mid); line-height:1.7;">Contact your supervisor or reach the VAGT office directly.</p>
+          <p style="margin-top:12px; font-size:14px;">
+            <a href="tel:+919008977711" style="color:var(--amber); font-weight:600;">+91 90089 77711</a> &nbsp;·&nbsp;
+            <a href="mailto:info@vagtsecurityservices.com" style="color:var(--amber); font-weight:600;">info@vagtsecurityservices.com</a>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ── SAME CONFIG AS LOGIN PAGE ──
+  const firebaseConfig = {
+    apiKey: "REPLACE_WITH_YOUR_API_KEY",
+    authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+    appId: "REPLACE_WITH_YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, user => {
+    if (!user) {
+      window.location.href = 'employee-portal.html';
+      return;
+    }
+    const name = user.displayName || user.email.split('@')[0];
+    const initials = name.charAt(0).toUpperCase();
+    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-name').textContent = name;
+    document.getElementById('greeting-name').textContent = name;
+    document.getElementById('account-email').textContent = user.email;
+  });
+
+  // Date
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Sign out
+  document.getElementById('signout-btn').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'employee-portal.html';
+  });
+</script>
+
+</body>
+</html>
