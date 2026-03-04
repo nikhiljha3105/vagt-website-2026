@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Block portal and dashboard pages from indexing
+Disallow: /pages/employee-portal.html
+Disallow: /pages/employee-dashboard.html
+Disallow: /pages/client-portal.html
+Disallow: /pages/client-dashboard.html
+
+Sitemap: https://vagtservices.com/sitemap.xml
