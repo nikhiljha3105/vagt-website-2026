@@ -865,3 +865,202 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .logo-img {
   width: 38px; height: auto; object-fit: contain;
 }
+
+/* ══════════════════════════════════════════════
+   PORTAL — shared login + dashboard styles
+   ══════════════════════════════════════════════ */
+
+/* Active portal button in sidebar */
+.portal-btn-active {
+  color: var(--amber) !important;
+  background: rgba(245,196,0,0.09) !important;
+  border-left: 2px solid var(--amber);
+}
+.portal-btn-active svg { opacity: 1 !important; }
+
+/* ── LOGIN CARD ── */
+.portal-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--warm-white);
+}
+.portal-login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 40px rgba(13,31,60,0.10);
+}
+.portal-login-header {
+  background: var(--navy);
+  padding: 36px 36px 30px;
+  text-align: center;
+}
+.portal-login-icon {
+  width: 52px; height: 52px;
+  background: rgba(245,196,0,0.1);
+  border: 1px solid rgba(245,196,0,0.22);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.portal-login-icon svg {
+  width: 22px; height: 22px;
+  stroke: var(--amber); fill: none; stroke-width: 1.8;
+}
+.portal-role-badge {
+  display: inline-block;
+  background: rgba(245,196,0,0.1);
+  color: var(--amber);
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 4px 12px; margin-bottom: 14px;
+  border: 1px solid rgba(245,196,0,0.18);
+}
+.portal-login-header h2 {
+  font-size: 20px; font-weight: 800;
+  color: var(--white); margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+.portal-login-header p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.52);
+  line-height: 1.65;
+}
+.portal-login-body { padding: 30px 36px 36px; }
+
+/* Inline feedback */
+.portal-error {
+  background: rgba(196,30,30,0.07);
+  border: 1px solid rgba(196,30,30,0.22);
+  color: var(--red);
+  font-size: 13px; padding: 12px 14px;
+  margin-bottom: 16px; line-height: 1.5;
+}
+.portal-success-msg {
+  background: rgba(37,211,102,0.08);
+  border: 1px solid rgba(37,211,102,0.25);
+  color: #0e8042;
+  font-size: 13px; padding: 12px 14px;
+  margin-top: 12px; line-height: 1.5;
+}
+
+/* ── EMPLOYEE: ATTENDANCE CARD ── */
+.attendance-card {
+  max-width: 540px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 40px 40px 36px;
+  box-shadow: 0 4px 24px rgba(13,31,60,0.06);
+}
+.attendance-clock {
+  font-size: clamp(38px, 6vw, 58px);
+  font-weight: 900; color: var(--navy);
+  letter-spacing: -2px; line-height: 1;
+  text-align: center; margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.attendance-date-label {
+  font-size: 12px; color: var(--text-muted);
+  text-align: center; margin-bottom: 28px;
+  font-weight: 500;
+}
+.attendance-status-wrap {
+  text-align: center; margin-bottom: 24px;
+}
+.attendance-status-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 7px 18px; border-radius: 100px;
+}
+.status-active  { background: rgba(37,211,102,0.12); color: #0e8042; border: 1px solid rgba(37,211,102,0.3); }
+.status-idle    { background: rgba(245,196,0,0.12); color: #9a7d00; border: 1px solid rgba(245,196,0,0.3); }
+.status-done    { background: rgba(13,31,60,0.07); color: var(--navy); border: 1px solid rgba(13,31,60,0.15); }
+.status-unknown { background: var(--warm-grey); color: var(--text-muted); border: 1px solid var(--border); }
+
+.attendance-actions {
+  display: flex; gap: 12px; justify-content: center;
+  margin-bottom: 28px;
+}
+
+/* Attendance log */
+.attendance-log { border-top: 1px solid var(--border); padding-top: 22px; }
+.attendance-log-label {
+  font-size: 9px; font-weight: 700;
+  color: var(--text-faint); text-transform: uppercase;
+  letter-spacing: 2px; margin-bottom: 12px;
+}
+.attendance-log-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+.attendance-log-item:last-child { border-bottom: none; }
+.log-key { color: var(--text-muted); font-weight: 500; }
+.log-val { color: var(--navy); font-weight: 700; }
+
+/* ── CLIENT: COMPLAINTS ── */
+.complaint-card {
+  max-width: 640px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  padding: 36px;
+  box-shadow: 0 4px 24px rgba(13,31,60,0.06);
+}
+.complaints-history { margin-top: 48px; }
+.complaints-history-title {
+  font-size: 9px; font-weight: 700;
+  color: var(--text-faint); text-transform: uppercase;
+  letter-spacing: 2px; margin-bottom: 16px;
+}
+.complaint-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 16px 0; border-bottom: 1px solid var(--border);
+}
+.complaint-item:last-child { border-bottom: none; }
+.complaint-item-id {
+  font-size: 9px; font-weight: 700; color: var(--amber);
+  text-transform: uppercase; letter-spacing: 1px;
+  background: var(--amber-soft); padding: 3px 8px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.complaint-item-body { flex: 1; min-width: 0; }
+.complaint-item-subject {
+  font-size: 14px; font-weight: 600; color: var(--navy);
+  margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.complaint-item-meta {
+  font-size: 11px; color: var(--text-muted);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.complaint-status-pill {
+  display: inline-block; font-size: 9px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 100px;
+}
+.pill-open     { background: rgba(245,196,0,0.15); color: #9a7d00; }
+.pill-resolved { background: rgba(37,211,102,0.1); color: #0e8042; }
+.pill-progress { background: rgba(13,31,60,0.08); color: var(--navy); }
+.pill-closed   { background: var(--warm-grey); color: var(--text-muted); }
+
+/* Empty state */
+.portal-empty-state {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-faint); font-size: 13px; line-height: 1.7;
+}
+.portal-empty-state svg {
+  display: block; margin: 0 auto 14px;
+  stroke: var(--border); fill: none; stroke-width: 1.5;
+}
+
+/* Dashboard sign-out button in page-header */
+.portal-signout {
+  margin-top: 18px;
+  font-size: 11px; padding: 8px 18px;
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.portal-signout svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }

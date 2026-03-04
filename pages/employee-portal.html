@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Employee Portal | VAGT Security Services</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    </div>
+
+    <div class="sidebar-portals">
+      <a href="employee-portal.html" class="portal-btn portal-btn-active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Employee
+      </a>
+      <a href="client-portal.html" class="portal-btn">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Client
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Main</div>
+      <a href="../index.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+
+      <div class="nav-group-label">Services</div>
+      <a href="security.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Security Services
+      </a>
+      <a href="facilities.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Facilities Management
+      </a>
+      <a href="surveillance.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Intelligent Surveillance
+        <span class="nav-badge">Soon</span>
+      </a>
+
+      <div class="nav-group-label">Company</div>
+      <a href="about.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        About VAGT
+      </a>
+      <a href="contact.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Contact / Audit
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-label">Get in touch</div>
+      <p>
+        <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br>
+        <a href="tel:+919008977711">+91 90089 77711</a>
+      </p>
+    </div>
+  </aside>
+  <!-- ══ END SIDEBAR ══ -->
+
+  <main class="main">
+
+    <!-- ══════════════ LOGIN VIEW ══════════════ -->
+    <div id="loginView" class="portal-login-wrap">
+      <div class="portal-login-card">
+
+        <div class="portal-login-header">
+          <div class="portal-login-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div class="portal-role-badge">Employee Access</div>
+          <h2>Employee Sign In</h2>
+          <p>Enter your Employee ID and password to access your attendance dashboard.</p>
+        </div>
+
+        <div class="portal-login-body">
+          <div id="loginError" class="portal-error" style="display:none;" role="alert"></div>
+
+          <form id="loginForm" class="contact-form" novalidate>
+            <div class="form-group">
+              <label for="empId">Employee ID <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="empId" name="employee_id" required
+                     placeholder="e.g. VAGT-0042" autocomplete="username"
+                     spellcheck="false" autocapitalize="none">
+            </div>
+            <div class="form-group">
+              <label for="empPassword">Password <span style="color:var(--amber)">*</span></label>
+              <input type="password" id="empPassword" name="password" required
+                     placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button type="submit" id="loginBtn" class="btn btn-amber"
+                    style="width:100%; justify-content:center; padding:15px; font-size:14px; margin-top:4px;">
+              Sign In
+              <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+
+          <p style="text-align:center; margin-top:20px; font-size:12px; color:var(--text-muted);">
+            Forgot your credentials?
+            <a href="mailto:info@vagtsecurityservices.com" style="color:var(--navy); font-weight:600;">Contact HR / Admin</a>
+          </p>
+        </div>
+
+      </div>
+    </div>
+    <!-- ══════════════ END LOGIN VIEW ══════════════ -->
+
+
+    <!-- ══════════════ DASHBOARD VIEW ══════════════ -->
+    <div id="dashboardView" style="display:none;">
+
+      <div class="page-header">
+        <div class="section-label">Employee Portal</div>
+        <h1 id="dashGreeting">Welcome</h1>
+        <p id="dashMeta" style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;"></p>
+        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+
+      <section class="section">
+        <div class="section-head" style="margin-bottom:32px;">
+          <div class="section-label">Attendance</div>
+          <h2 class="section-title">Today's Check-In</h2>
+        </div>
+
+        <div class="attendance-card">
+          <!-- Live clock -->
+          <div class="attendance-clock" id="liveClock" aria-live="off"></div>
+          <div class="attendance-date-label" id="liveDate"></div>
+
+          <!-- Status badge -->
+          <div class="attendance-status-wrap">
+            <div id="attendanceStatusBadge" class="attendance-status-badge status-unknown">Loading…</div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="attendance-actions">
+            <button id="checkInBtn" class="btn btn-amber" onclick="doCheckIn()" style="display:none;">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg>
+              Check In
+            </button>
+            <button id="checkOutBtn" class="btn btn-navy" onclick="doCheckOut()" style="display:none;">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Check Out
+            </button>
+          </div>
+
+          <!-- Inline feedback -->
+          <div id="attendanceMsg" style="display:none;" role="alert"></div>
+
+          <!-- Today's log -->
+          <div id="todayLog" class="attendance-log" style="display:none;">
+            <div class="attendance-log-label">Today's Record</div>
+            <div class="attendance-log-item">
+              <span class="log-key">Check-in time</span>
+              <span id="logCheckIn" class="log-val">—</span>
+            </div>
+            <div class="attendance-log-item">
+              <span class="log-key">Check-out time</span>
+              <span id="logCheckOut" class="log-val">—</span>
+            </div>
+            <div class="attendance-log-item">
+              <span class="log-key">Duration on duty</span>
+              <span id="logDuration" class="log-val">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
+        <ul class="footer-nav">
+          <li><a href="../index.html">Home</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
+        </ul>
+      </footer>
+
+    </div>
+    <!-- ══════════════ END DASHBOARD VIEW ══════════════ -->
+
+  </main>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────────────
+   VAGT Employee Portal
+   API_BASE: update this to your backend URL before deploying.
+   Expected API contract:
+
+   POST /api/auth/employee/login
+     Body:    { employee_id: string, password: string }
+     Returns: { token: string, employee: { name, employee_id, role, site } }
+
+   GET  /api/attendance/today          (Bearer token required)
+     Returns: {
+       checked_in: boolean,
+       check_in_time: string|null,   // ISO 8601
+       check_out_time: string|null,  // ISO 8601
+       duration_minutes: number|null
+     }
+
+   POST /api/attendance/checkin        (Bearer token required)
+     Returns: { check_in_time: string }
+
+   POST /api/attendance/checkout       (Bearer token required)
+     Returns: { check_out_time: string, duration_minutes: number }
+───────────────────────────────────────────────────────── */
+const API_BASE = 'https://api.vagtsecurityservices.com';
+
+/* ── Helpers ── */
+async function api(method, path, body) {
+  const token = localStorage.getItem('vagt_emp_token');
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body)  opts.body = JSON.stringify(body);
+
+  let res;
+  try {
+    res = await fetch(API_BASE + path, opts);
+  } catch {
+    throw new Error('Network error — please check your connection and try again.');
+  }
+
+  if (res.status === 401) {
+    logout();
+    return null;
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Something went wrong (error ' + res.status + ').');
+  }
+  return res.json();
+}
+
+function formatTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('en-IN', {
+    hour: '2-digit', minute: '2-digit', hour12: true,
+  });
+}
+
+function formatDuration(minutes) {
+  if (minutes == null) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return m + 'm';
+  return h + 'h ' + (m > 0 ? m + 'm' : '');
+}
+
+/* ── Live clock ── */
+function startClock() {
+  function tick() {
+    const now = new Date();
+    document.getElementById('liveClock').textContent =
+      now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    document.getElementById('liveDate').textContent =
+      now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+/* ── Login form ── */
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn    = document.getElementById('loginBtn');
+  const errEl  = document.getElementById('loginError');
+  const empId  = document.getElementById('empId').value.trim();
+  const pass   = document.getElementById('empPassword').value;
+
+  if (!empId || !pass) {
+    errEl.textContent = 'Please enter your Employee ID and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    const data = await api('POST', '/api/auth/employee/login', {
+      employee_id: empId,
+      password: pass,
+    });
+    if (!data) return; // 401 handled in api()
+    localStorage.setItem('vagt_emp_token', data.token);
+    localStorage.setItem('vagt_emp_user', JSON.stringify(data.employee));
+    showDashboard(data.employee);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+});
+
+/* ── Dashboard ── */
+function showDashboard(employee) {
+  document.getElementById('loginView').style.display   = 'none';
+  document.getElementById('dashboardView').style.display = 'block';
+  document.getElementById('dashGreeting').textContent  = 'Hello, ' + employee.name;
+  document.getElementById('dashMeta').textContent      =
+    (employee.role || 'Guard') + (employee.site ? ' · ' + employee.site : '');
+  startClock();
+  loadAttendanceStatus();
+}
+
+/* ── Attendance: load today ── */
+async function loadAttendanceStatus() {
+  const badge     = document.getElementById('attendanceStatusBadge');
+  const checkInBtn  = document.getElementById('checkInBtn');
+  const checkOutBtn = document.getElementById('checkOutBtn');
+
+  badge.className = 'attendance-status-badge status-unknown';
+  badge.textContent = 'Loading…';
+  checkInBtn.style.display  = 'none';
+  checkOutBtn.style.display = 'none';
+
+  try {
+    const data = await api('GET', '/api/attendance/today');
+    if (!data) return;
+    renderAttendance(data);
+  } catch (err) {
+    badge.textContent = 'Unable to load — ' + err.message;
+    badge.className = 'attendance-status-badge status-unknown';
+  }
+}
+
+function renderAttendance(data) {
+  const badge     = document.getElementById('attendanceStatusBadge');
+  const checkInBtn  = document.getElementById('checkInBtn');
+  const checkOutBtn = document.getElementById('checkOutBtn');
+  const todayLog  = document.getElementById('todayLog');
+
+  if (data.checked_in) {
+    badge.textContent = '● On Duty';
+    badge.className = 'attendance-status-badge status-active';
+    checkInBtn.style.display  = 'none';
+    checkOutBtn.style.display = 'inline-flex';
+  } else if (data.check_out_time) {
+    badge.textContent = '✓ Shift Complete';
+    badge.className = 'attendance-status-badge status-done';
+    checkInBtn.style.display  = 'none';
+    checkOutBtn.style.display = 'none';
+  } else {
+    badge.textContent = '○ Not Checked In';
+    badge.className = 'attendance-status-badge status-idle';
+    checkInBtn.style.display  = 'inline-flex';
+    checkOutBtn.style.display = 'none';
+  }
+
+  if (data.check_in_time) {
+    document.getElementById('logCheckIn').textContent  = formatTime(data.check_in_time);
+    document.getElementById('logCheckOut').textContent =
+      data.check_out_time ? formatTime(data.check_out_time) : 'Still on duty';
+    document.getElementById('logDuration').textContent = formatDuration(data.duration_minutes);
+    todayLog.style.display = 'block';
+  } else {
+    todayLog.style.display = 'none';
+  }
+}
+
+/* ── Attendance actions ── */
+async function doCheckIn() {
+  const btn = document.getElementById('checkInBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking in…';
+  hideAttendanceMsg();
+
+  try {
+    const data = await api('POST', '/api/attendance/checkin');
+    if (!data) return;
+    showAttendanceMsg('Checked in at ' + formatTime(data.check_in_time) + '.', 'success');
+    await loadAttendanceStatus();
+  } catch (err) {
+    showAttendanceMsg(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Check In';
+  }
+}
+
+async function doCheckOut() {
+  const btn = document.getElementById('checkOutBtn');
+  btn.disabled = true;
+  btn.textContent = 'Checking out…';
+  hideAttendanceMsg();
+
+  try {
+    const data = await api('POST', '/api/attendance/checkout');
+    if (!data) return;
+    showAttendanceMsg(
+      'Checked out. Duty duration: ' + formatDuration(data.duration_minutes) + '.',
+      'success'
+    );
+    await loadAttendanceStatus();
+  } catch (err) {
+    showAttendanceMsg(err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Check Out';
+  }
+}
+
+function showAttendanceMsg(text, type) {
+  const el = document.getElementById('attendanceMsg');
+  el.textContent = text;
+  el.className = type === 'success' ? 'portal-success-msg' : 'portal-error';
+  el.style.display = 'block';
+}
+function hideAttendanceMsg() {
+  document.getElementById('attendanceMsg').style.display = 'none';
+}
+
+/* ── Logout ── */
+function logout() {
+  localStorage.removeItem('vagt_emp_token');
+  localStorage.removeItem('vagt_emp_user');
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('loginView').style.display     = 'flex';
+  document.getElementById('loginError').style.display    = 'none';
+  document.getElementById('empId').value      = '';
+  document.getElementById('empPassword').value = '';
+}
+
+/* ── Auto-login if valid token exists ── */
+(function init() {
+  try {
+    const token = localStorage.getItem('vagt_emp_token');
+    const user  = localStorage.getItem('vagt_emp_user');
+    if (token && user) {
+      showDashboard(JSON.parse(user));
+    }
+  } catch {
+    logout();
+  }
+})();
+
+/* ── Mobile nav ── */
+const toggle  = document.getElementById('navToggle');
+const sidebar = document.getElementById('sidebar');
+toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+document.addEventListener('click', e => {
+  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
+    sidebar.classList.remove('open');
+});
+</script>
+</body>
+</html>
