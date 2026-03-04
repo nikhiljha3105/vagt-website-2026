@@ -681,7 +681,10 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   align-items: center; justify-content: center;
   cursor: pointer;
   border: none;
+  border-radius: 6px;
+  transition: left 0.28s ease;
 }
+.mobile-nav-toggle.nav-open { left: 274px; }
 .mobile-nav-toggle svg { width: 18px; height: 18px; stroke: var(--white); fill: none; stroke-width: 2; }
 
 /* ── RESPONSIVE ── */
@@ -856,13 +859,14 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 
 /* ── REAL LOGO IMAGE IN SIDEBAR ── */
 .logo-img-wrap {
-  width: 52px; height: 52px; border-radius: 8px;
+  width: 88px; height: 40px; border-radius: 6px;
   background: var(--amber); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
+  padding: 5px 8px;
   overflow: hidden;
 }
 .logo-img {
-  width: 44px; height: auto; object-fit: contain;
+  width: 100%; height: 100%; object-fit: contain;
 }
 
 /* ── HERO GUARD ICON (replaces 'g') ── */
@@ -877,3 +881,42 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .hero-brand-display:hover .guard-icon {
   fill: rgba(245,196,0,0.75);
 }
+
+/* ── COOKIE CONSENT BANNER ── */
+#cookie-banner {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 999;
+  background: var(--navy);
+  border-top: 2px solid var(--amber);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+}
+#cookie-banner p {
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+}
+#cookie-banner a { color: var(--amber); text-decoration: underline; }
+.cookie-actions { display: flex; gap: 10px; flex-shrink: 0; }
+.cookie-btn {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  letter-spacing: 0.4px;
+  transition: opacity 0.2s;
+}
+.cookie-btn:hover { opacity: 0.85; }
+.cookie-btn-accept { background: var(--amber); color: var(--navy); }
+.cookie-btn-decline { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
