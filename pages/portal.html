@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal Login | VAGT Security Services</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Main</div>
+      <a href="../index.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+
+      <div class="nav-group-label">Services</div>
+      <a href="security.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Security Services
+      </a>
+      <a href="facilities.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Facilities Management
+      </a>
+      <a href="surveillance.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Intelligent Surveillance
+        <span class="nav-badge">Soon</span>
+      </a>
+
+      <div class="nav-group-label">Company</div>
+      <a href="about.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        About VAGT
+      </a>
+      <a href="contact.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Contact / Audit
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-label">Get in touch</div>
+      <p>
+        <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br>
+        <a href="tel:+919008977711">+91 90089 77711</a>
+      </p>
+    </div>
+  </aside>
+  <!-- ══ END SIDEBAR ══ -->
+
+  <main class="main">
+
+    <!-- ══════════════ LOGIN VIEW ══════════════ -->
+    <div id="loginView" class="portal-login-wrap">
+      <div class="portal-login-card">
+
+        <div class="portal-login-header">
+          <div class="portal-login-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="portal-role-badge">Secure Access</div>
+          <h2>VAGT Portal Login</h2>
+          <p>Sign in with your VAGT credentials. Your access level will be detected automatically.</p>
+        </div>
+
+        <div class="portal-login-body">
+          <div id="loginError" class="portal-error" style="display:none;" role="alert"></div>
+
+          <form id="loginForm" class="contact-form" novalidate>
+            <div class="form-group">
+              <label for="identifier">Employee ID or Email <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="identifier" required
+                     placeholder="VAGT20260001 or you@company.com"
+                     autocomplete="username" spellcheck="false" autocapitalize="none">
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password <span style="color:var(--amber)">*</span></label>
+              <input type="password" id="loginPassword" required
+                     placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button type="submit" id="loginBtn" class="btn btn-amber"
+                    style="width:100%; justify-content:center; padding:15px; font-size:14px; margin-top:4px;">
+              Sign In
+              <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </form>
+
+          <p style="text-align:center; margin-top:18px; font-size:12px; color:var(--text-muted);">
+            Forgot your password?
+            <button onclick="showForgot()" style="background:none; border:none; color:var(--navy); font-weight:600; font-size:12px; cursor:pointer; padding:0; font-family:inherit;">Reset it here</button>
+          </p>
+
+          <div style="margin-top:18px; padding-top:18px; border-top:1px solid var(--border); text-align:center;">
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">New employee joining VAGT?</p>
+            <a href="employee-portal.html" class="btn btn-outline-navy"
+               style="width:100%; justify-content:center; font-size:12.5px; padding:12px 20px; display:inline-flex;">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              Register as New Employee
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- ══════════════ END LOGIN VIEW ══════════════ -->
+
+
+    <!-- ══════════════ ROLE PICKER ══════════════ -->
+    <div id="rolePickerView" class="portal-login-wrap" style="display:none;">
+      <div class="portal-login-card" style="max-width:560px;">
+
+        <div class="portal-login-header">
+          <div class="portal-login-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+          </div>
+          <div class="portal-role-badge">Welcome back</div>
+          <h2 id="rolePickerName">Hello</h2>
+          <p>You have access to multiple portals. Choose where you'd like to go.</p>
+        </div>
+
+        <div class="portal-login-body">
+          <div id="roleCards" class="role-picker-grid">
+            <!-- populated by JS based on returned roles -->
+          </div>
+          <p style="text-align:center; margin-top:22px; font-size:12px; color:var(--text-muted);">
+            <button onclick="logout()" style="background:none; border:none; color:var(--text-muted); font-size:12px; cursor:pointer; padding:0; font-family:inherit; text-decoration:underline;">Sign out</button>
+          </p>
+        </div>
+
+      </div>
+    </div>
+    <!-- ══════════════ END ROLE PICKER ══════════════ -->
+
+
+    <!-- ══════════════ FORGOT PASSWORD ══════════════ -->
+    <div id="forgotView" class="portal-login-wrap" style="display:none;">
+      <div class="portal-login-card" style="max-width:420px;">
+
+        <div class="portal-login-header">
+          <div class="portal-login-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+          </div>
+          <div class="portal-role-badge">Password Reset</div>
+          <h2>Forgot Password</h2>
+          <p id="forgotSubtitle">Enter your Employee ID or registered email. We'll send an OTP to verify it's you.</p>
+
+          <!-- Step indicator -->
+          <div class="reg-step-indicator" style="margin-top:20px;">
+            <div class="rsi-step active" id="fpStep1dot">1</div>
+            <div class="rsi-line" id="fpLine1"></div>
+            <div class="rsi-step" id="fpStep2dot">2</div>
+            <div class="rsi-line" id="fpLine2"></div>
+            <div class="rsi-step" id="fpStep3dot">3</div>
+          </div>
+        </div>
+
+        <div class="portal-login-body">
+
+          <!-- Step 1: Enter identifier -->
+          <div id="fpStep1">
+            <div id="fpError1" class="portal-error" style="display:none;" role="alert"></div>
+            <form id="fpForm1" class="contact-form" novalidate>
+              <div class="form-group">
+                <label for="fpIdentifier">Employee ID or Email <span style="color:var(--amber)">*</span></label>
+                <input type="text" id="fpIdentifier" required
+                       placeholder="VAGT20260001 or you@company.com"
+                       autocomplete="username" spellcheck="false" autocapitalize="none">
+              </div>
+              <button type="submit" id="fpBtn1" class="btn btn-amber"
+                      style="width:100%; justify-content:center; padding:15px; font-size:14px; margin-top:4px;">
+                Send OTP
+                <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </form>
+            <p style="text-align:center; margin-top:18px; font-size:12px; color:var(--text-muted);">
+              <button onclick="showLogin()" style="background:none; border:none; color:var(--navy); font-weight:600; font-size:12px; cursor:pointer; padding:0; font-family:inherit;">← Back to Sign In</button>
+            </p>
+          </div>
+
+          <!-- Step 2: OTP + New password -->
+          <div id="fpStep2" style="display:none;">
+            <div style="background:var(--amber-soft); border:1px solid rgba(245,196,0,0.25); padding:14px 16px; margin-bottom:20px; font-size:13px; color:var(--text-mid); line-height:1.65;">
+              <strong style="color:var(--navy);">Check your phone / email.</strong>
+              <span id="fpOtpNote"> A 6-digit OTP has been sent to verify your identity.</span>
+            </div>
+            <div id="fpError2" class="portal-error" style="display:none;" role="alert"></div>
+            <form id="fpForm2" class="contact-form" novalidate>
+              <div class="form-group">
+                <label for="fpOtp">Enter OTP <span style="color:var(--amber)">*</span></label>
+                <input type="text" id="fpOtp" required maxlength="6"
+                       inputmode="numeric" autocomplete="one-time-code"
+                       class="otp-input" placeholder="— — — — — —">
+              </div>
+              <div class="form-group">
+                <label for="fpNewPassword">New Password <span style="color:var(--amber)">*</span></label>
+                <input type="password" id="fpNewPassword" required minlength="8"
+                       placeholder="At least 8 characters" autocomplete="new-password">
+              </div>
+              <div class="form-group">
+                <label for="fpConfirmPassword">Confirm New Password <span style="color:var(--amber)">*</span></label>
+                <input type="password" id="fpConfirmPassword" required
+                       placeholder="Re-enter new password" autocomplete="new-password">
+              </div>
+              <button type="submit" id="fpBtn2" class="btn btn-amber"
+                      style="width:100%; justify-content:center; padding:15px; font-size:14px;">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Reset Password
+              </button>
+            </form>
+            <p style="text-align:center; margin-top:16px; font-size:12px; color:var(--text-muted);">
+              Didn't receive the OTP?
+              <button id="fpResendBtn" onclick="fpResend()"
+                      style="background:none; border:none; color:var(--navy); font-weight:600; font-size:12px; cursor:pointer; padding:0; font-family:inherit;">
+                Resend OTP
+              </button>
+            </p>
+          </div>
+
+          <!-- Step 3: Success -->
+          <div id="fpStep3" style="display:none; text-align:center; padding:8px 0 4px;">
+            <div style="width:60px; height:60px; background:rgba(37,211,102,0.1); border:2px solid rgba(37,211,102,0.3); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px;">
+              <svg viewBox="0 0 24 24" width="24" height="24" stroke="#0e8042" fill="none" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3 style="font-size:18px; font-weight:800; color:var(--navy); margin-bottom:10px;">Password Reset!</h3>
+            <p style="font-size:13px; color:var(--text-muted); line-height:1.72; margin-bottom:24px;">
+              Your password has been updated. You can now sign in with your new password.
+            </p>
+            <button onclick="showLogin()" class="btn btn-navy"
+                    style="width:100%; justify-content:center; padding:14px; font-size:13px;">
+              Go to Sign In
+              <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <!-- ══════════════ END FORGOT PASSWORD ══════════════ -->
+
+  </main>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   VAGT Unified Portal Login
+   API_BASE: replace with your backend URL before deploying.
+
+   POST /api/auth/login
+     Body:    { identifier: string, password: string }
+     Returns: {
+       token: string,
+       roles: Array<'employee'|'client'|'admin'>,
+       user: {
+         name: string,
+         employee_id?: string,   // if employee role
+         role?: string,          // guard role/title
+         site?: string,
+         company?: string,       // if client role
+       }
+     }
+
+   POST /api/auth/forgot-password
+     Body:    { identifier: string }
+     Returns: { reset_token: string }
+
+   POST /api/auth/reset-password
+     Body:    { reset_token: string, otp: string, new_password: string }
+     Returns: { success: true }
+
+   POST /api/auth/resend-reset-otp
+     Body:    { reset_token: string }
+     Returns: { message: string }
+═══════════════════════════════════════════════════════════ */
+const API_BASE = 'https://api.vagtsecurityservices.com';
+
+async function apiAnon(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  let res;
+  try { res = await fetch(API_BASE + path, opts); }
+  catch { throw new Error('No internet connection. Please check your network and try again.'); }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Something went wrong. Please try again.');
+  }
+  return res.json();
+}
+
+/* ─────────────────── VIEW SWITCHERS ─────────────────── */
+function showLogin() {
+  document.getElementById('loginView').style.display      = 'flex';
+  document.getElementById('rolePickerView').style.display = 'none';
+  document.getElementById('forgotView').style.display     = 'none';
+}
+function showRolePicker(user, roles) {
+  document.getElementById('loginView').style.display      = 'none';
+  document.getElementById('forgotView').style.display     = 'none';
+  document.getElementById('rolePickerView').style.display = 'flex';
+  document.getElementById('rolePickerName').textContent   = 'Hello, ' + user.name;
+  buildRoleCards(roles);
+}
+function showForgot() {
+  document.getElementById('loginView').style.display      = 'none';
+  document.getElementById('rolePickerView').style.display = 'none';
+  document.getElementById('forgotView').style.display     = 'flex';
+  setFpStep(1);
+}
+
+/* ─────────────────── LOGIN ─────────────────── */
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn     = document.getElementById('loginBtn');
+  const errEl   = document.getElementById('loginError');
+  const identifier = document.getElementById('identifier').value.trim();
+  const password   = document.getElementById('loginPassword').value;
+
+  errEl.style.display = 'none';
+  if (!identifier || !password) {
+    errEl.textContent = 'Please enter your Employee ID (or email) and password.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    const data = await apiAnon('POST', '/api/auth/login', { identifier, password });
+    if (!data) return;
+
+    /* Store token universally */
+    localStorage.setItem('vagt_token', data.token);
+    localStorage.setItem('vagt_user',  JSON.stringify(data.user));
+
+    const roles = data.roles || [];
+
+    if (roles.length === 1) {
+      /* Only one role — go straight to that portal */
+      navigateToRole(roles[0], data.token, data.user);
+    } else {
+      /* Multiple roles — let user choose */
+      showRolePicker(data.user, roles);
+    }
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+});
+
+/* ─────────────────── ROLE CARDS ─────────────────── */
+const ROLE_META = {
+  employee: {
+    icon: '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+    label: 'Employee',
+    sub: 'Security Guards & Staff',
+    url: 'employee-portal.html',
+  },
+  client: {
+    icon: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    label: 'Client',
+    sub: 'Site Managers & Business Clients',
+    url: 'client-portal.html',
+  },
+  admin: {
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    label: 'Admin',
+    sub: 'VAGT Management & HR',
+    url: 'admin-portal.html',
+  },
+};
+
+function buildRoleCards(roles) {
+  const token = localStorage.getItem('vagt_token');
+  const user  = JSON.parse(localStorage.getItem('vagt_user') || '{}');
+  const grid  = document.getElementById('roleCards');
+  grid.innerHTML = roles.map(function(role) {
+    const m = ROLE_META[role];
+    if (!m) return '';
+    return '<div class="role-card" onclick="navigateToRole(\'' + escHtml(role) + '\',\'' + escHtml(token) + '\',JSON.parse(localStorage.getItem(\'vagt_user\')||\'{}\')">'
+      + '<div class="role-card-icon">' + m.icon + '</div>'
+      + '<div class="role-card-label">' + m.label + '</div>'
+      + '<div class="role-card-sub">' + m.sub + '</div>'
+      + '<div class="role-card-arrow">→</div>'
+      + '</div>';
+  }).join('');
+}
+
+function navigateToRole(role, token, user) {
+  if (role === 'employee') {
+    localStorage.setItem('vagt_emp_token', token);
+    localStorage.setItem('vagt_emp_user', JSON.stringify({
+      name: user.name,
+      employee_id: user.employee_id || '',
+      role: user.role || 'Guard',
+      site: user.site || '',
+    }));
+    location.href = 'employee-portal.html';
+  } else if (role === 'client') {
+    localStorage.setItem('vagt_client_token', token);
+    localStorage.setItem('vagt_client_user', JSON.stringify({
+      name: user.name,
+      company: user.company || '',
+      site: user.site || '',
+    }));
+    location.href = 'client-portal.html';
+  } else if (role === 'admin') {
+    localStorage.setItem('vagt_admin_token', token);
+    localStorage.setItem('vagt_admin_user', JSON.stringify({ name: user.name }));
+    location.href = 'admin-portal.html';
+  }
+}
+
+function logout() {
+  localStorage.removeItem('vagt_token');
+  localStorage.removeItem('vagt_user');
+  showLogin();
+}
+
+/* ─────────────────── FORGOT PASSWORD ─────────────────── */
+let fpResetToken     = null;
+let fpCooldownTimer  = null;
+
+function setFpStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    const dot  = document.getElementById('fpStep' + i + 'dot');
+    const step = document.getElementById('fpStep'  + i);
+    if (i < n)       dot.className = 'rsi-step done';
+    else if (i === n) dot.className = 'rsi-step active';
+    else              dot.className = 'rsi-step';
+    if (i < 3) document.getElementById('fpLine' + i).className = 'rsi-line' + (i < n ? ' done' : '');
+    if (step) step.style.display = i === n ? 'block' : 'none';
+  }
+  if (n === 2) document.getElementById('fpOtp').focus();
+}
+
+/* OTP: digits only */
+document.getElementById('fpOtp').addEventListener('input', function() {
+  this.value = this.value.replace(/\D/g, '').slice(0, 6);
+});
+
+document.getElementById('fpForm1').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('fpError1');
+  const btn   = document.getElementById('fpBtn1');
+  errEl.style.display = 'none';
+
+  const identifier = document.getElementById('fpIdentifier').value.trim();
+  if (!identifier) {
+    errEl.textContent = 'Please enter your Employee ID or email address.';
+    errEl.style.display = 'block'; return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Sending OTP…';
+  try {
+    const data = await apiAnon('POST', '/api/auth/forgot-password', { identifier });
+    fpResetToken = data.reset_token;
+    document.getElementById('fpOtpNote').textContent =
+      ' A 6-digit OTP has been sent to the phone number or email linked to your account.';
+    setFpStep(2);
+    fpStartCooldown();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Send OTP <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+  }
+});
+
+document.getElementById('fpForm2').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const errEl = document.getElementById('fpError2');
+  const btn   = document.getElementById('fpBtn2');
+  errEl.style.display = 'none';
+
+  const otp         = document.getElementById('fpOtp').value.replace(/\D/g,'');
+  const newPassword = document.getElementById('fpNewPassword').value;
+  const confirm     = document.getElementById('fpConfirmPassword').value;
+
+  if (otp.length !== 6)          { errEl.textContent = 'Please enter the complete 6-digit OTP.'; errEl.style.display = 'block'; return; }
+  if (newPassword.length < 8)    { errEl.textContent = 'New password must be at least 8 characters long.'; errEl.style.display = 'block'; return; }
+  if (newPassword !== confirm)   { errEl.textContent = 'Passwords do not match. Please re-enter.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Resetting password…';
+  try {
+    await apiAnon('POST', '/api/auth/reset-password', {
+      reset_token: fpResetToken, otp, new_password: newPassword,
+    });
+    fpClearCooldown();
+    setFpStep(3);
+  } catch (err) {
+    errEl.textContent = err.message; errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><polyline points="20 6 9 17 4 12"/></svg> Reset Password';
+  }
+});
+
+async function fpResend() {
+  const errEl = document.getElementById('fpError2');
+  errEl.style.display = 'none';
+  try {
+    await apiAnon('POST', '/api/auth/resend-reset-otp', { reset_token: fpResetToken });
+    fpStartCooldown();
+  } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
+}
+function fpStartCooldown(s = 60) {
+  fpClearCooldown();
+  const btn = document.getElementById('fpResendBtn');
+  btn.disabled = true;
+  let left = s;
+  btn.textContent = 'Resend OTP (' + left + 's)';
+  fpCooldownTimer = setInterval(function() {
+    left--;
+    if (left <= 0) { fpClearCooldown(); btn.textContent = 'Resend OTP'; btn.disabled = false; }
+    else btn.textContent = 'Resend OTP (' + left + 's)';
+  }, 1000);
+}
+function fpClearCooldown() {
+  if (fpCooldownTimer) { clearInterval(fpCooldownTimer); fpCooldownTimer = null; }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ─────────────────── MOBILE NAV ─────────────────── */
+const toggle  = document.getElementById('navToggle');
+const sidebar = document.getElementById('sidebar');
+toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+document.addEventListener('click', e => {
+  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
+    sidebar.classList.remove('open');
+});
+</script>
+</body>
+</html>
