@@ -1390,3 +1390,179 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 /* ── FORGOT PASSWORD STEPS ── */
 .forgot-step { display: none; }
 .forgot-step.active { display: block; }
+
+/* ═══════════════════════════════════
+   ADMIN TABLE
+═══════════════════════════════════ */
+.admin-table-wrap { overflow-x: auto; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.admin-table th {
+  font-size: 10px; font-weight: 700; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid var(--border); white-space: nowrap;
+}
+.admin-table td {
+  padding: 11px 14px; border-bottom: 1px solid var(--border);
+  color: var(--text-mid); vertical-align: middle;
+}
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover td { background: var(--warm-grey); }
+.admin-table .col-id   { font-weight: 700; color: var(--navy); font-family: monospace; font-size: 12px; }
+.admin-table .col-name { font-weight: 700; color: var(--navy); }
+.admin-table .col-actions { white-space: nowrap; }
+
+/* STATUS BADGES */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10.5px; font-weight: 700;
+  padding: 3px 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.status-badge::before {
+  content: ''; width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; flex-shrink: 0;
+}
+.status-badge.badge-active   { color: #0e8042; background: rgba(14,128,66,0.1); }
+.status-badge.badge-pending  { color: #b8860b; background: rgba(245,196,0,0.15); }
+.status-badge.badge-inactive { color: var(--text-faint); background: var(--warm-grey); }
+.status-badge.badge-open     { color: var(--navy); background: rgba(17,17,80,0.08); }
+.status-badge.badge-progress { color: #b8860b; background: rgba(245,196,0,0.15); }
+.status-badge.badge-resolved { color: #0e8042; background: rgba(14,128,66,0.1); }
+.status-badge.badge-urgent   { color: #c0392b; background: rgba(192,57,43,0.08); }
+
+/* ADMIN FILTER BAR */
+.admin-filter-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 14px 16px;
+  background: var(--warm-grey); border: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.admin-filter-bar input[type="text"],
+.admin-filter-bar select {
+  font-size: 13px; padding: 8px 12px; border: 1px solid var(--border);
+  background: var(--white); color: var(--navy); font-family: inherit; min-width: 0;
+}
+.admin-filter-bar input[type="text"] { flex: 1; min-width: 160px; }
+.admin-filter-bar .filter-count { font-size: 12px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+
+/* PAGINATION */
+.admin-pagination {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-top: 1px solid var(--border); margin-top: 4px; flex-wrap: wrap; gap: 10px;
+}
+.admin-pagination-info { font-size: 12px; color: var(--text-muted); }
+.admin-pagination-btns { display: flex; gap: 6px; }
+
+/* EMPLOYEE DETAIL MODAL */
+.emp-detail-overlay {
+  position: fixed; inset: 0; background: rgba(17,17,35,0.72);
+  z-index: 300; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+}
+.emp-detail-modal {
+  background: var(--white); max-width: 500px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+}
+.emp-detail-header {
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.emp-detail-close {
+  background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 4px;
+}
+.emp-detail-close:hover { color: var(--navy); }
+.emp-detail-body { padding: 20px 24px; }
+.emp-detail-row {
+  display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.emp-detail-row:last-child { border-bottom: none; }
+.emp-detail-key {
+  width: 130px; flex-shrink: 0; font-weight: 700; color: var(--text-muted);
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; padding-top: 2px;
+}
+.emp-detail-val { color: var(--navy); font-weight: 600; flex: 1; word-break: break-word; }
+
+/* ═══════════════════════════════════
+   TRAINING MODAL (employee portal)
+═══════════════════════════════════ */
+.training-modal-overlay {
+  position: fixed; inset: 0; background: rgba(17,17,35,0.9);
+  z-index: 400; display: flex; align-items: flex-start; justify-content: center;
+  overflow-y: auto; padding: 36px 16px 60px;
+}
+.training-modal { background: var(--white); max-width: 760px; width: 100%; position: relative; }
+.training-modal-header {
+  padding: 22px 28px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+}
+.training-modal-meta { font-size: 10px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+.training-modal-title { font-size: 17px; font-weight: 800; color: var(--navy); margin: 0; line-height: 1.3; }
+.training-modal-close {
+  background: none; border: none; cursor: pointer; color: var(--text-muted);
+  padding: 4px; flex-shrink: 0; line-height: 1;
+}
+.training-modal-close:hover { color: var(--navy); }
+.training-modal-body { padding: 24px 28px; }
+.training-video-wrap {
+  position: relative; width: 100%; padding-bottom: 56.25%; background: #0a0a14;
+  margin-bottom: 22px; overflow: hidden;
+}
+.training-video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
+.training-text-content {
+  font-size: 13.5px; color: var(--text-mid); line-height: 1.9;
+  margin-bottom: 24px; border-left: 3px solid var(--amber); padding-left: 16px;
+}
+.training-text-content ul { padding-left: 18px; margin: 8px 0; }
+.training-text-content li { margin-bottom: 5px; }
+
+/* MCQ */
+.mcq-section-title {
+  font-size: 10px; font-weight: 700; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;
+  padding-top: 20px; border-top: 1px solid var(--border);
+}
+.mcq-question-block { margin-bottom: 22px; }
+.mcq-q { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 10px; line-height: 1.5; }
+.mcq-q-num { font-size: 10px; color: var(--text-faint); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.mcq-options { display: flex; flex-direction: column; gap: 7px; }
+.mcq-option {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  border: 1.5px solid var(--border); cursor: pointer;
+  font-size: 13.5px; color: var(--text-mid);
+  transition: border-color 0.1s, background 0.1s; user-select: none;
+}
+.mcq-option:hover:not(.locked) { border-color: var(--navy); background: var(--warm-grey); }
+.mcq-option.selected { border-color: var(--navy); background: rgba(17,17,80,0.05); color: var(--navy); font-weight: 600; }
+.mcq-option.correct  { border-color: #0e8042; background: rgba(14,128,66,0.09); color: #0e8042; font-weight: 700; }
+.mcq-option.wrong    { border-color: #c0392b; background: rgba(192,57,43,0.07); color: #c0392b; }
+.mcq-option.reveal   { border-color: #0e8042; background: rgba(14,128,66,0.05); color: #0e8042; }
+.mcq-option.locked   { cursor: default; }
+.mcq-dot {
+  width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 900; transition: border-color 0.1s, background 0.1s;
+}
+.mcq-option.selected .mcq-dot { border-color: var(--navy); background: var(--navy); }
+.mcq-option.correct .mcq-dot  { border-color: #0e8042; background: #0e8042; color: #fff; }
+.mcq-option.wrong .mcq-dot    { border-color: #c0392b; background: #c0392b; color: #fff; }
+.mcq-option.reveal .mcq-dot   { border-color: #0e8042; }
+/* Result panel */
+.mcq-result { padding: 24px 20px; text-align: center; border-top: 1px solid var(--border); margin-top: 8px; display: none; }
+.mcq-result.visible { display: block; }
+.mcq-result-score { font-size: 44px; font-weight: 900; letter-spacing: -2px; line-height: 1; margin-bottom: 6px; color: var(--navy); }
+.mcq-result-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 14px; }
+.mcq-result-msg   { font-size: 14px; color: var(--text-mid); line-height: 1.72; margin-bottom: 20px; }
+.mcq-result.pass .mcq-result-score { color: #0e8042; }
+.mcq-result.fail .mcq-result-score { color: #c0392b; }
+/* Active training card */
+.training-card.active-module { cursor: pointer; }
+.training-card.active-module:hover { border-color: var(--navy); transform: translateY(-2px); }
+.training-card.active-module:hover .training-card-icon { background: var(--navy); color: var(--white); }
+.training-badge-done  { font-size: 9.5px; font-weight: 700; background: rgba(14,128,66,0.12); color: #0e8042; padding: 3px 9px; letter-spacing: 0.8px; text-transform: uppercase; }
+.training-badge-start { font-size: 9.5px; font-weight: 700; background: var(--amber-soft); color: #7a5800; padding: 3px 9px; letter-spacing: 0.8px; text-transform: uppercase; }
+
+/* ═══════════════════════════════════
+   CLIENT REGISTRATION
+═══════════════════════════════════ */
+.client-reg-view { display: none; }
+.client-reg-view.visible { display: flex; }
