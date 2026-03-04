@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Site Reports | VAGT Client</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <!-- ═══ Security ═══ -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
+      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    </div>
+    <div class="sidebar-portals">
+      <a href="portal.html" class="portal-btn"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>All Portals</a>
+      <a href="client-portal.html" class="portal-btn portal-btn-active"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Client</a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Client Portal</div>
+      <a href="client-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </a>
+      <a href="client-reports.html" class="nav-link nav-link-active">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Site Reports
+      </a>
+      <a href="client-invoices.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Invoices
+      </a>
+      <div class="nav-group-label">Company</div>
+      <a href="../index.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</a>
+      <a href="contact.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact VAGT</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-label">Get in touch</div>
+      <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br><a href="tel:+919008977711">+91 90089 77711</a></p>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent">
+
+    <div id="loginGate" class="portal-login-wrap">
+      <div class="portal-login-card" style="max-width:400px;">
+        <div class="portal-login-header">
+          <div class="portal-login-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="portal-role-badge">Client</div>
+          <h2>Sign In</h2>
+          <p>Please sign in to view site reports.</p>
+        </div>
+        <div class="portal-login-body">
+          <a href="portal.html" class="btn btn-amber" style="width:100%; justify-content:center; padding:15px; font-size:14px; display:inline-flex;">
+            Go to Portal Login<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboardView" style="display:none;">
+
+      <div class="page-header">
+        <div class="section-label">Client Portal</div>
+        <h1>Site Reports</h1>
+        <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;" id="dashMeta"></p>
+        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
+        </button>
+      </div>
+
+      <!-- DEPLOYMENT SUMMARY -->
+      <section class="section" style="padding-bottom:0;">
+        <div class="admin-stats" id="deploymentStats">
+          <div class="admin-stat-card">
+            <div class="admin-stat-value" id="statGuards">—</div>
+            <div class="admin-stat-label">Guards On Duty Now</div>
+            <div class="admin-stat-sub" id="statSites">Across your sites</div>
+          </div>
+          <div class="admin-stat-card accent-green">
+            <div class="admin-stat-value" id="statSitesCovered">—</div>
+            <div class="admin-stat-label">Sites Covered</div>
+            <div class="admin-stat-sub">Fully staffed today</div>
+          </div>
+          <div class="admin-stat-card accent-amber">
+            <div class="admin-stat-value" id="statIncidents">—</div>
+            <div class="admin-stat-label">Incidents This Month</div>
+            <div class="admin-stat-sub" id="statIncidentsSub">Reported by guards</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-value" id="statOpenTickets">—</div>
+            <div class="admin-stat-label">Open Tickets</div>
+            <div class="admin-stat-sub">Your service requests</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <!-- filter bar -->
+        <div class="admin-filter-bar" style="margin-bottom:0;">
+          <select id="siteFilter" onchange="applyFilters()">
+            <option value="">All sites</option>
+          </select>
+          <select id="typeFilter" onchange="applyFilters()">
+            <option value="">All report types</option>
+            <option value="daily_log">Daily Activity Log</option>
+            <option value="incident">Incident Report</option>
+            <option value="inspection">Site Inspection</option>
+          </select>
+          <input type="month" id="monthFilter" onchange="applyFilters()" style="font-size:13px; padding:9px 12px; border:1px solid var(--border); color:var(--navy);">
+          <span class="filter-count" id="filterCount"></span>
+        </div>
+
+        <div class="admin-card" style="padding:0; margin-top:0;">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Site</th>
+                  <th>Report Type</th>
+                  <th>Guard</th>
+                  <th>Summary</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody">
+                <tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="admin-pagination" style="padding:14px 16px;">
+            <span class="admin-pagination-info" id="pageInfo">—</span>
+            <div class="admin-pagination-btns">
+              <button class="btn btn-outline-navy" style="font-size:11px; padding:7px 14px;" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
+              <button class="btn btn-outline-navy" style="font-size:11px; padding:7px 14px;" id="nextBtn" onclick="changePage(1)"  disabled>Next →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
+        <ul class="footer-nav">
+          <li><a href="client-portal.html">Dashboard</a></li>
+          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
+        </ul>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<!-- REPORT DETAIL MODAL -->
+<div id="reportOverlay" class="emp-detail-overlay" style="display:none;" onclick="closeOverlay(event)">
+  <div class="emp-detail-modal" style="max-width:560px;" onclick="event.stopPropagation()">
+    <div class="emp-detail-header">
+      <div>
+        <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px;" id="detailLabel">Report</div>
+        <h3 id="detailTitle" style="margin:0; font-size:17px; color:var(--navy);"></h3>
+      </div>
+      <button class="emp-detail-close" onclick="document.getElementById('reportOverlay').style.display='none'">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="emp-detail-body" id="detailBody"></div>
+    <div style="padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+      <button onclick="document.getElementById('reportOverlay').style.display='none'" class="btn btn-ghost" style="font-size:12px; padding:10px 16px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   VAGT Client – Site Reports
+
+   GET /api/client/deployment-summary                 (Bearer, client)
+     Returns: {
+       guards_on_duty, sites_covered, incidents_this_month, open_tickets
+     }
+
+   GET /api/client/reports?site=&type=&month=YYYY-MM  (Bearer, client)
+     Returns: [{
+       id, date, site_id, site_name, report_type: 'daily_log'|'incident'|'inspection',
+       guard_name, summary, details
+     }]
+
+   GET /api/client/sites                              (Bearer, client)
+     Returns: [{ id, name }]
+═══════════════════════════════════════════════════════════ */
+const API_BASE = 'https://api.vagtsecurityservices.com';
+
+async function api(method, path) {
+  const token = localStorage.getItem('vagt_client_token');
+  const opts  = { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token||'') } };
+  let res;
+  try { res = await fetch(API_BASE + path, opts); }
+  catch { throw new Error('Network error.'); }
+  if (res.status === 401) { logout(); return null; }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Error'); }
+  return res.json();
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(iso) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
+
+function logout() {
+  localStorage.removeItem('vagt_client_token');
+  localStorage.removeItem('vagt_client_user');
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('loginGate').style.display     = 'flex';
+}
+
+let allReports   = [];
+let filteredList = [];
+let currentPage  = 1;
+const PAGE_SIZE  = 25;
+
+const TYPE_BADGE = {
+  daily_log:  '<span class="status-badge badge-resolved">Daily Log</span>',
+  incident:   '<span class="status-badge badge-open">Incident</span>',
+  inspection: '<span class="status-badge badge-pending">Inspection</span>',
+};
+
+(function init() {
+  const token = localStorage.getItem('vagt_client_token');
+  const user  = localStorage.getItem('vagt_client_user');
+  if (token && user) {
+    const u = JSON.parse(user);
+    document.getElementById('loginGate').style.display     = 'none';
+    document.getElementById('dashboardView').style.display = 'block';
+    document.getElementById('dashMeta').textContent        = u.company_name || u.name || '';
+    /* default month to current */
+    const now = new Date();
+    document.getElementById('monthFilter').value = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+    loadAll();
+  }
+})();
+
+async function loadAll() {
+  await Promise.all([loadSummary(), loadSites(), loadReports()]);
+}
+
+async function loadSummary() {
+  try {
+    const d = await api('GET', '/api/client/deployment-summary');
+    if (!d) return;
+    document.getElementById('statGuards').textContent       = d.guards_on_duty ?? '—';
+    document.getElementById('statSitesCovered').textContent = d.sites_covered ?? '—';
+    document.getElementById('statIncidents').textContent    = d.incidents_this_month ?? '—';
+    document.getElementById('statOpenTickets').textContent  = d.open_tickets ?? '—';
+  } catch { /* non-fatal */ }
+}
+
+async function loadSites() {
+  try {
+    const list = await api('GET', '/api/client/sites');
+    if (!list) return;
+    const sel = document.getElementById('siteFilter');
+    list.forEach(function(s) {
+      const o = document.createElement('option');
+      o.value = s.id; o.textContent = s.name;
+      sel.appendChild(o);
+    });
+  } catch { /* non-fatal */ }
+}
+
+async function loadReports() {
+  const month = document.getElementById('monthFilter').value;
+  const site  = document.getElementById('siteFilter').value;
+  const type  = document.getElementById('typeFilter').value;
+  const qs    = '?month=' + (month||'') + (site ? '&site=' + encodeURIComponent(site) : '') + (type ? '&type=' + type : '');
+  try {
+    const list = await api('GET', '/api/client/reports' + qs);
+    if (!list) return;
+    allReports = list;
+    applyFilters();
+  } catch {
+    document.getElementById('reportsTableBody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center; padding:28px; color:var(--text-muted);">Could not load reports.</td></tr>';
+  }
+}
+
+function applyFilters() {
+  filteredList = allReports;
+  document.getElementById('filterCount').textContent = filteredList.length + ' reports';
+  currentPage = 1;
+  renderPage();
+}
+
+function renderPage() {
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const end   = Math.min(start + PAGE_SIZE, filteredList.length);
+  const page  = filteredList.slice(start, end);
+  const total = Math.ceil(filteredList.length / PAGE_SIZE) || 1;
+
+  document.getElementById('pageInfo').textContent    = 'Showing ' + (filteredList.length ? start+1 : 0) + '–' + end + ' of ' + filteredList.length;
+  document.getElementById('prevBtn').disabled        = currentPage <= 1;
+  document.getElementById('nextBtn').disabled        = currentPage >= total;
+
+  if (!page.length) {
+    document.getElementById('reportsTableBody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center; padding:32px; color:var(--text-muted);">No reports for this period.</td></tr>';
+    return;
+  }
+
+  document.getElementById('reportsTableBody').innerHTML = page.map(function(r) {
+    const badge = TYPE_BADGE[r.report_type] || '<span class="status-badge badge-inactive">' + escHtml(r.report_type) + '</span>';
+    return '<tr>'
+      + '<td>' + formatDate(r.date) + '</td>'
+      + '<td class="col-name">' + escHtml(r.site_name||'—') + '</td>'
+      + '<td>' + badge + '</td>'
+      + '<td>' + escHtml(r.guard_name||'—') + '</td>'
+      + '<td style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:12px;">' + escHtml(r.summary||'—') + '</td>'
+      + '<td class="col-actions"><button onclick="openDetail(\'' + escHtml(r.id) + '\')" class="btn btn-ghost" style="font-size:11px; padding:6px 12px;">View</button></td>'
+      + '</tr>';
+  }).join('');
+}
+
+function changePage(dir) {
+  const total = Math.ceil(filteredList.length / PAGE_SIZE) || 1;
+  currentPage = Math.max(1, Math.min(total, currentPage + dir));
+  renderPage();
+}
+
+function openDetail(id) {
+  const r = allReports.find(function(x) { return x.id === id; });
+  if (!r) return;
+  document.getElementById('detailLabel').textContent = (TYPE_BADGE[r.report_type] ? r.report_type.replace('_',' ') : r.report_type) + ' · ' + escHtml(r.site_name||'');
+  document.getElementById('detailTitle').textContent = formatDate(r.date) + ' — ' + escHtml(r.guard_name||'');
+  const badge = TYPE_BADGE[r.report_type] || '';
+  const rows  = [
+    ['Site',       escHtml(r.site_name||'—')],
+    ['Date',       formatDate(r.date)],
+    ['Type',       badge],
+    ['Guard',      escHtml(r.guard_name||'—')],
+    ['Summary',    escHtml(r.summary||'—')],
+    ['Details',    r.details ? '<span style="white-space:pre-wrap; font-size:12px;">' + escHtml(r.details) + '</span>' : '—'],
+  ];
+  document.getElementById('detailBody').innerHTML = rows.map(function(x) {
+    return '<div class="emp-detail-row"><div class="emp-detail-key">' + x[0] + '</div><div class="emp-detail-val">' + x[1] + '</div></div>';
+  }).join('');
+  document.getElementById('reportOverlay').style.display = 'flex';
+}
+
+function closeOverlay(e) {
+  if (e.target === document.getElementById('reportOverlay'))
+    document.getElementById('reportOverlay').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') document.getElementById('reportOverlay').style.display = 'none';
+});
+
+const toggle  = document.getElementById('navToggle');
+const sidebar = document.getElementById('sidebar');
+toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+document.addEventListener('click', e => {
+  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
+    sidebar.classList.remove('open');
+});
+</script>
+</body>
+</html>

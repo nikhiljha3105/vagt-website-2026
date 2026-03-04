@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoices | VAGT Client</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <!-- ═══ Security ═══ -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
+      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    </div>
+    <div class="sidebar-portals">
+      <a href="portal.html" class="portal-btn"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>All Portals</a>
+      <a href="client-portal.html" class="portal-btn portal-btn-active"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Client</a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-label">Client Portal</div>
+      <a href="client-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </a>
+      <a href="client-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Site Reports
+      </a>
+      <a href="client-invoices.html" class="nav-link nav-link-active">
+        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Invoices
+      </a>
+      <div class="nav-group-label">Company</div>
+      <a href="../index.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</a>
+      <a href="contact.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>Contact VAGT</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-label">Get in touch</div>
+      <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br><a href="tel:+919008977711">+91 90089 77711</a></p>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent">
+
+    <div id="loginGate" class="portal-login-wrap">
+      <div class="portal-login-card" style="max-width:400px;">
+        <div class="portal-login-header">
+          <div class="portal-login-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="portal-role-badge">Client</div>
+          <h2>Sign In</h2>
+          <p>Please sign in to view your invoices.</p>
+        </div>
+        <div class="portal-login-body">
+          <a href="portal.html" class="btn btn-amber" style="width:100%; justify-content:center; padding:15px; font-size:14px; display:inline-flex;">
+            Go to Portal Login<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="dashboardView" style="display:none;">
+
+      <div class="page-header">
+        <div class="section-label">Client Portal</div>
+        <h1>Invoices</h1>
+        <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;" id="dashMeta"></p>
+        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
+          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
+        </button>
+      </div>
+
+      <!-- BILLING SUMMARY -->
+      <section class="section" style="padding-bottom:0;">
+        <div class="admin-stats">
+          <div class="admin-stat-card accent-amber">
+            <div class="admin-stat-value" id="statOutstanding">—</div>
+            <div class="admin-stat-label">Outstanding</div>
+            <div class="admin-stat-sub" id="statOutstandingSub">Total due</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-value" id="statOverdue">—</div>
+            <div class="admin-stat-label">Overdue</div>
+            <div class="admin-stat-sub">Past due date</div>
+          </div>
+          <div class="admin-stat-card accent-green">
+            <div class="admin-stat-value" id="statPaidYTD">—</div>
+            <div class="admin-stat-label">Paid This Year</div>
+            <div class="admin-stat-sub" id="statYear">FY 2025–26</div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-value" id="statTotal">—</div>
+            <div class="admin-stat-label">Total Invoices</div>
+            <div class="admin-stat-sub">All time</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="admin-filter-bar" style="margin-bottom:0;">
+          <select id="statusFilter" onchange="applyFilters()">
+            <option value="">All statuses</option>
+            <option value="paid">Paid</option>
+            <option value="unpaid">Unpaid</option>
+            <option value="overdue">Overdue</option>
+            <option value="partial">Partially Paid</option>
+          </select>
+          <input type="text" id="searchInput" placeholder="Search invoice number…" oninput="applyFilters()" autocomplete="off">
+          <span class="filter-count" id="filterCount"></span>
+        </div>
+
+        <div class="admin-card" style="padding:0; margin-top:0;">
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Invoice #</th>
+                  <th>Period</th>
+                  <th>Issued</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceTableBody">
+                <tr><td colspan="7" style="text-align:center; padding:32px; color:var(--text-muted);">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
+        <ul class="footer-nav">
+          <li><a href="client-portal.html">Dashboard</a></li>
+          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
+        </ul>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   VAGT Client – Invoices
+
+   GET /api/client/invoices/summary                   (Bearer, client)
+     Returns: {
+       outstanding_amount, overdue_amount,
+       paid_ytd, total_invoices, fiscal_year_label
+     }
+
+   GET /api/client/invoices                           (Bearer, client)
+     Returns: [{
+       id, invoice_number, period_label,
+       issued_date, due_date, amount,
+       status: 'paid'|'unpaid'|'overdue'|'partial',
+       paid_amount?, pdf_url?
+     }]
+═══════════════════════════════════════════════════════════ */
+const API_BASE = 'https://api.vagtsecurityservices.com';
+
+async function api(method, path) {
+  const token = localStorage.getItem('vagt_client_token');
+  const opts  = { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token||'') } };
+  let res;
+  try { res = await fetch(API_BASE + path, opts); }
+  catch { throw new Error('Network error.'); }
+  if (res.status === 401) { logout(); return null; }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Error'); }
+  return res.json();
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDate(iso) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
+function formatRupee(n)  { if (n == null) return '—'; return '₹' + Number(n).toLocaleString('en-IN'); }
+
+function logout() {
+  localStorage.removeItem('vagt_client_token');
+  localStorage.removeItem('vagt_client_user');
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('loginGate').style.display     = 'flex';
+}
+
+let allInvoices  = [];
+let filteredList = [];
+
+const STATUS_BADGE = {
+  paid:    '<span class="status-badge badge-resolved">Paid</span>',
+  unpaid:  '<span class="status-badge badge-pending">Unpaid</span>',
+  overdue: '<span class="status-badge badge-open">Overdue</span>',
+  partial: '<span class="status-badge badge-progress">Partial</span>',
+};
+
+(function init() {
+  const token = localStorage.getItem('vagt_client_token');
+  const user  = localStorage.getItem('vagt_client_user');
+  if (token && user) {
+    const u = JSON.parse(user);
+    document.getElementById('loginGate').style.display     = 'none';
+    document.getElementById('dashboardView').style.display = 'block';
+    document.getElementById('dashMeta').textContent        = u.company_name || u.name || '';
+    loadAll();
+  }
+})();
+
+async function loadAll() {
+  await Promise.all([loadSummary(), loadInvoices()]);
+}
+
+async function loadSummary() {
+  try {
+    const d = await api('GET', '/api/client/invoices/summary');
+    if (!d) return;
+    document.getElementById('statOutstanding').textContent    = formatRupee(d.outstanding_amount);
+    document.getElementById('statOutstandingSub').textContent = d.outstanding_amount > 0 ? 'Action needed' : 'All clear';
+    document.getElementById('statOverdue').textContent        = formatRupee(d.overdue_amount);
+    document.getElementById('statPaidYTD').textContent        = formatRupee(d.paid_ytd);
+    document.getElementById('statYear').textContent           = d.fiscal_year_label || '';
+    document.getElementById('statTotal').textContent          = d.total_invoices || '—';
+  } catch { /* non-fatal */ }
+}
+
+async function loadInvoices() {
+  try {
+    const list = await api('GET', '/api/client/invoices');
+    if (!list) return;
+    allInvoices = list;
+    applyFilters();
+  } catch {
+    document.getElementById('invoiceTableBody').innerHTML =
+      '<tr><td colspan="7" style="text-align:center; padding:28px; color:var(--text-muted);">Could not load invoices.</td></tr>';
+  }
+}
+
+function applyFilters() {
+  const q      = document.getElementById('searchInput').value.trim().toLowerCase();
+  const status = document.getElementById('statusFilter').value;
+
+  filteredList = allInvoices.filter(function(inv) {
+    if (status && inv.status !== status) return false;
+    if (q && !(inv.invoice_number||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('filterCount').textContent = filteredList.length + ' invoices';
+  renderTable();
+}
+
+function renderTable() {
+  if (!filteredList.length) {
+    document.getElementById('invoiceTableBody').innerHTML =
+      '<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--text-muted);">No invoices found.</td></tr>';
+    return;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  document.getElementById('invoiceTableBody').innerHTML = filteredList.map(function(inv) {
+    const badge     = STATUS_BADGE[inv.status] || '<span class="status-badge badge-inactive">' + escHtml(inv.status) + '</span>';
+    const isOverdue = inv.status === 'overdue';
+    const dueCls    = isOverdue ? 'color:#c0392b; font-weight:700;' : '';
+    const pdfBtn    = inv.pdf_url
+      ? '<a href="' + escHtml(inv.pdf_url) + '" target="_blank" rel="noopener noreferrer" class="btn btn-outline-navy" style="font-size:11px; padding:6px 12px;">PDF</a>'
+      : '<span style="font-size:11px; color:var(--text-faint);">—</span>';
+    return '<tr>'
+      + '<td class="col-id" style="font-weight:700;">' + escHtml(inv.invoice_number||'—') + '</td>'
+      + '<td>' + escHtml(inv.period_label||'—') + '</td>'
+      + '<td>' + formatDate(inv.issued_date) + '</td>'
+      + '<td style="' + dueCls + '">' + formatDate(inv.due_date) + '</td>'
+      + '<td style="font-weight:700;">'
+        + formatRupee(inv.amount)
+        + (inv.paid_amount && inv.status === 'partial' ? '<br><span style="font-size:10px; color:var(--text-muted);">Paid: ' + formatRupee(inv.paid_amount) + '</span>' : '')
+      + '</td>'
+      + '<td>' + badge + '</td>'
+      + '<td class="col-actions">' + pdfBtn + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+const toggle  = document.getElementById('navToggle');
+const sidebar = document.getElementById('sidebar');
+toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+document.addEventListener('click', e => {
+  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
+    sidebar.classList.remove('open');
+});
+</script>
+</body>
+</html>
