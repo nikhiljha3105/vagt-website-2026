@@ -220,6 +220,14 @@
     document.getElementById('msg-error').style.display = 'none';
   }
 
+  // ── Token guard — URL must include ?token=YsRwg-DYNoecIfV7D5BbwZiEMn7rexMv ──
+  const SETUP_TOKEN = 'YsRwg-DYNoecIfV7D5BbwZiEMn7rexMv';
+  const urlToken = new URLSearchParams(window.location.search).get('token');
+  if (urlToken !== SETUP_TOKEN) {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:sans-serif;color:#6b7280;font-size:14px;">Page not found.</div>';
+    throw new Error('Invalid setup token');
+  }
+
   // ── If someone is already logged in, sign them out first ──
   const currentUser = await new Promise(r => onAuthStateChanged(auth, r));
   if (currentUser) await signOut(auth);
