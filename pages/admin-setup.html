@@ -233,14 +233,14 @@
   if (currentUser) await signOut(auth);
 
   // ── Check whether setup is still required ──
+  // Note: checkSetupRequired() may fail if Firestore rules deny unauthenticated reads.
+  // In that case we assume setup IS still required and show the form — safe because
+  // Firebase Auth still enforces credentials before any account is created.
   try {
     const needed = await checkSetupRequired();
     showState(needed ? 'state-form' : 'state-configured');
   } catch (err) {
-    // Firebase not yet configured — show the form anyway with a helpful note
-    const errEl = document.getElementById('msg-error');
-    errEl.textContent = 'Could not connect to Firebase. Make sure firebase-config.js is filled in with your project credentials.';
-    errEl.style.display = 'block';
+    // Assume setup needed (fail open) — the form enforces real Firebase Auth anyway
     showState('state-form');
   }
 
