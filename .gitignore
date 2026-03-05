@@ -1,0 +1,46 @@
+# ── Credentials & Secrets ────────────────────────────────────────────────────
+.env
+.env.*
+*.env
+firebase-config.js
+firebase-config.*.js
+service-account*.json
+*-service-account.json
+google-credentials*.json
+secrets/
+.secret*
+
+# ── Firebase local ────────────────────────────────────────────────────────────
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+database-debug.log
+.runtimeconfig.json
+
+# ── Node / Functions ──────────────────────────────────────────────────────────
+node_modules/
+firebase/functions/node_modules/
+npm-debug.log*
+yarn-error.log*
+.pnp.*
+.yarn/
+
+# ── OS & Editor ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+.cache/
+
+# ── Test artifacts ────────────────────────────────────────────────────────────
+tests/__pycache__/
+tests/*.pyc
