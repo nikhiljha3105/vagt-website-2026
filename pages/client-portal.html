@@ -5,613 +5,139 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Client Portal | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <!-- ═══ Security ═══ -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .maintenance-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg, #f5f5f5);
+      padding: 40px 20px;
+    }
+    .maintenance-card {
+      background: #fff;
+      border: 1px solid var(--border, #e0e0e0);
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 48px 40px 40px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .maintenance-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(0,40,100,0.07);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .maintenance-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--navy, #002864);
+      fill: none;
+      stroke-width: 1.8;
+    }
+    .maintenance-badge {
+      display: inline-block;
+      background: rgba(245,196,0,0.15);
+      color: #7a5c00;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,196,0,0.35);
+      margin-bottom: 18px;
+    }
+    .maintenance-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy, #002864);
+      margin: 0 0 14px;
+      line-height: 1.3;
+    }
+    .maintenance-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.75;
+      margin: 0 0 28px;
+    }
+    .maintenance-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 0 0 24px;
+    }
+    .maintenance-contact {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.65;
+    }
+    .maintenance-contact a {
+      color: var(--navy, #002864);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .maintenance-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy, #002864);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      margin-bottom: 28px;
+    }
+    .maintenance-home-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+    }
+  </style>
 </head>
 <body>
+<div class="maintenance-wrap">
+  <div class="maintenance-card">
 
-<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
-  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<div class="layout">
-
-  <!-- ══ SIDEBAR ══ -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <a href="../index.html" class="logo-link">
-        <div class="logo-img-wrap">
-          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
-        </div>
-        <div class="logo-text-block">
-          <div class="logo-wordmark">VAGT</div>
-          <div class="logo-sub">Security Services</div>
-        </div>
-      </a>
-      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    <div class="maintenance-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
     </div>
 
-    <div class="sidebar-portals">
-      <a href="portal.html" class="portal-btn">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        All Portals
-      </a>
-      <a href="client-portal.html" class="portal-btn portal-btn-active">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Client
-      </a>
+    <div class="maintenance-badge">Portal Temporarily Disabled</div>
+
+    <h2>Portal Access Unavailable</h2>
+
+    <p>
+      Our client, employee, and admin portals are currently offline
+      while we complete security configuration.
+      We will restore access as soon as the infrastructure is ready.
+    </p>
+
+    <a href="../index.html" class="maintenance-home-btn">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to VAGT Home
+    </a>
+
+    <hr class="maintenance-divider"/>
+
+    <div class="maintenance-contact">
+      Need immediate assistance?<br>
+      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="tel:+919008977711">+91 90089 77711</a>
     </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-group-label">Client Portal</div>
-      <a href="client-portal.html" class="nav-link nav-link-active">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </a>
-      <a href="client-reports.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Site Reports
-      </a>
-      <a href="client-invoices.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        Invoices
-      </a>
-
-      <div class="nav-group-label">Company</div>
-      <a href="../index.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Home
-      </a>
-
-      <div class="nav-group-label">Services</div>
-      <a href="security.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Security Services
-      </a>
-      <a href="facilities.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        Facilities Management
-      </a>
-      <a href="surveillance.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        Intelligent Surveillance
-        <span class="nav-badge">Soon</span>
-      </a>
-
-      <div class="nav-group-label">Company</div>
-      <a href="about.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        About VAGT
-      </a>
-      <a href="contact.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Contact / Audit
-      </a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-label">Get in touch</div>
-      <p>
-        <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br>
-        <a href="tel:+919008977711">+91 90089 77711</a>
-      </p>
-    </div>
-  </aside>
-  <!-- ══ END SIDEBAR ══ -->
-
-  <main class="main">
-
-    <!-- ══════════════ LOGIN VIEW ══════════════ -->
-    <div id="loginView" class="portal-login-wrap">
-      <div class="portal-login-card">
-
-        <div class="portal-login-header">
-          <div class="portal-login-icon">
-            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <div class="portal-role-badge">Client Access</div>
-          <h2>Client Sign In</h2>
-          <p>Sign in to raise complaints, submit service requests, and track your cases.</p>
-        </div>
-
-        <div class="portal-login-body">
-          <div id="loginError" class="portal-error" style="display:none;" role="alert"></div>
-
-          <form id="loginForm" class="contact-form" novalidate>
-            <div class="form-group">
-              <label for="clientEmail">Email <span style="color:var(--amber)">*</span></label>
-              <input type="email" id="clientEmail" name="email" required
-                     placeholder="you@company.com" autocomplete="username"
-                     spellcheck="false" autocapitalize="none">
-            </div>
-            <div class="form-group">
-              <label for="clientPassword">Password <span style="color:var(--amber)">*</span></label>
-              <input type="password" id="clientPassword" name="password" required
-                     placeholder="••••••••" autocomplete="current-password">
-            </div>
-            <button type="submit" id="loginBtn" class="btn btn-amber"
-                    style="width:100%; justify-content:center; padding:15px; font-size:14px; margin-top:4px;">
-              Sign In
-              <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
-          </form>
-
-          <p style="text-align:center; margin-top:20px; font-size:12px; color:var(--text-muted);">
-            Don't have access yet?
-            <a href="contact.html" style="color:var(--navy); font-weight:600;">Contact us to set up your account</a>
-          </p>
-        </div>
-
-      </div>
-    </div>
-    <!-- ══════════════ END LOGIN VIEW ══════════════ -->
-
-
-    <!-- ══════════════ DASHBOARD VIEW ══════════════ -->
-    <div id="dashboardView" style="display:none;">
-
-      <div class="page-header">
-        <div class="section-label">Client Portal</div>
-        <h1 id="dashGreeting">Welcome</h1>
-        <p id="dashMeta" style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;"></p>
-        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign Out
-        </button>
-      </div>
-
-      <!-- ── TAB NAV ── -->
-      <div class="dash-tabs" role="tablist">
-        <button id="tabBtn-complaints" class="dash-tab active" role="tab"
-                onclick="showTab('complaints')" aria-selected="true">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          Complaints &amp; Requests
-        </button>
-        <button id="tabBtn-training" class="dash-tab" role="tab"
-                onclick="showTab('training')" aria-selected="false">
-          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
-          Training
-        </button>
-      </div>
-
-      <!-- ══ TAB: COMPLAINTS ══ -->
-      <section id="tab-complaints" class="section" role="tabpanel">
-        <div class="grid-2-1" style="max-width:960px;">
-
-          <!-- LEFT: Submit form -->
-          <div>
-            <div class="section-label" style="margin-bottom:20px;">Raise a Complaint or Request</div>
-
-            <div class="complaint-card">
-              <div id="formSuccess" class="portal-success-msg" style="display:none;" role="alert"></div>
-              <div id="formError"   class="portal-error"       style="display:none;" role="alert"></div>
-
-              <form id="complaintForm" class="contact-form" novalidate>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="reqType">Type <span style="color:var(--amber)">*</span></label>
-                    <select id="reqType" name="type" required>
-                      <option value="">Select…</option>
-                      <option value="complaint">Complaint</option>
-                      <option value="service_request">Service Request</option>
-                      <option value="feedback">Feedback</option>
-                      <option value="emergency">Emergency</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="reqPriority">Priority <span style="color:var(--amber)">*</span></label>
-                    <select id="reqPriority" name="priority" required>
-                      <option value="">Select…</option>
-                      <option value="low">Low</option>
-                      <option value="medium" selected>Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="reqSubject">Subject <span style="color:var(--amber)">*</span></label>
-                  <input type="text" id="reqSubject" name="subject" required
-                         placeholder="Brief description of the issue or request"
-                         maxlength="120">
-                </div>
-
-                <div class="form-group">
-                  <label for="reqDescription">Details <span style="color:var(--amber)">*</span></label>
-                  <textarea id="reqDescription" name="description" rows="5" required
-                            placeholder="Please describe the issue in as much detail as possible — location, time, what happened, what you need."></textarea>
-                </div>
-
-                <button type="submit" id="submitBtn" class="btn btn-amber"
-                        style="width:100%; justify-content:center; padding:15px; font-size:14px;">
-                  Submit
-                  <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </button>
-
-              </form>
-            </div>
-          </div>
-
-          <!-- RIGHT: Previous submissions -->
-          <div>
-            <div class="section-label" style="margin-bottom:20px;">Previous Submissions</div>
-            <div id="complaintsList">
-              <!-- populated by JS -->
-              <div class="portal-empty-state">
-                <svg viewBox="0 0 24 24" width="36" height="36">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                  <polyline points="14 2 14 8 20 8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10 9 9 9 8 9"/>
-                </svg>
-                Loading your submissions…
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ══ TAB: TRAINING ══ -->
-      <section id="tab-training" class="section" role="tabpanel" style="display:none;">
-        <div class="section-head" style="margin-bottom:28px;">
-          <div class="section-label">Training</div>
-          <h2 class="section-title">Client Training Resources</h2>
-          <p class="section-sub">Guides and resources to help you get the most from your VAGT security partnership.</p>
-        </div>
-
-        <div class="training-coming-banner">
-          <strong style="color:var(--navy);">Coming soon.</strong>
-          Training materials are being prepared for your team. You'll be notified by email when content is ready to access.
-        </div>
-
-        <div class="training-grid">
-
-          <div class="training-card coming-soon">
-            <div class="training-card-icon">
-              <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-            </div>
-            <div class="training-card-title">Using the Client Portal</div>
-            <div class="training-card-desc">How to raise complaints, track your requests, and communicate with the VAGT team through this portal.</div>
-            <div class="training-card-footer">
-              <span class="training-card-duration">~10 min</span>
-              <span class="training-badge-soon">Coming Soon</span>
-            </div>
-          </div>
-
-          <div class="training-card coming-soon">
-            <div class="training-card-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
-            <div class="training-card-title">Understanding Your Security Plan</div>
-            <div class="training-card-desc">What VAGT provides at your site — guard schedules, patrol routes, escalation procedures, and SLAs.</div>
-            <div class="training-card-footer">
-              <span class="training-card-duration">~15 min</span>
-              <span class="training-badge-soon">Coming Soon</span>
-            </div>
-          </div>
-
-          <div class="training-card coming-soon">
-            <div class="training-card-icon">
-              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8a2 2 0 011.72-2.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91"/><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-            </div>
-            <div class="training-card-title">Emergency Contacts & Procedures</div>
-            <div class="training-card-desc">Who to call, when to call, and what happens step-by-step during a security emergency at your site.</div>
-            <div class="training-card-footer">
-              <span class="training-card-duration">~12 min</span>
-              <span class="training-badge-soon">Coming Soon</span>
-            </div>
-          </div>
-
-          <div class="training-card coming-soon">
-            <div class="training-card-icon">
-              <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </div>
-            <div class="training-card-title">Incident Reporting Guide</div>
-            <div class="training-card-desc">How to document and report security incidents effectively so VAGT can investigate and respond quickly.</div>
-            <div class="training-card-footer">
-              <span class="training-card-duration">~10 min</span>
-              <span class="training-badge-soon">Coming Soon</span>
-            </div>
-          </div>
-
-          <div class="training-card coming-soon">
-            <div class="training-card-icon">
-              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </div>
-            <div class="training-card-title">CCTV & Surveillance Overview</div>
-            <div class="training-card-desc">What your surveillance system covers, data retention policies, and how to request footage when needed.</div>
-            <div class="training-card-footer">
-              <span class="training-card-duration">~15 min</span>
-              <span class="training-badge-soon">Coming Soon</span>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <footer class="site-footer">
-        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
-        <ul class="footer-nav">
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="contact.html">Contact</a></li>
-          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
-        </ul>
-      </footer>
-
-    </div>
-    <!-- ══════════════ END DASHBOARD VIEW ══════════════ -->
-
-  </main>
+  </div>
 </div>
-
-<script>
-/* ─────────────────────────────────────────────────────────
-   VAGT Client Portal
-   API_BASE: update this to your backend URL before deploying.
-   Expected API contract:
-
-   POST /api/auth/client/login
-     Body:    { email: string, password: string }
-     Returns: { token: string, client: { name, company, site } }
-
-   POST /api/complaints                (Bearer token required)
-     Body:    { type, priority, subject, description }
-     Returns: { id: string, status: string, created_at: string }
-
-   GET  /api/complaints                (Bearer token required)
-     Returns: Array<{
-       id: string,
-       type: string,
-       priority: string,
-       subject: string,
-       status: 'open'|'in_progress'|'resolved'|'closed',
-       created_at: string   // ISO 8601
-     }>
-───────────────────────────────────────────────────────── */
-const API_BASE = 'https://api.vagtsecurityservices.com';
-
-/* ── Helpers ── */
-async function api(method, path, body) {
-  const token = localStorage.getItem('vagt_client_token');
-  const opts = {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-  };
-  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
-  if (body)  opts.body = JSON.stringify(body);
-
-  let res;
-  try {
-    res = await fetch(API_BASE + path, opts);
-  } catch {
-    throw new Error('Network error — please check your connection and try again.');
-  }
-
-  if (res.status === 401) {
-    logout();
-    return null;
-  }
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Something went wrong (error ' + res.status + ').');
-  }
-  return res.json();
-}
-
-function formatDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-  });
-}
-
-function statusPill(status) {
-  const map = {
-    open:        ['pill-open',     'Open'],
-    in_progress: ['pill-progress', 'In Progress'],
-    resolved:    ['pill-resolved', 'Resolved'],
-    closed:      ['pill-closed',   'Closed'],
-  };
-  const [cls, label] = map[status] || ['pill-closed', status];
-  return '<span class="complaint-status-pill ' + cls + '">' + label + '</span>';
-}
-
-function typeLabel(type) {
-  const map = {
-    complaint:       'Complaint',
-    service_request: 'Service Request',
-    feedback:        'Feedback',
-    emergency:       'Emergency',
-  };
-  return map[type] || type;
-}
-
-/* ── Login form ── */
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const btn   = document.getElementById('loginBtn');
-  const errEl = document.getElementById('loginError');
-  const email = document.getElementById('clientEmail').value.trim();
-  const pass  = document.getElementById('clientPassword').value;
-
-  if (!email || !pass) {
-    errEl.textContent = 'Please enter your email and password.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  errEl.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Signing in…';
-
-  try {
-    const data = await api('POST', '/api/auth/client/login', { email, password: pass });
-    if (!data) return;
-    localStorage.setItem('vagt_client_token', data.token);
-    localStorage.setItem('vagt_client_user', JSON.stringify(data.client));
-    showDashboard(data.client);
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Sign In <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-  }
-});
-
-/* ── Dashboard tabs ── */
-function showTab(name) {
-  ['complaints','training'].forEach(function(p) {
-    document.getElementById('tab-' + p).style.display = p === name ? 'block' : 'none';
-    const btn = document.getElementById('tabBtn-' + p);
-    btn.classList.toggle('active', p === name);
-    btn.setAttribute('aria-selected', p === name ? 'true' : 'false');
-  });
-}
-
-/* ── Dashboard ── */
-function showDashboard(client) {
-  document.getElementById('loginView').style.display     = 'none';
-  document.getElementById('dashboardView').style.display = 'block';
-  document.getElementById('dashGreeting').textContent    = 'Hello, ' + client.name;
-  document.getElementById('dashMeta').textContent        =
-    client.company + (client.site ? ' · ' + client.site : '');
-  showTab('complaints');
-  loadComplaints();
-}
-
-/* ── Submit complaint ── */
-document.getElementById('complaintForm').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const btn     = document.getElementById('submitBtn');
-  const successEl = document.getElementById('formSuccess');
-  const errEl     = document.getElementById('formError');
-  successEl.style.display = 'none';
-  errEl.style.display     = 'none';
-
-  const type        = document.getElementById('reqType').value;
-  const priority    = document.getElementById('reqPriority').value;
-  const subject     = document.getElementById('reqSubject').value.trim();
-  const description = document.getElementById('reqDescription').value.trim();
-
-  if (!type || !priority || !subject || !description) {
-    errEl.textContent = 'Please fill in all required fields.';
-    errEl.style.display = 'block';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
-
-  try {
-    const data = await api('POST', '/api/complaints', { type, priority, subject, description });
-    if (!data) return;
-    successEl.textContent = 'Submitted successfully. Reference: ' + data.id + '. We will respond within 2 business hours.';
-    successEl.style.display = 'block';
-    document.getElementById('complaintForm').reset();
-    await loadComplaints(); // refresh list
-  } catch (err) {
-    errEl.textContent = err.message;
-    errEl.style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Submit <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
-  }
-});
-
-/* ── Load complaints list ── */
-async function loadComplaints() {
-  const container = document.getElementById('complaintsList');
-  container.innerHTML = '<div class="portal-empty-state" style="padding:20px 0;">Loading…</div>';
-
-  try {
-    const list = await api('GET', '/api/complaints');
-    if (!list) return;
-    renderComplaints(list);
-  } catch (err) {
-    container.innerHTML = '<div class="portal-empty-state" style="padding:20px 0; color:var(--red);">Could not load submissions: ' + err.message + '</div>';
-  }
-}
-
-function renderComplaints(list) {
-  const container = document.getElementById('complaintsList');
-
-  if (!list.length) {
-    container.innerHTML = '<div class="portal-empty-state">'
-      + '<svg viewBox="0 0 24 24" width="36" height="36"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'
-      + 'No submissions yet.<br>Use the form to raise your first complaint or request.'
-      + '</div>';
-    return;
-  }
-
-  const html = list.map(function(item) {
-    return '<div class="complaint-item">'
-      + '<div class="complaint-item-id">' + item.id + '</div>'
-      + '<div class="complaint-item-body">'
-      + '<div class="complaint-item-subject">' + escHtml(item.subject) + '</div>'
-      + '<div class="complaint-item-meta">'
-      + typeLabel(item.type) + ' · '
-      + formatDate(item.created_at) + ' · '
-      + statusPill(item.status)
-      + '</div>'
-      + '</div>'
-      + '</div>';
-  }).join('');
-
-  container.innerHTML = '<div class="complaints-history">'
-    + '<div class="complaints-history-title">Your Submissions (' + list.length + ')</div>'
-    + html
-    + '</div>';
-}
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-/* ── Logout ── */
-function logout() {
-  localStorage.removeItem('vagt_client_token');
-  localStorage.removeItem('vagt_client_user');
-  document.getElementById('dashboardView').style.display = 'none';
-  document.getElementById('loginView').style.display     = 'flex';
-  document.getElementById('loginError').style.display   = 'none';
-  document.getElementById('clientEmail').value    = '';
-  document.getElementById('clientPassword').value = '';
-}
-
-/* ── Auto-login if valid token exists ── */
-(function init() {
-  try {
-    const token = localStorage.getItem('vagt_client_token');
-    const user  = localStorage.getItem('vagt_client_user');
-    if (token && user) {
-      showDashboard(JSON.parse(user));
-    }
-  } catch {
-    logout();
-  }
-})();
-
-/* ── Mobile nav ── */
-const toggle  = document.getElementById('navToggle');
-const sidebar = document.getElementById('sidebar');
-toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-document.addEventListener('click', e => {
-  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
-    sidebar.classList.remove('open');
-});
-</script>
 </body>
 </html>

@@ -3,521 +3,141 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shift Schedule | VAGT Admin</title>
+  <title>Admin — Schedule | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <!-- ═══ Security ═══ -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    /* ── Schedule grid ── */
-    .sched-wrap        { overflow-x: auto; }
-    .sched-grid        { display: grid; grid-template-columns: 180px repeat(7, 1fr); min-width: 820px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .sched-head-cell   { background: var(--navy); color: #fff; padding: 10px 8px; font-size: 11px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-    .sched-head-cell.today { background: var(--amber); color: var(--navy); }
-    .sched-row-label   { background: var(--warm-grey, #f7f5f0); padding: 14px 12px; font-size: 12px; font-weight: 600; color: var(--navy); border-bottom: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; gap: 2px; }
-    .sched-row-site    { font-size: 11px; color: var(--text-muted); font-weight: 400; }
-    .sched-cell        { padding: 6px; border-left: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 64px; cursor: pointer; transition: background 0.15s; }
-    .sched-cell:hover  { background: #f0f4ff; }
-    .sched-slot        { background: #fff; border-radius: 5px; padding: 6px 8px; font-size: 11px; border: 1px solid var(--border); }
-    .sched-slot.filled { background: #e8f5e9; border-color: #a5d6a7; color: #1b5e20; }
-    .sched-slot.vacant { background: #fff8e1; border-color: #ffe082; color: #7a6000; }
-    .sched-slot.conflict { background: #fce4ec; border-color: #ef9a9a; color: #7f0000; }
-    .sched-slot-name   { font-weight: 600; }
-    .sched-slot-time   { font-size: 10px; opacity: 0.75; margin-top: 1px; }
-    .sched-cell-empty  { display: flex; align-items: center; justify-content: center; height: 100%; min-height: 52px; }
-    .sched-add-btn     { font-size: 18px; color: var(--border); line-height: 1; }
-    .sched-cell:hover .sched-add-btn { color: var(--navy); }
-    /* shift type pills */
-    .shift-m { background:#e3f2fd; color:#0d47a1; }
-    .shift-a { background:#fff3e0; color:#7a4100; }
-    .shift-n { background:#ede7f6; color:#311b92; }
-    /* legend */
-    .sched-legend      { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
-    .sched-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
-    .sched-legend-dot  { width: 10px; height: 10px; border-radius: 2px; }
+    .maintenance-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg, #f5f5f5);
+      padding: 40px 20px;
+    }
+    .maintenance-card {
+      background: #fff;
+      border: 1px solid var(--border, #e0e0e0);
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 48px 40px 40px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .maintenance-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(0,40,100,0.07);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .maintenance-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--navy, #002864);
+      fill: none;
+      stroke-width: 1.8;
+    }
+    .maintenance-badge {
+      display: inline-block;
+      background: rgba(245,196,0,0.15);
+      color: #7a5c00;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,196,0,0.35);
+      margin-bottom: 18px;
+    }
+    .maintenance-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy, #002864);
+      margin: 0 0 14px;
+      line-height: 1.3;
+    }
+    .maintenance-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.75;
+      margin: 0 0 28px;
+    }
+    .maintenance-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 0 0 24px;
+    }
+    .maintenance-contact {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.65;
+    }
+    .maintenance-contact a {
+      color: var(--navy, #002864);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .maintenance-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy, #002864);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      margin-bottom: 28px;
+    }
+    .maintenance-home-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+    }
   </style>
 </head>
 <body>
+<div class="maintenance-wrap">
+  <div class="maintenance-card">
 
-<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
-  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<div class="layout">
-
-  <!-- ══ SIDEBAR ══ -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <a href="../index.html" class="logo-link">
-        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
-        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
-      </a>
-      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
-    </div>
-    <div class="sidebar-portals">
-      <a href="portal.html" class="portal-btn">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>All Portals
-      </a>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-group-label">Admin</div>
-      <a href="admin-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
-      </a>
-      <a href="admin-employees.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Employees
-      </a>
-      <a href="admin-schedule.html" class="nav-link nav-link-active">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Schedule
-      </a>
-      <a href="admin-clients.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Clients
-      </a>
-      <a href="admin-sites.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Sites
-      </a>
-      <a href="admin-payroll.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Payroll
-      </a>
-      <a href="admin-reports.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports
-      </a>
-      <a href="admin-complaints.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Complaints
-      </a>
-      <div class="nav-group-label">Operations</div>
-      <a href="employee-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Employee Portal
-      </a>
-      <a href="client-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Client Portal
-      </a>
-      <div class="nav-group-label">Company</div>
-      <a href="../index.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-label">Get in touch</div>
-      <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br><a href="tel:+919008977711">+91 90089 77711</a></p>
-    </div>
-  </aside>
-
-  <main class="main" id="mainContent">
-
-    <!-- ══ AUTH GATE ══ -->
-    <div id="loginGate" class="portal-login-wrap">
-      <div class="portal-login-card" style="max-width:400px;">
-        <div class="portal-login-header">
-          <div class="portal-login-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <div class="portal-role-badge">Restricted</div>
-          <h2>Admin Access Required</h2>
-          <p>Please sign in through the main portal with admin credentials.</p>
-        </div>
-        <div class="portal-login-body">
-          <a href="portal.html" class="btn btn-amber" style="width:100%; justify-content:center; padding:15px; font-size:14px; display:inline-flex;">
-            Go to Portal Login
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </div>
+    <div class="maintenance-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
     </div>
 
-    <!-- ══ DASHBOARD ══ -->
-    <div id="dashboardView" style="display:none;">
+    <div class="maintenance-badge">Portal Temporarily Disabled</div>
 
-      <div class="page-header">
-        <div class="section-label">Admin · Schedule</div>
-        <h1>Shift Roster</h1>
-        <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;" id="dashMeta"></p>
-        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
-        </button>
-      </div>
+    <h2>Portal Access Unavailable</h2>
 
-      <section class="section">
+    <p>
+      Our client, employee, and admin portals are currently offline
+      while we complete security configuration.
+      We will restore access as soon as the infrastructure is ready.
+    </p>
 
-        <!-- week nav + filters -->
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
-          <div style="display:flex; align-items:center; gap:6px;">
-            <button onclick="shiftWeek(-1)" class="btn btn-outline-navy" style="font-size:12px; padding:8px 12px;">← Prev</button>
-            <span id="weekLabel" style="font-size:13px; font-weight:600; color:var(--navy); min-width:200px; text-align:center;"></span>
-            <button onclick="shiftWeek(1)"  class="btn btn-outline-navy" style="font-size:12px; padding:8px 12px;">Next →</button>
-          </div>
-          <button onclick="goToday()" class="btn btn-ghost" style="font-size:12px; padding:8px 12px;">Today</button>
-          <select id="siteFilter" onchange="renderSchedule()" style="font-size:13px; padding:8px 12px; border:1px solid var(--border); color:var(--navy);">
-            <option value="">All sites</option>
-          </select>
-          <button onclick="openAddShift()" class="btn btn-navy" style="font-size:12px; padding:9px 16px; margin-left:auto;">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Shift
-          </button>
-        </div>
+    <a href="../index.html" class="maintenance-home-btn">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to VAGT Home
+    </a>
 
-        <!-- legend -->
-        <div class="sched-legend" style="margin-bottom:12px;">
-          <div class="sched-legend-item"><div class="sched-legend-dot" style="background:#e8f5e9; border:1px solid #a5d6a7;"></div>Filled</div>
-          <div class="sched-legend-item"><div class="sched-legend-dot" style="background:#fff8e1; border:1px solid #ffe082;"></div>Vacant</div>
-          <div class="sched-legend-item"><div class="sched-legend-dot" style="background:#fce4ec; border:1px solid #ef9a9a;"></div>Conflict</div>
-          <div class="sched-legend-item"><div class="sched-legend-dot shift-m" style="width:18px; height:10px; border-radius:3px;"></div>Morning</div>
-          <div class="sched-legend-item"><div class="sched-legend-dot shift-a" style="width:18px; height:10px; border-radius:3px;"></div>Afternoon</div>
-          <div class="sched-legend-item"><div class="sched-legend-dot shift-n" style="width:18px; height:10px; border-radius:3px;"></div>Night</div>
-        </div>
+    <hr class="maintenance-divider"/>
 
-        <div class="admin-card" style="padding:0;">
-          <div class="sched-wrap">
-            <div class="sched-grid" id="schedGrid">
-              <div class="sched-head-cell" style="text-align:left; padding-left:16px;">Site · Shift</div>
-              <!-- day headers injected by JS -->
-            </div>
-          </div>
-          <div style="padding:10px 16px; font-size:11px; color:var(--text-muted); border-top:1px solid var(--border);" id="schedFooter"></div>
-        </div>
-
-      </section>
-
-      <footer class="site-footer">
-        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
-        <ul class="footer-nav">
-          <li><a href="admin-portal.html">Dashboard</a></li>
-          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
-        </ul>
-      </footer>
-
+    <div class="maintenance-contact">
+      Need immediate assistance?<br>
+      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="tel:+919008977711">+91 90089 77711</a>
     </div>
 
-  </main>
-</div>
-
-<!-- ══ ASSIGN SHIFT MODAL ══ -->
-<div id="shiftOverlay" class="emp-detail-overlay" style="display:none;" onclick="closeShiftModal(event)">
-  <div class="emp-detail-modal" style="max-width:480px;" onclick="event.stopPropagation()">
-    <div class="emp-detail-header">
-      <div>
-        <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px;" id="shiftModalLabel">Assign Shift</div>
-        <h3 id="shiftModalTitle" style="margin:0; font-size:17px; color:var(--navy);"></h3>
-      </div>
-      <button class="emp-detail-close" onclick="document.getElementById('shiftOverlay').style.display='none'">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="emp-detail-body">
-      <div class="emp-detail-row"><div class="emp-detail-key">Site</div>
-        <select id="modalSite" style="font-size:13px; padding:8px; border:1px solid var(--border); color:var(--navy); width:100%;"></select>
-      </div>
-      <div class="emp-detail-row"><div class="emp-detail-key">Date</div>
-        <input type="date" id="modalDate" style="font-size:13px; padding:8px; border:1px solid var(--border); color:var(--navy); width:100%;"/>
-      </div>
-      <div class="emp-detail-row"><div class="emp-detail-key">Shift</div>
-        <select id="modalShift" style="font-size:13px; padding:8px; border:1px solid var(--border); color:var(--navy); width:100%;">
-          <option value="morning">Morning (06:00 – 14:00)</option>
-          <option value="afternoon">Afternoon (14:00 – 22:00)</option>
-          <option value="night">Night (22:00 – 06:00)</option>
-        </select>
-      </div>
-      <div class="emp-detail-row"><div class="emp-detail-key">Guard</div>
-        <select id="modalGuard" style="font-size:13px; padding:8px; border:1px solid var(--border); color:var(--navy); width:100%;">
-          <option value="">— Loading employees… —</option>
-        </select>
-      </div>
-    </div>
-    <div style="padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end;">
-      <button onclick="document.getElementById('shiftOverlay').style.display='none'" class="btn btn-ghost" style="font-size:12px; padding:10px 16px;">Cancel</button>
-      <button onclick="saveShift()" id="saveShiftBtn" class="btn btn-navy" style="font-size:12px; padding:10px 16px;">Save Shift</button>
-    </div>
   </div>
 </div>
-
-<script>
-/* ═══════════════════════════════════════════════════════════
-   VAGT Admin – Shift Schedule
-
-   GET /api/admin/schedule?week_start=YYYY-MM-DD     (Bearer, admin)
-     Returns: [{
-       id, employee_id, employee_name, site_id, site_name,
-       date, shift_type: 'morning'|'afternoon'|'night',
-       start_time, end_time
-     }]
-
-   GET /api/admin/sites                               (Bearer, admin)
-     Returns: [{ id, name, client_name }]
-
-   GET /api/admin/employees?status=active             (Bearer, admin)
-     Returns: [{ id, name, employee_id }]
-
-   POST /api/admin/schedule                           (Bearer, admin)
-     Body: { employee_id, site_id, date, shift_type }
-     Returns: { id, ... }
-
-   DELETE /api/admin/schedule/:id                     (Bearer, admin)
-     Returns: { success: true }
-═══════════════════════════════════════════════════════════ */
-const API_BASE = 'https://api.vagtsecurityservices.com';
-
-async function api(method, path, body) {
-  const token = localStorage.getItem('vagt_admin_token');
-  const opts  = { method, headers: { 'Content-Type': 'application/json' } };
-  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
-  if (body)  opts.body = JSON.stringify(body);
-  let res;
-  try { res = await fetch(API_BASE + path, opts); }
-  catch { throw new Error('Network error.'); }
-  if (res.status === 401) { logout(); return null; }
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Error'); }
-  return res.json();
-}
-
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* ─── AUTH ─── */
-function logout() {
-  ['vagt_admin_token','vagt_admin_user'].forEach(k => localStorage.removeItem(k));
-  document.getElementById('dashboardView').style.display = 'none';
-  document.getElementById('loginGate').style.display     = 'flex';
-}
-
-let weekOffset = 0;
-let allShifts  = [];
-let allSites   = [];
-let allGuards  = [];
-
-function getWeekStart(offset) {
-  const d = new Date();
-  const day = d.getDay(); // 0=Sun
-  const mon = new Date(d);
-  mon.setDate(d.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
-  mon.setHours(0,0,0,0);
-  return mon;
-}
-
-function formatISO(d) {
-  return d.toISOString().split('T')[0];
-}
-
-function formatShortDate(d) {
-  return d.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
-}
-
-function isToday(d) {
-  const t = new Date(); t.setHours(0,0,0,0);
-  return d.getTime() === t.getTime();
-}
-
-const SHIFT_LABEL = { morning: 'Morning', afternoon: 'Afternoon', night: 'Night' };
-const SHIFT_TIME  = { morning: '06:00–14:00', afternoon: '14:00–22:00', night: '22:00–06:00' };
-const SHIFT_CLS   = { morning: 'shift-m', afternoon: 'shift-a', night: 'shift-n' };
-
-(function init() {
-  const token = localStorage.getItem('vagt_admin_token');
-  const user  = localStorage.getItem('vagt_admin_user');
-  if (token && user) {
-    const u = JSON.parse(user);
-    document.getElementById('loginGate').style.display     = 'none';
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('dashMeta').textContent        = 'Signed in as ' + u.name;
-    loadData();
-  }
-})();
-
-async function loadData() {
-  await Promise.all([loadSites(), loadGuards()]);
-  await loadWeek();
-}
-
-async function loadSites() {
-  try {
-    const list = await api('GET', '/api/admin/sites');
-    if (!list) return;
-    allSites = list;
-    const sel   = document.getElementById('siteFilter');
-    const mSel  = document.getElementById('modalSite');
-    list.forEach(function(s) {
-      [sel, mSel].forEach(function(el) {
-        const o = document.createElement('option');
-        o.value = s.id; o.textContent = s.name;
-        el.appendChild(o);
-      });
-    });
-  } catch { /* non-fatal */ }
-}
-
-async function loadGuards() {
-  try {
-    const list = await api('GET', '/api/admin/employees?status=active');
-    if (!list) return;
-    allGuards = list;
-    const sel = document.getElementById('modalGuard');
-    sel.innerHTML = '<option value="">— Select guard —</option>';
-    list.forEach(function(g) {
-      const o = document.createElement('option');
-      o.value = g.id; o.textContent = g.name + ' (' + (g.employee_id||g.id) + ')';
-      sel.appendChild(o);
-    });
-  } catch { /* non-fatal */ }
-}
-
-async function loadWeek() {
-  const ws  = getWeekStart(weekOffset);
-  const we  = new Date(ws); we.setDate(ws.getDate() + 6);
-  const wStr = formatISO(ws);
-
-  document.getElementById('weekLabel').textContent =
-    formatShortDate(ws) + ' – ' + formatShortDate(we);
-
-  try {
-    const shifts = await api('GET', '/api/admin/schedule?week_start=' + wStr);
-    allShifts = shifts || [];
-  } catch {
-    allShifts = [];
-  }
-  renderSchedule();
-}
-
-function renderSchedule() {
-  const ws         = getWeekStart(weekOffset);
-  const siteFilter = document.getElementById('siteFilter').value;
-
-  /* day columns */
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(ws); d.setDate(ws.getDate() + i);
-    days.push(d);
-  }
-
-  /* which sites to show */
-  const visibleSites = siteFilter
-    ? allSites.filter(s => s.id === siteFilter)
-    : allSites;
-
-  const grid = document.getElementById('schedGrid');
-
-  /* rebuild headers */
-  grid.innerHTML = '<div class="sched-head-cell" style="text-align:left; padding-left:16px;">Site · Shift</div>'
-    + days.map(function(d) {
-        return '<div class="sched-head-cell' + (isToday(d) ? ' today' : '') + '">'
-          + d.toLocaleDateString('en-IN', { weekday:'short' }) + '<br>'
-          + '<span style="font-size:13px; font-weight:800;">' + d.getDate() + '</span>'
-          + '</div>';
-      }).join('');
-
-  /* shift rows */
-  const SHIFTS = ['morning', 'afternoon', 'night'];
-
-  if (!visibleSites.length) {
-    grid.innerHTML += '<div style="grid-column:1/-1; padding:32px; text-align:center; color:var(--text-muted); font-size:13px;">No sites loaded. Check your API connection.</div>';
-    return;
-  }
-
-  visibleSites.forEach(function(site) {
-    SHIFTS.forEach(function(shiftType) {
-      /* row label */
-      grid.innerHTML += '<div class="sched-row-label">'
-        + '<span style="font-size:11px; padding:2px 6px; border-radius:3px; font-weight:700; display:inline-block; margin-bottom:3px;" class="' + SHIFT_CLS[shiftType] + '">' + SHIFT_LABEL[shiftType] + '</span>'
-        + '<span class="sched-row-site">' + escHtml(site.name) + '</span>'
-        + '<span style="font-size:10px; color:var(--text-faint);">' + SHIFT_TIME[shiftType] + '</span>'
-        + '</div>';
-
-      /* day cells */
-      days.forEach(function(day) {
-        const dateStr = formatISO(day);
-        const shift   = allShifts.find(function(s) {
-          return s.site_id === site.id && s.shift_type === shiftType && s.date === dateStr;
-        });
-
-        if (shift) {
-          grid.innerHTML += '<div class="sched-cell" onclick="openEditShift(\'' + escHtml(shift.id) + '\')">'
-            + '<div class="sched-slot filled">'
-            + '<div class="sched-slot-name">' + escHtml(shift.employee_name) + '</div>'
-            + '<div class="sched-slot-time">' + SHIFT_TIME[shiftType] + '</div>'
-            + '</div>'
-            + '</div>';
-        } else {
-          grid.innerHTML += '<div class="sched-cell" onclick="openNewShift(\'' + escHtml(site.id) + '\',\'' + dateStr + '\',\'' + shiftType + '\')">'
-            + '<div class="sched-cell-empty"><span class="sched-add-btn">+</span></div>'
-            + '</div>';
-        }
-      });
-    });
-  });
-
-  const total   = visibleSites.length * 3 * 7;
-  const filled  = allShifts.filter(function(s) {
-    return !siteFilter || s.site_id === siteFilter;
-  }).length;
-  document.getElementById('schedFooter').textContent =
-    filled + ' of ' + total + ' slots filled this week';
-}
-
-function shiftWeek(dir) { weekOffset += dir; loadWeek(); }
-function goToday()      { weekOffset = 0; loadWeek(); }
-
-function openAddShift() {
-  document.getElementById('shiftModalLabel').textContent = 'New Shift';
-  document.getElementById('shiftModalTitle').textContent = 'Assign a guard to a shift';
-  document.getElementById('modalDate').value = formatISO(new Date());
-  document.getElementById('shiftOverlay').style.display = 'flex';
-}
-
-function openNewShift(siteId, date, shiftType) {
-  document.getElementById('shiftModalLabel').textContent = 'Assign Shift';
-  document.getElementById('shiftModalTitle').textContent =
-    SHIFT_LABEL[shiftType] + ' · ' + new Date(date + 'T00:00:00').toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'short' });
-  document.getElementById('modalSite').value  = siteId;
-  document.getElementById('modalDate').value  = date;
-  document.getElementById('modalShift').value = shiftType;
-  document.getElementById('shiftOverlay').style.display = 'flex';
-}
-
-function openEditShift(shiftId) {
-  const s = allShifts.find(function(x) { return x.id === shiftId; });
-  if (!s) return;
-  document.getElementById('shiftModalLabel').textContent = 'Edit Shift · ' + escHtml(s.employee_name);
-  document.getElementById('shiftModalTitle').textContent = escHtml(s.site_name) + ' · ' + SHIFT_LABEL[s.shift_type];
-  document.getElementById('modalSite').value  = s.site_id;
-  document.getElementById('modalDate').value  = s.date;
-  document.getElementById('modalShift').value = s.shift_type;
-  document.getElementById('modalGuard').value = s.employee_id;
-  document.getElementById('shiftOverlay').style.display = 'flex';
-}
-
-function closeShiftModal(e) {
-  if (e.target === document.getElementById('shiftOverlay'))
-    document.getElementById('shiftOverlay').style.display = 'none';
-}
-
-async function saveShift() {
-  const btn = document.getElementById('saveShiftBtn');
-  btn.disabled = true; btn.textContent = 'Saving…';
-  try {
-    await api('POST', '/api/admin/schedule', {
-      employee_id: document.getElementById('modalGuard').value,
-      site_id:     document.getElementById('modalSite').value,
-      date:        document.getElementById('modalDate').value,
-      shift_type:  document.getElementById('modalShift').value,
-    });
-    document.getElementById('shiftOverlay').style.display = 'none';
-    await loadWeek();
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    btn.disabled = false; btn.textContent = 'Save Shift';
-  }
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') document.getElementById('shiftOverlay').style.display = 'none';
-});
-
-const toggle  = document.getElementById('navToggle');
-const sidebar = document.getElementById('sidebar');
-toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-document.addEventListener('click', e => {
-  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
-    sidebar.classList.remove('open');
-});
-</script>
 </body>
 </html>

@@ -3,391 +3,141 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Payroll | VAGT Admin</title>
+  <title>Admin — Payroll | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <!-- ═══ Security ═══ -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .maintenance-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg, #f5f5f5);
+      padding: 40px 20px;
+    }
+    .maintenance-card {
+      background: #fff;
+      border: 1px solid var(--border, #e0e0e0);
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 48px 40px 40px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .maintenance-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(0,40,100,0.07);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .maintenance-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--navy, #002864);
+      fill: none;
+      stroke-width: 1.8;
+    }
+    .maintenance-badge {
+      display: inline-block;
+      background: rgba(245,196,0,0.15);
+      color: #7a5c00;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,196,0,0.35);
+      margin-bottom: 18px;
+    }
+    .maintenance-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy, #002864);
+      margin: 0 0 14px;
+      line-height: 1.3;
+    }
+    .maintenance-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.75;
+      margin: 0 0 28px;
+    }
+    .maintenance-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 0 0 24px;
+    }
+    .maintenance-contact {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.65;
+    }
+    .maintenance-contact a {
+      color: var(--navy, #002864);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .maintenance-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy, #002864);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      margin-bottom: 28px;
+    }
+    .maintenance-home-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+    }
+  </style>
 </head>
 <body>
+<div class="maintenance-wrap">
+  <div class="maintenance-card">
 
-<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
-  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<div class="layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <a href="../index.html" class="logo-link">
-        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
-        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
-      </a>
-      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
-    </div>
-    <div class="sidebar-portals">
-      <a href="portal.html" class="portal-btn"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>All Portals</a>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-group-label">Admin</div>
-      <a href="admin-portal.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
-      <a href="admin-employees.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Employees</a>
-      <a href="admin-schedule.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Schedule</a>
-      <a href="admin-clients.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Clients</a>
-      <a href="admin-sites.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Sites</a>
-      <a href="admin-payroll.html" class="nav-link nav-link-active"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Payroll</a>
-      <a href="admin-reports.html" class="nav-link"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Reports</a>
-      <a href="admin-complaints.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Complaints</a>
-      <div class="nav-group-label">Operations</div>
-      <a href="employee-portal.html" class="nav-link"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Employee Portal</a>
-      <a href="client-portal.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Client Portal</a>
-      <div class="nav-group-label">Company</div>
-      <a href="../index.html" class="nav-link"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home</a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-label">Get in touch</div>
-      <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br><a href="tel:+919008977711">+91 90089 77711</a></p>
-    </div>
-  </aside>
-
-  <main class="main" id="mainContent">
-
-    <div id="loginGate" class="portal-login-wrap">
-      <div class="portal-login-card" style="max-width:400px;">
-        <div class="portal-login-header">
-          <div class="portal-login-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-          <div class="portal-role-badge">Restricted</div>
-          <h2>Admin Access Required</h2>
-          <p>Please sign in through the main portal with admin credentials.</p>
-        </div>
-        <div class="portal-login-body">
-          <a href="portal.html" class="btn btn-amber" style="width:100%; justify-content:center; padding:15px; font-size:14px; display:inline-flex;">
-            Go to Portal Login<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </div>
+    <div class="maintenance-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
     </div>
 
-    <div id="dashboardView" style="display:none;">
+    <div class="maintenance-badge">Portal Temporarily Disabled</div>
 
-      <div class="page-header">
-        <div class="section-label">Admin · Payroll</div>
-        <h1>Payroll</h1>
-        <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;" id="dashMeta"></p>
-        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
-        </button>
-      </div>
+    <h2>Portal Access Unavailable</h2>
 
-      <!-- ── STATS ── -->
-      <section class="section" style="padding-bottom:0;">
-        <div class="admin-stats">
-          <div class="admin-stat-card">
-            <div class="admin-stat-value" id="statTotal">—</div>
-            <div class="admin-stat-label">Total Payable</div>
-            <div class="admin-stat-sub" id="statMonth">This month</div>
-          </div>
-          <div class="admin-stat-card accent-green">
-            <div class="admin-stat-value" id="statPaid">—</div>
-            <div class="admin-stat-label">Slips Generated</div>
-            <div class="admin-stat-sub" id="statPaidSub">of total employees</div>
-          </div>
-          <div class="admin-stat-card accent-amber">
-            <div class="admin-stat-value" id="statPending">—</div>
-            <div class="admin-stat-label">Pending</div>
-            <div class="admin-stat-sub">Awaiting generation</div>
-          </div>
-          <div class="admin-stat-card accent-red">
-            <div class="admin-stat-value" id="statDeductions">—</div>
-            <div class="admin-stat-label">Total Deductions</div>
-            <div class="admin-stat-sub">Advances + leaves</div>
-          </div>
-        </div>
-      </section>
+    <p>
+      Our client, employee, and admin portals are currently offline
+      while we complete security configuration.
+      We will restore access as soon as the infrastructure is ready.
+    </p>
 
-      <section class="section">
-        <!-- month selector + run button -->
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
-          <select id="monthSelect" onchange="loadPayroll()" style="font-size:13px; padding:9px 12px; border:1px solid var(--border); color:var(--navy); font-weight:600;"></select>
-          <input type="text" id="searchInput" placeholder="Search employee…" oninput="applyFilters()" autocomplete="off" style="flex:1; min-width:200px; font-size:13px; padding:9px 12px; border:1px solid var(--border); color:var(--navy);">
-          <select id="statusFilter" onchange="applyFilters()" style="font-size:13px; padding:9px 12px; border:1px solid var(--border); color:var(--navy);">
-            <option value="">All</option>
-            <option value="generated">Slip Generated</option>
-            <option value="pending">Pending</option>
-          </select>
-          <button onclick="runPayroll()" id="runBtn" class="btn btn-navy" style="font-size:12px; padding:9px 16px;">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-            Run Pay Period
-          </button>
-        </div>
+    <a href="../index.html" class="maintenance-home-btn">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to VAGT Home
+    </a>
 
-        <div class="admin-card" style="padding:0;">
-          <div class="admin-table-wrap">
-            <table class="admin-table">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Employee ID</th>
-                  <th>Days Worked</th>
-                  <th>Leaves</th>
-                  <th>Gross Pay</th>
-                  <th>Deductions</th>
-                  <th>Net Pay</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="payrollTableBody">
-                <tr><td colspan="9" style="text-align:center; padding:32px; color:var(--text-muted);">Select a month to load payroll.</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="admin-pagination" style="padding:14px 16px; border-top:1px solid var(--border);">
-            <span class="admin-pagination-info" id="filterCount">—</span>
-          </div>
-        </div>
-      </section>
+    <hr class="maintenance-divider"/>
 
-      <footer class="site-footer">
-        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
-        <ul class="footer-nav">
-          <li><a href="admin-portal.html">Dashboard</a></li>
-          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
-        </ul>
-      </footer>
-
+    <div class="maintenance-contact">
+      Need immediate assistance?<br>
+      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="tel:+919008977711">+91 90089 77711</a>
     </div>
-  </main>
-</div>
 
-<!-- ══ PAYSLIP DETAIL MODAL ══ -->
-<div id="slipOverlay" class="emp-detail-overlay" style="display:none;" onclick="closeOverlay(event)">
-  <div class="emp-detail-modal" style="max-width:540px;" onclick="event.stopPropagation()">
-    <div class="emp-detail-header">
-      <div>
-        <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px;" id="slipLabel">Payslip</div>
-        <h3 id="slipName" style="margin:0; font-size:17px; color:var(--navy);"></h3>
-      </div>
-      <button class="emp-detail-close" onclick="document.getElementById('slipOverlay').style.display='none'">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="emp-detail-body" id="slipBody"></div>
-    <div style="padding:16px 24px; border-top:1px solid var(--border); display:flex; gap:8px; justify-content:flex-end;">
-      <button onclick="generateSlip()" id="generateBtn" class="btn btn-navy" style="font-size:12px; padding:10px 16px;">Generate Slip</button>
-      <button onclick="document.getElementById('slipOverlay').style.display='none'" class="btn btn-ghost" style="font-size:12px; padding:10px 16px;">Close</button>
-    </div>
   </div>
 </div>
-
-<script>
-/* ═══════════════════════════════════════════════════════════
-   VAGT Admin – Payroll
-
-   GET /api/admin/payroll?month=YYYY-MM               (Bearer, admin)
-     Returns: {
-       summary: { total_payable, slips_generated, pending, total_deductions },
-       employees: [{
-         id, employee_id, name, days_worked, days_in_month,
-         leaves_taken, gross_pay, deductions, net_pay,
-         slip_status: 'generated'|'pending', slip_url?
-       }]
-     }
-
-   POST /api/admin/payroll/run                        (Bearer, admin)
-     Body: { month: 'YYYY-MM' }
-     Returns: { success: true, generated: number }
-
-   POST /api/admin/payroll/:employee_id/generate-slip (Bearer, admin)
-     Body: { month: 'YYYY-MM' }
-     Returns: { slip_url: string }
-═══════════════════════════════════════════════════════════ */
-const API_BASE = 'https://api.vagtsecurityservices.com';
-
-async function api(method, path, body) {
-  const token = localStorage.getItem('vagt_admin_token');
-  const opts  = { method, headers: { 'Content-Type': 'application/json' } };
-  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
-  if (body)  opts.body = JSON.stringify(body);
-  let res;
-  try { res = await fetch(API_BASE + path, opts); }
-  catch { throw new Error('Network error.'); }
-  if (res.status === 401) { logout(); return null; }
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Error'); }
-  return res.json();
-}
-
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function formatRupee(n) { return '₹' + Number(n||0).toLocaleString('en-IN'); }
-
-function logout() {
-  ['vagt_admin_token','vagt_admin_user'].forEach(k => localStorage.removeItem(k));
-  document.getElementById('dashboardView').style.display = 'none';
-  document.getElementById('loginGate').style.display     = 'flex';
-}
-
-let allEmployees  = [];
-let filteredList  = [];
-let currentMonth  = '';
-let currentSlipId = null;
-
-function buildMonthOptions() {
-  const sel  = document.getElementById('monthSelect');
-  const now  = new Date();
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const val = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-    const lbl = d.toLocaleDateString('en-IN', { month:'long', year:'numeric' });
-    const o   = document.createElement('option');
-    o.value = val; o.textContent = lbl;
-    if (i === 0) o.selected = true;
-    sel.appendChild(o);
-  }
-  currentMonth = sel.value;
-}
-
-(function init() {
-  const token = localStorage.getItem('vagt_admin_token');
-  const user  = localStorage.getItem('vagt_admin_user');
-  if (token && user) {
-    const u = JSON.parse(user);
-    document.getElementById('loginGate').style.display     = 'none';
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('dashMeta').textContent        = 'Signed in as ' + u.name;
-    buildMonthOptions();
-    loadPayroll();
-  }
-})();
-
-async function loadPayroll() {
-  currentMonth = document.getElementById('monthSelect').value;
-  document.getElementById('payrollTableBody').innerHTML =
-    '<tr><td colspan="9" style="text-align:center; padding:28px; color:var(--text-muted);">Loading…</td></tr>';
-  try {
-    const data = await api('GET', '/api/admin/payroll?month=' + currentMonth);
-    if (!data) return;
-
-    const s = data.summary || {};
-    document.getElementById('statTotal').textContent     = formatRupee(s.total_payable);
-    document.getElementById('statPaid').textContent      = s.slips_generated || 0;
-    document.getElementById('statPaidSub').textContent   = 'of ' + (allEmployees.length || (s.slips_generated||0) + (s.pending||0)) + ' employees';
-    document.getElementById('statPending').textContent   = s.pending || 0;
-    document.getElementById('statDeductions').textContent = formatRupee(s.total_deductions);
-
-    allEmployees = data.employees || [];
-    applyFilters();
-  } catch (err) {
-    document.getElementById('payrollTableBody').innerHTML =
-      '<tr><td colspan="9" style="text-align:center; padding:28px; color:var(--text-muted);">Could not load payroll: ' + escHtml(err.message) + '</td></tr>';
-  }
-}
-
-function applyFilters() {
-  const q      = document.getElementById('searchInput').value.trim().toLowerCase();
-  const status = document.getElementById('statusFilter').value;
-
-  filteredList = allEmployees.filter(function(e) {
-    if (status && e.slip_status !== status) return false;
-    if (q && !(e.name||'').toLowerCase().includes(q) && !(e.employee_id||'').toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  document.getElementById('filterCount').textContent = filteredList.length + ' employees';
-  renderTable();
-}
-
-function renderTable() {
-  if (!filteredList.length) {
-    document.getElementById('payrollTableBody').innerHTML =
-      '<tr><td colspan="9" style="text-align:center; padding:32px; color:var(--text-muted);">No records found.</td></tr>';
-    return;
-  }
-
-  document.getElementById('payrollTableBody').innerHTML = filteredList.map(function(e) {
-    const slipBadge = e.slip_status === 'generated'
-      ? '<span class="status-badge badge-resolved">Generated</span>'
-      : '<span class="status-badge badge-pending">Pending</span>';
-    const daysDisplay = (e.days_worked || 0) + (e.days_in_month ? ' / ' + e.days_in_month : '');
-    return '<tr>'
-      + '<td class="col-name">' + escHtml(e.name) + '</td>'
-      + '<td class="col-id" style="font-size:11px;">' + escHtml(e.employee_id||'—') + '</td>'
-      + '<td style="text-align:center;">' + daysDisplay + '</td>'
-      + '<td style="text-align:center;">' + (e.leaves_taken || 0) + '</td>'
-      + '<td style="font-weight:600;">' + formatRupee(e.gross_pay) + '</td>'
-      + '<td style="color:#c0392b;">' + (e.deductions ? '– ' + formatRupee(e.deductions) : '—') + '</td>'
-      + '<td style="font-weight:700; color:var(--navy);">' + formatRupee(e.net_pay) + '</td>'
-      + '<td>' + slipBadge + '</td>'
-      + '<td class="col-actions"><button onclick="openSlip(\'' + escHtml(e.id) + '\')" class="btn btn-ghost" style="font-size:11px; padding:6px 12px;">Details</button></td>'
-      + '</tr>';
-  }).join('');
-}
-
-async function runPayroll() {
-  if (!confirm('Run pay period for ' + document.getElementById('monthSelect').options[document.getElementById('monthSelect').selectedIndex].text + '?\n\nThis will calculate all payslips. You can still make adjustments afterwards.')) return;
-  const btn = document.getElementById('runBtn');
-  btn.disabled = true; btn.textContent = 'Processing…';
-  try {
-    const res = await api('POST', '/api/admin/payroll/run', { month: currentMonth });
-    if (res) { alert('Pay period run complete. ' + (res.generated||0) + ' slips generated.'); loadPayroll(); }
-  } catch (err) { alert(err.message); }
-  finally { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg> Run Pay Period'; }
-}
-
-function openSlip(id) {
-  const e = allEmployees.find(function(x) { return x.id === id; });
-  if (!e) return;
-  currentSlipId = id;
-  document.getElementById('slipLabel').textContent = 'Payslip · ' + document.getElementById('monthSelect').options[document.getElementById('monthSelect').selectedIndex].text;
-  document.getElementById('slipName').textContent  = e.name;
-  document.getElementById('generateBtn').style.display = e.slip_status === 'generated' ? 'none' : 'inline-flex';
-  document.getElementById('slipBody').innerHTML = [
-    ['Employee ID',   escHtml(e.employee_id||'—')],
-    ['Days Worked',   (e.days_worked||0) + (e.days_in_month ? ' of ' + e.days_in_month : '')],
-    ['Leaves Taken',  String(e.leaves_taken||0)],
-    ['Gross Pay',     formatRupee(e.gross_pay)],
-    ['Deductions',    e.deductions ? '– ' + formatRupee(e.deductions) : '—'],
-    ['Net Pay',       '<strong style="color:var(--navy); font-size:15px;">' + formatRupee(e.net_pay) + '</strong>'],
-    ['Slip Status',   e.slip_status === 'generated'
-      ? '<span class="status-badge badge-resolved">Generated</span>' + (e.slip_url ? ' <a href="' + escHtml(e.slip_url) + '" target="_blank" rel="noopener noreferrer" style="font-size:11px; margin-left:8px;">Download PDF</a>' : '')
-      : '<span class="status-badge badge-pending">Pending generation</span>'],
-  ].map(function(r) {
-    return '<div class="emp-detail-row"><div class="emp-detail-key">' + r[0] + '</div><div class="emp-detail-val">' + r[1] + '</div></div>';
-  }).join('');
-  document.getElementById('slipOverlay').style.display = 'flex';
-}
-
-async function generateSlip() {
-  const btn = document.getElementById('generateBtn');
-  btn.disabled = true; btn.textContent = 'Generating…';
-  try {
-    const res = await api('POST', '/api/admin/payroll/' + currentSlipId + '/generate-slip', { month: currentMonth });
-    if (res && res.slip_url) {
-      alert('Slip generated. Employee will be notified.');
-      document.getElementById('slipOverlay').style.display = 'none';
-      loadPayroll();
-    }
-  } catch (err) { alert(err.message); }
-  finally { btn.disabled = false; btn.textContent = 'Generate Slip'; }
-}
-
-function closeOverlay(e) {
-  if (e.target === document.getElementById('slipOverlay'))
-    document.getElementById('slipOverlay').style.display = 'none';
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') document.getElementById('slipOverlay').style.display = 'none';
-});
-
-const toggle  = document.getElementById('navToggle');
-const sidebar = document.getElementById('sidebar');
-toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-document.addEventListener('click', e => {
-  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
-    sidebar.classList.remove('open');
-});
-</script>
 </body>
 </html>

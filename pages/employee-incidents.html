@@ -3,367 +3,141 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Report Incident | VAGT Employee</title>
+  <title>Employee — Incidents | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <!-- ═══ Security ═══ -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .maintenance-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg, #f5f5f5);
+      padding: 40px 20px;
+    }
+    .maintenance-card {
+      background: #fff;
+      border: 1px solid var(--border, #e0e0e0);
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 48px 40px 40px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .maintenance-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(0,40,100,0.07);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .maintenance-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--navy, #002864);
+      fill: none;
+      stroke-width: 1.8;
+    }
+    .maintenance-badge {
+      display: inline-block;
+      background: rgba(245,196,0,0.15);
+      color: #7a5c00;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,196,0,0.35);
+      margin-bottom: 18px;
+    }
+    .maintenance-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy, #002864);
+      margin: 0 0 14px;
+      line-height: 1.3;
+    }
+    .maintenance-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.75;
+      margin: 0 0 28px;
+    }
+    .maintenance-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 0 0 24px;
+    }
+    .maintenance-contact {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.65;
+    }
+    .maintenance-contact a {
+      color: var(--navy, #002864);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .maintenance-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy, #002864);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      margin-bottom: 28px;
+    }
+    .maintenance-home-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+    }
+  </style>
 </head>
 <body>
+<div class="maintenance-wrap">
+  <div class="maintenance-card">
 
-<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
-  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<div class="layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <a href="../index.html" class="logo-link">
-        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
-        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
-      </a>
-      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
-    </div>
-    <div class="sidebar-portals">
-      <a href="portal.html" class="portal-btn"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>All Portals</a>
-      <a href="employee-portal.html" class="portal-btn portal-btn-active"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Employee</a>
-    </div>
-    <nav class="sidebar-nav">
-      <div class="nav-group-label">Employee</div>
-      <a href="employee-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
-      </a>
-      <a href="employee-schedule.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>My Schedule
-      </a>
-      <a href="employee-incidents.html" class="nav-link nav-link-active">
-        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Report Incident
-      </a>
-      <div class="nav-group-label">Company</div>
-      <a href="../index.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Home
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-label">Get in touch</div>
-      <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br><a href="tel:+919008977711">+91 90089 77711</a></p>
-    </div>
-  </aside>
-
-  <main class="main" id="mainContent">
-
-    <div id="loginGate" class="portal-login-wrap">
-      <div class="portal-login-card" style="max-width:400px;">
-        <div class="portal-login-header">
-          <div class="portal-login-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-          <div class="portal-role-badge">Employee</div>
-          <h2>Sign In</h2>
-          <p>Please sign in to report an incident.</p>
-        </div>
-        <div class="portal-login-body">
-          <a href="portal.html" class="btn btn-amber" style="width:100%; justify-content:center; padding:15px; font-size:14px; display:inline-flex;">
-            Go to Portal Login<svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </div>
+    <div class="maintenance-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
     </div>
 
-    <div id="dashboardView" style="display:none;">
+    <div class="maintenance-badge">Portal Temporarily Disabled</div>
 
-      <div class="page-header">
-        <div class="section-label">Employee</div>
-        <h1>Incident Reports</h1>
-        <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;" id="dashMeta"></p>
-        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sign Out
-        </button>
-      </div>
+    <h2>Portal Access Unavailable</h2>
 
-      <section class="section">
-        <div class="grid-2-1" style="gap:24px; max-width:900px;">
+    <p>
+      Our client, employee, and admin portals are currently offline
+      while we complete security configuration.
+      We will restore access as soon as the infrastructure is ready.
+    </p>
 
-          <!-- NEW INCIDENT FORM -->
-          <div>
-            <div class="admin-card">
-              <div class="admin-card-title">Report New Incident</div>
-              <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px; margin-top:-4px;">
-                Report any unusual event, safety concern, or security breach at your post. All reports are reviewed by VAGT management within 2 hours.
-              </p>
+    <a href="../index.html" class="maintenance-home-btn">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to VAGT Home
+    </a>
 
-              <div id="submitSuccess" style="display:none; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:#1b5e20;">
-                <strong>Report submitted.</strong> Your supervisor has been notified. Reference: <strong id="refId"></strong>
-              </div>
-              <div id="submitError" style="display:none; background:#fce4ec; border:1px solid #ef9a9a; border-radius:8px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:#7f0000;"></div>
+    <hr class="maintenance-divider"/>
 
-              <form id="incidentForm" onsubmit="submitIncident(event)">
-                <div class="form-group">
-                  <label class="form-label">Incident Type <span style="color:#c0392b;">*</span></label>
-                  <select name="type" required style="width:100%; font-size:13px; padding:11px 12px; border:1px solid var(--border); color:var(--navy);">
-                    <option value="">— Select type —</option>
-                    <option value="security_breach">Security Breach</option>
-                    <option value="trespassing">Trespassing / Unauthorised Entry</option>
-                    <option value="theft">Theft or Attempted Theft</option>
-                    <option value="vandalism">Vandalism / Property Damage</option>
-                    <option value="fire">Fire / Smoke</option>
-                    <option value="medical">Medical Emergency</option>
-                    <option value="altercation">Physical Altercation</option>
-                    <option value="suspicious_activity">Suspicious Activity / Person</option>
-                    <option value="equipment_failure">Equipment / System Failure</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Severity <span style="color:#c0392b;">*</span></label>
-                  <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid var(--border); border-radius:6px; flex:1; min-width:100px;">
-                      <input type="radio" name="severity" value="low" required> Low
-                    </label>
-                    <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid var(--border); border-radius:6px; flex:1; min-width:100px;">
-                      <input type="radio" name="severity" value="medium"> Medium
-                    </label>
-                    <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid #ef9a9a; border-radius:6px; flex:1; min-width:100px; background:#fce4ec;">
-                      <input type="radio" name="severity" value="high"> High
-                    </label>
-                    <label style="display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; padding:8px 12px; border:1px solid #c0392b; border-radius:6px; flex:1; min-width:100px; background:#fce4ec; color:#7f0000;">
-                      <input type="radio" name="severity" value="critical"> Critical
-                    </label>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Site / Location <span style="color:#c0392b;">*</span></label>
-                  <select name="site_id" id="siteSelect" required style="width:100%; font-size:13px; padding:11px 12px; border:1px solid var(--border); color:var(--navy);">
-                    <option value="">— Loading sites… —</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Date &amp; Time of Incident <span style="color:#c0392b;">*</span></label>
-                  <input type="datetime-local" name="occurred_at" id="occurredAt" required
-                    style="width:100%; font-size:13px; padding:11px 12px; border:1px solid var(--border); color:var(--navy); box-sizing:border-box;"/>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Description <span style="color:#c0392b;">*</span></label>
-                  <textarea name="description" rows="5" required placeholder="Describe exactly what happened — who was involved, what you observed, any actions you took…"
-                    style="width:100%; font-size:13px; padding:11px 12px; border:1px solid var(--border); color:var(--navy); font-family:inherit; resize:vertical; box-sizing:border-box;"></textarea>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Persons Involved <span style="font-weight:400; color:var(--text-muted);">(optional)</span></label>
-                  <input type="text" name="persons_involved" placeholder="Names, descriptions, vehicle numbers, etc."
-                    style="width:100%; font-size:13px; padding:11px 12px; border:1px solid var(--border); color:var(--navy); box-sizing:border-box;"/>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Immediate Action Taken <span style="font-weight:400; color:var(--text-muted);">(optional)</span></label>
-                  <textarea name="action_taken" rows="2" placeholder="What did you do in response? Alerted supervisor, called police, etc."
-                    style="width:100%; font-size:13px; padding:11px 12px; border:1px solid var(--border); color:var(--navy); font-family:inherit; resize:vertical; box-sizing:border-box;"></textarea>
-                </div>
-
-                <div style="margin-top:20px;">
-                  <button type="submit" id="submitBtn" class="btn btn-navy" style="padding:13px 24px; font-size:14px;">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    Submit Report
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- INCIDENT HISTORY -->
-          <div>
-            <div class="admin-card">
-              <div class="admin-card-title">My Reports</div>
-              <div id="historyList">
-                <div class="portal-empty-state" style="padding:16px 0;">Loading…</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <footer class="site-footer">
-        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
-        <ul class="footer-nav">
-          <li><a href="employee-portal.html">Dashboard</a></li>
-          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
-        </ul>
-      </footer>
-
+    <div class="maintenance-contact">
+      Need immediate assistance?<br>
+      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="tel:+919008977711">+91 90089 77711</a>
     </div>
-  </main>
+
+  </div>
 </div>
-
-<script>
-/* ═══════════════════════════════════════════════════════════
-   VAGT Employee – Incident Reports
-
-   POST /api/employee/incidents                        (Bearer, employee)
-     Body: { type, severity, site_id, occurred_at, description,
-             persons_involved?, action_taken? }
-     Returns: { id, reference_number, status: 'submitted' }
-
-   GET /api/employee/incidents                         (Bearer, employee)
-     Returns: [{
-       id, reference_number, type_label, severity,
-       site_name, occurred_at, status, submitted_at
-     }]
-
-   GET /api/employee/sites                             (Bearer, employee)
-     Returns: [{ id, name }]  — sites the employee is deployed to
-═══════════════════════════════════════════════════════════ */
-const API_BASE = 'https://api.vagtsecurityservices.com';
-
-async function api(method, path, body) {
-  const token = localStorage.getItem('vagt_emp_token');
-  const opts  = { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (token||'') } };
-  if (body) opts.body = JSON.stringify(body);
-  let res;
-  try { res = await fetch(API_BASE + path, opts); }
-  catch { throw new Error('Network error.'); }
-  if (res.status === 401) { logout(); return null; }
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || 'Error'); }
-  return res.json();
-}
-
-function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function formatDate(iso) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
-
-function logout() {
-  localStorage.removeItem('vagt_emp_token');
-  localStorage.removeItem('vagt_emp_user');
-  document.getElementById('dashboardView').style.display = 'none';
-  document.getElementById('loginGate').style.display     = 'flex';
-}
-
-const SEVERITY_BADGE = {
-  low:      '<span class="status-badge badge-inactive">Low</span>',
-  medium:   '<span class="status-badge badge-pending">Medium</span>',
-  high:     '<span class="status-badge badge-open">High</span>',
-  critical: '<span class="status-badge badge-open" style="background:#7f0000; color:#fff;">Critical</span>',
-};
-const STATUS_BADGE = {
-  submitted:   '<span class="status-badge badge-pending">Submitted</span>',
-  acknowledged:'<span class="status-badge badge-progress">Acknowledged</span>',
-  resolved:    '<span class="status-badge badge-resolved">Resolved</span>',
-};
-
-(function init() {
-  const token = localStorage.getItem('vagt_emp_token');
-  const user  = localStorage.getItem('vagt_emp_user');
-  if (token && user) {
-    const u = JSON.parse(user);
-    document.getElementById('loginGate').style.display     = 'none';
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('dashMeta').textContent        = u.name || u.employee_id || '';
-    /* default datetime to now */
-    const now = new Date();
-    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('occurredAt').value = now.toISOString().slice(0,16);
-    loadSites();
-    loadHistory();
-  }
-})();
-
-async function loadSites() {
-  try {
-    const list = await api('GET', '/api/employee/sites');
-    if (!list) return;
-    const sel = document.getElementById('siteSelect');
-    sel.innerHTML = '<option value="">— Select site —</option>';
-    list.forEach(function(s) {
-      const o = document.createElement('option');
-      o.value = s.id; o.textContent = s.name;
-      sel.appendChild(o);
-    });
-  } catch { /* non-fatal; guard can still type */ }
-}
-
-async function loadHistory() {
-  try {
-    const list = await api('GET', '/api/employee/incidents');
-    if (!list) return;
-    renderHistory(list);
-  } catch {
-    document.getElementById('historyList').innerHTML =
-      '<div class="portal-empty-state" style="color:var(--text-muted);">Could not load reports.</div>';
-  }
-}
-
-function renderHistory(list) {
-  const c = document.getElementById('historyList');
-  if (!list.length) {
-    c.innerHTML = '<div class="portal-empty-state" style="padding:16px 0;">No reports submitted yet.</div>';
-    return;
-  }
-  c.innerHTML = list.map(function(i) {
-    return '<div style="padding:12px 0; border-bottom:1px solid var(--border);">'
-      + '<div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">'
-      + '<div style="font-size:12px; font-weight:700; color:var(--navy);">' + escHtml(i.type_label||i.type||'—') + '</div>'
-      + (SEVERITY_BADGE[i.severity] || '')
-      + '</div>'
-      + '<div style="font-size:11px; color:var(--text-muted); margin-top:4px;">'
-      + escHtml(i.site_name||'—') + ' &nbsp;·&nbsp; ' + formatDate(i.occurred_at)
-      + '</div>'
-      + '<div style="display:flex; justify-content:space-between; margin-top:6px;">'
-      + '<span style="font-size:10px; color:var(--text-faint);">Ref: ' + escHtml(i.reference_number||i.id) + '</span>'
-      + (STATUS_BADGE[i.status] || '')
-      + '</div>'
-      + '</div>';
-  }).join('');
-}
-
-async function submitIncident(event) {
-  event.preventDefault();
-  const form = event.target;
-  const btn  = document.getElementById('submitBtn');
-  const ok   = document.getElementById('submitSuccess');
-  const err  = document.getElementById('submitError');
-  ok.style.display = 'none';
-  err.style.display = 'none';
-  btn.disabled = true; btn.textContent = 'Submitting…';
-
-  const data = {
-    type:             form.type.value,
-    severity:         form.severity.value,
-    site_id:          form.site_id.value,
-    occurred_at:      form.occurred_at.value,
-    description:      form.description.value.trim(),
-    persons_involved: form.persons_involved.value.trim() || undefined,
-    action_taken:     form.action_taken.value.trim() || undefined,
-  };
-
-  try {
-    const res = await api('POST', '/api/employee/incidents', data);
-    if (!res) return;
-    ok.style.display = 'block';
-    document.getElementById('refId').textContent = res.reference_number || res.id;
-    form.reset();
-    const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-    document.getElementById('occurredAt').value = now.toISOString().slice(0,16);
-    loadHistory();
-  } catch (e) {
-    err.style.display = 'block';
-    err.textContent   = e.message;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit Report';
-  }
-}
-
-const toggle  = document.getElementById('navToggle');
-const sidebar = document.getElementById('sidebar');
-toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-document.addEventListener('click', e => {
-  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
-    sidebar.classList.remove('open');
-});
-</script>
 </body>
 </html>

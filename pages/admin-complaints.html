@@ -3,486 +3,141 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Complaints & Tickets | VAGT Admin</title>
+  <title>Admin — Complaints | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <!-- ═══ Security ═══ -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .maintenance-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg, #f5f5f5);
+      padding: 40px 20px;
+    }
+    .maintenance-card {
+      background: #fff;
+      border: 1px solid var(--border, #e0e0e0);
+      border-radius: 12px;
+      max-width: 480px;
+      width: 100%;
+      padding: 48px 40px 40px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .maintenance-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(0,40,100,0.07);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .maintenance-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: var(--navy, #002864);
+      fill: none;
+      stroke-width: 1.8;
+    }
+    .maintenance-badge {
+      display: inline-block;
+      background: rgba(245,196,0,0.15);
+      color: #7a5c00;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(245,196,0,0.35);
+      margin-bottom: 18px;
+    }
+    .maintenance-card h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy, #002864);
+      margin: 0 0 14px;
+      line-height: 1.3;
+    }
+    .maintenance-card p {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.75;
+      margin: 0 0 28px;
+    }
+    .maintenance-divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 0 0 24px;
+    }
+    .maintenance-contact {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.65;
+    }
+    .maintenance-contact a {
+      color: var(--navy, #002864);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .maintenance-home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--navy, #002864);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 13px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      margin-bottom: 28px;
+    }
+    .maintenance-home-btn svg {
+      width: 14px; height: 14px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+    }
+  </style>
 </head>
 <body>
+<div class="maintenance-wrap">
+  <div class="maintenance-card">
 
-<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
-  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-
-<div class="layout">
-
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-brand">
-      <a href="../index.html" class="logo-link">
-        <div class="logo-img-wrap">
-          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
-        </div>
-        <div class="logo-text-block">
-          <div class="logo-wordmark">VAGT</div>
-          <div class="logo-sub">Security Services</div>
-        </div>
-      </a>
-      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    <div class="maintenance-icon">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
     </div>
 
-    <div class="sidebar-portals">
-      <a href="portal.html" class="portal-btn">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-        All Portals
-      </a>
+    <div class="maintenance-badge">Portal Temporarily Disabled</div>
+
+    <h2>Portal Access Unavailable</h2>
+
+    <p>
+      Our client, employee, and admin portals are currently offline
+      while we complete security configuration.
+      We will restore access as soon as the infrastructure is ready.
+    </p>
+
+    <a href="../index.html" class="maintenance-home-btn">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to VAGT Home
+    </a>
+
+    <hr class="maintenance-divider"/>
+
+    <div class="maintenance-contact">
+      Need immediate assistance?<br>
+      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
+      &nbsp;&middot;&nbsp;
+      <a href="tel:+919008977711">+91 90089 77711</a>
     </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-group-label">Admin</div>
-      <a href="admin-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </a>
-      <a href="admin-employees.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-        Employees
-      </a>
-      <a href="admin-schedule.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Schedule
-      </a>
-      <a href="admin-clients.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        Clients
-      </a>
-      <a href="admin-sites.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Sites
-      </a>
-      <a href="admin-payroll.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-        Payroll
-      </a>
-      <a href="admin-reports.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Reports
-      </a>
-      <a href="admin-complaints.html" class="nav-link nav-link-active">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Complaints
-      </a>
-      <div class="nav-group-label">Operations</div>
-      <a href="employee-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        Employee Portal
-      </a>
-      <a href="client-portal.html" class="nav-link">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Client Portal
-      </a>
-    </nav>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-label">Get in touch</div>
-      <p>
-        <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br>
-        <a href="tel:+919008977711">+91 90089 77711</a>
-      </p>
-    </div>
-  </aside>
-
-  <main class="main" id="mainContent">
-
-    <!-- ══ AUTH GATE ══ -->
-    <div id="loginGate" class="portal-login-wrap">
-      <div class="portal-login-card" style="max-width:400px;">
-        <div class="portal-login-header">
-          <div class="portal-login-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <div class="portal-role-badge">Restricted</div>
-          <h2>Admin Access Required</h2>
-          <p>Please sign in through the main portal with admin credentials.</p>
-        </div>
-        <div class="portal-login-body">
-          <a href="portal.html" class="btn btn-amber" style="width:100%; justify-content:center; padding:15px; font-size:14px; display:inline-flex;">
-            Go to Portal Login
-            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ DASHBOARD ══ -->
-    <div id="dashboardView" style="display:none;">
-
-      <div class="page-header">
-        <div class="section-label">Admin · Complaints</div>
-        <h1>Complaints &amp; Tickets</h1>
-        <p style="font-size:14px; color:rgba(255,255,255,0.6); margin-top:4px;" id="dashMeta"></p>
-        <button onclick="logout()" class="btn btn-ghost portal-signout" style="margin-top:18px;">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Sign Out
-        </button>
-      </div>
-
-      <section class="section">
-        <!-- FILTER BAR -->
-        <div class="admin-filter-bar" style="margin-bottom:0;">
-          <input type="text" id="searchInput" placeholder="Search by ticket ID, client, site, or subject…"
-                 oninput="applyFilters()" autocomplete="off">
-          <select id="statusFilter" onchange="applyFilters()">
-            <option value="">All statuses</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-          </select>
-          <select id="priorityFilter" onchange="applyFilters()">
-            <option value="">All priorities</option>
-            <option value="urgent">Urgent</option>
-            <option value="normal">Normal</option>
-            <option value="low">Low</option>
-          </select>
-          <select id="siteFilter" onchange="applyFilters()">
-            <option value="">All sites</option>
-          </select>
-          <span class="filter-count" id="filterCount"></span>
-        </div>
-
-        <!-- TABLE -->
-        <div class="admin-card" style="padding:0;">
-          <div class="admin-table-wrap">
-            <table class="admin-table" id="ticketTable">
-              <thead>
-                <tr>
-                  <th>Ticket ID</th>
-                  <th>Client</th>
-                  <th>Site</th>
-                  <th>Subject</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Submitted</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="ticketTableBody">
-                <tr><td colspan="8" style="text-align:center; padding:32px; color:var(--text-muted);">Loading…</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="admin-pagination" style="padding:14px 16px;">
-            <span class="admin-pagination-info" id="pageInfo">—</span>
-            <div class="admin-pagination-btns">
-              <button class="btn btn-outline-navy" style="font-size:11px; padding:7px 14px;" id="prevBtn" onclick="changePage(-1)" disabled>← Prev</button>
-              <button class="btn btn-outline-navy" style="font-size:11px; padding:7px 14px;" id="nextBtn" onclick="changePage(1)"  disabled>Next →</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer class="site-footer">
-        <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
-        <ul class="footer-nav">
-          <li><a href="admin-portal.html">Dashboard</a></li>
-          <li><a href="admin-employees.html">Employees</a></li>
-          <li><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></li>
-        </ul>
-      </footer>
-
-    </div>
-
-  </main>
-</div>
-
-<!-- ══ TICKET DETAIL MODAL ══ -->
-<div id="ticketOverlay" class="emp-detail-overlay" style="display:none;" onclick="closeDetail(event)">
-  <div class="emp-detail-modal" style="max-width:560px;" onclick="event.stopPropagation()">
-    <div class="emp-detail-header">
-      <div>
-        <div style="font-size:10px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; margin-bottom:4px;" id="detailTicketId">Ticket</div>
-        <h3 id="detailSubject" style="margin:0; font-size:17px; color:var(--navy);"></h3>
-      </div>
-      <button class="emp-detail-close" onclick="closeDetailModal()">
-        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="emp-detail-body" id="detailBody"></div>
-    <div style="padding:16px 24px; border-top:1px solid var(--border);">
-      <div style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Update Status</div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;" id="statusActions"></div>
-      <div style="margin-top:12px;">
-        <textarea id="adminNote" rows="2" placeholder="Add a note (optional)…"
-          style="width:100%; font-size:13px; padding:9px 12px; border:1px solid var(--border); font-family:inherit; color:var(--navy); resize:vertical; box-sizing:border-box;"></textarea>
-      </div>
-      <div style="display:flex; gap:8px; margin-top:10px; justify-content:flex-end;">
-        <button onclick="closeDetailModal()" class="btn btn-ghost" style="font-size:12px; padding:10px 14px;">Close</button>
-      </div>
-    </div>
   </div>
 </div>
-
-<script>
-/* ═══════════════════════════════════════════════════════════
-   VAGT Admin – Complaints & Tickets
-   API_BASE: replace with your backend URL before deploying.
-
-   GET /api/admin/complaints
-     Query: ?status=&priority=&site=&search=
-     Returns: [{
-       id, ticket_id, client_name, site, subject,
-       priority, status, submitted_at, message, admin_note
-     }]
-
-   GET /api/admin/complaints/:id
-     Returns: { full ticket object }
-
-   POST /api/admin/complaints/:id/status
-     Body: { status: 'open'|'in_progress'|'resolved', note?: string }
-     Returns: { success: true }
-═══════════════════════════════════════════════════════════ */
-const API_BASE = 'https://api.vagtsecurityservices.com';
-
-async function api(method, path, body) {
-  const token = localStorage.getItem('vagt_admin_token');
-  const opts  = { method, headers: { 'Content-Type': 'application/json' } };
-  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
-  if (body)  opts.body = JSON.stringify(body);
-  let res;
-  try { res = await fetch(API_BASE + path, opts); }
-  catch { throw new Error('Network error.'); }
-  if (res.status === 401) { logout(); return null; }
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || 'Something went wrong.');
-  }
-  return res.json();
-}
-
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function formatDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-}
-
-/* ─── AUTH ─── */
-function logout() {
-  localStorage.removeItem('vagt_admin_token');
-  localStorage.removeItem('vagt_admin_user');
-  document.getElementById('dashboardView').style.display = 'none';
-  document.getElementById('loginGate').style.display     = 'flex';
-}
-
-(function init() {
-  const token = localStorage.getItem('vagt_admin_token');
-  const user  = localStorage.getItem('vagt_admin_user');
-  if (token && user) {
-    const u = JSON.parse(user);
-    document.getElementById('loginGate').style.display     = 'none';
-    document.getElementById('dashboardView').style.display = 'block';
-    document.getElementById('dashMeta').textContent        = 'Signed in as ' + u.name;
-    loadTickets();
-  }
-})();
-
-/* ─── DATA ─── */
-let allTickets   = [];
-let filteredList = [];
-let currentPage  = 1;
-const PAGE_SIZE  = 20;
-
-const STATUS_BADGE = {
-  open:        '<span class="status-badge badge-open">Open</span>',
-  in_progress: '<span class="status-badge badge-progress">In Progress</span>',
-  resolved:    '<span class="status-badge badge-resolved">Resolved</span>',
-};
-const PRIORITY_BADGE = {
-  urgent: '<span class="status-badge badge-urgent">Urgent</span>',
-  normal: '<span class="status-badge badge-pending" style="color:var(--text-muted);">Normal</span>',
-  low:    '<span class="status-badge badge-inactive">Low</span>',
-};
-
-async function loadTickets() {
-  try {
-    const list = await api('GET', '/api/admin/complaints');
-    if (!list) return;
-    allTickets = list;
-    buildSiteFilter(list);
-    applyFilters();
-  } catch {
-    document.getElementById('ticketTableBody').innerHTML =
-      '<tr><td colspan="8" style="text-align:center; padding:28px; color:var(--text-muted);">Could not load tickets. Please refresh.</td></tr>';
-  }
-}
-
-function buildSiteFilter(list) {
-  const sites = [...new Set(list.map(function(t) { return t.site; }).filter(Boolean))].sort();
-  const sel   = document.getElementById('siteFilter');
-  sites.forEach(function(s) {
-    const o = document.createElement('option');
-    o.value = s; o.textContent = s;
-    sel.appendChild(o);
-  });
-}
-
-function applyFilters() {
-  const q        = document.getElementById('searchInput').value.trim().toLowerCase();
-  const status   = document.getElementById('statusFilter').value;
-  const priority = document.getElementById('priorityFilter').value;
-  const site     = document.getElementById('siteFilter').value;
-
-  filteredList = allTickets.filter(function(t) {
-    if (status   && t.status   !== status)   return false;
-    if (priority && t.priority !== priority) return false;
-    if (site     && t.site     !== site)     return false;
-    if (q) {
-      const hay = (t.ticket_id + ' ' + t.client_name + ' ' + t.site + ' ' + t.subject).toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-
-  document.getElementById('filterCount').textContent =
-    filteredList.length + ' of ' + allTickets.length + ' tickets';
-
-  currentPage = 1;
-  renderPage();
-}
-
-function renderPage() {
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const end   = Math.min(start + PAGE_SIZE, filteredList.length);
-  const page  = filteredList.slice(start, end);
-  const total = Math.ceil(filteredList.length / PAGE_SIZE) || 1;
-
-  document.getElementById('pageInfo').textContent =
-    'Showing ' + (filteredList.length ? start + 1 : 0) + '–' + end + ' of ' + filteredList.length;
-  document.getElementById('prevBtn').disabled = currentPage <= 1;
-  document.getElementById('nextBtn').disabled = currentPage >= total;
-
-  if (!page.length) {
-    document.getElementById('ticketTableBody').innerHTML =
-      '<tr><td colspan="8" style="text-align:center; padding:32px; color:var(--text-muted);">No tickets match your filters.</td></tr>';
-    return;
-  }
-
-  document.getElementById('ticketTableBody').innerHTML = page.map(function(t) {
-    const statusBadge   = STATUS_BADGE[t.status]     || '<span class="status-badge badge-inactive">' + escHtml(t.status) + '</span>';
-    const priorityBadge = PRIORITY_BADGE[t.priority] || '<span class="status-badge badge-inactive">' + escHtml(t.priority || '—') + '</span>';
-    return '<tr id="row-' + escHtml(t.id) + '">'
-      + '<td class="col-id">' + escHtml(t.ticket_id || '—') + '</td>'
-      + '<td class="col-name">' + escHtml(t.client_name || '—') + '</td>'
-      + '<td>' + escHtml(t.site || '—') + '</td>'
-      + '<td style="max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escHtml(t.subject || '—') + '</td>'
-      + '<td>' + priorityBadge + '</td>'
-      + '<td>' + statusBadge + '</td>'
-      + '<td>' + formatDate(t.submitted_at) + '</td>'
-      + '<td class="col-actions"><button onclick="openDetail(\'' + escHtml(t.id) + '\')" class="btn btn-ghost" style="font-size:11px; padding:6px 12px;">View</button></td>'
-      + '</tr>';
-  }).join('');
-}
-
-function changePage(dir) {
-  const total = Math.ceil(filteredList.length / PAGE_SIZE) || 1;
-  currentPage = Math.max(1, Math.min(total, currentPage + dir));
-  renderPage();
-}
-
-/* ─── DETAIL MODAL ─── */
-let currentTicketId = null;
-
-async function openDetail(id) {
-  currentTicketId = id;
-  document.getElementById('ticketOverlay').style.display = 'flex';
-  document.getElementById('detailBody').innerHTML = '<p style="color:var(--text-muted); font-size:13px; padding:4px 0;">Loading…</p>';
-  document.getElementById('statusActions').innerHTML = '';
-  document.getElementById('adminNote').value = '';
-
-  try {
-    const t = await api('GET', '/api/admin/complaints/' + id);
-    if (!t) return;
-
-    document.getElementById('detailTicketId').textContent = 'Ticket · ' + (t.ticket_id || id);
-    document.getElementById('detailSubject').textContent  = t.subject || '(no subject)';
-
-    const STATUS_LABEL   = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved' };
-    const STATUS_CLS     = { open: 'badge-open', in_progress: 'badge-progress', resolved: 'badge-resolved' };
-    const PRIORITY_LABEL = { urgent: 'Urgent', normal: 'Normal', low: 'Low' };
-    const PRIORITY_CLS   = { urgent: 'badge-urgent', normal: 'badge-pending', low: 'badge-inactive' };
-
-    const rows = [
-      ['Client',     t.client_name || '—'],
-      ['Site',       t.site || '—'],
-      ['Priority',   '<span class="status-badge ' + (PRIORITY_CLS[t.priority]||'badge-inactive') + '">' + (PRIORITY_LABEL[t.priority]||t.priority||'—') + '</span>'],
-      ['Status',     '<span class="status-badge ' + (STATUS_CLS[t.status]||'badge-inactive') + '">' + (STATUS_LABEL[t.status]||t.status||'—') + '</span>'],
-      ['Submitted',  formatDate(t.submitted_at)],
-      ['Message',    '<span style="white-space:pre-wrap;">' + escHtml(t.message || '—') + '</span>'],
-    ];
-    if (t.admin_note) {
-      rows.push(['Admin Note', '<span style="white-space:pre-wrap; color:var(--text-muted);">' + escHtml(t.admin_note) + '</span>']);
-    }
-
-    document.getElementById('detailBody').innerHTML = rows.map(function(r) {
-      return '<div class="emp-detail-row"><div class="emp-detail-key">' + escHtml(r[0]) + '</div><div class="emp-detail-val">' + r[1] + '</div></div>';
-    }).join('');
-
-    /* Status action buttons — only show transitions that make sense */
-    const transitions = { open: ['in_progress','resolved'], in_progress: ['resolved','open'], resolved: ['open'] };
-    const LABELS      = { open: 'Mark Open', in_progress: 'Mark In Progress', resolved: 'Mark Resolved' };
-    const CLASSES     = { open: 'btn-outline-navy', in_progress: 'btn-outline-navy', resolved: 'btn-navy' };
-    const next        = transitions[t.status] || [];
-    document.getElementById('statusActions').innerHTML = next.map(function(s) {
-      return '<button onclick="updateStatus(\'' + escHtml(t.id) + '\',\'' + s + '\')" class="btn ' + CLASSES[s] + '" style="font-size:12px; padding:9px 16px;">'
-        + LABELS[s] + '</button>';
-    }).join('');
-
-  } catch (err) {
-    document.getElementById('detailBody').innerHTML =
-      '<p style="color:#c0392b; font-size:13px;">' + escHtml(err.message) + '</p>';
-  }
-}
-
-function closeDetail(e) { if (e.target === document.getElementById('ticketOverlay')) closeDetailModal(); }
-function closeDetailModal() {
-  document.getElementById('ticketOverlay').style.display = 'none';
-  currentTicketId = null;
-}
-
-async function updateStatus(id, status) {
-  const note = document.getElementById('adminNote').value.trim();
-  const btns = document.getElementById('statusActions').querySelectorAll('button');
-  btns.forEach(function(b) { b.disabled = true; });
-  try {
-    await api('POST', '/api/admin/complaints/' + id + '/status', { status, note: note || undefined });
-    /* Update local data */
-    const t = allTickets.find(function(x) { return x.id === id; });
-    if (t) { t.status = status; if (note) t.admin_note = note; }
-    closeDetailModal();
-    applyFilters();
-  } catch (err) {
-    btns.forEach(function(b) { b.disabled = false; });
-    alert(err.message);
-  }
-}
-
-/* ─── KEYBOARD ─── */
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeDetailModal();
-});
-
-/* ─── MOBILE NAV ─── */
-const toggle  = document.getElementById('navToggle');
-const sidebar = document.getElementById('sidebar');
-toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-document.addEventListener('click', e => {
-  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target))
-    sidebar.classList.remove('open');
-});
-</script>
 </body>
 </html>
