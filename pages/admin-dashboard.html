@@ -1,690 +1,1455 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel | VAGT Security Services</title>
-  <meta name="robots" content="noindex"/>
-  <link rel="stylesheet" href="../assets/css/main.css"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy: #0b1120; --amber: #f5c400; --amber-dark: #c49a00;
-      --amber-soft: rgba(245,196,0,0.1); --red: #e63946;
-      --white: #ffffff; --warm-white: #f8f9fa;
-      --border: #e5e7eb; --text: #111827; --text-mid: #4b5563; --text-faint: #9ca3af;
-      --green: #16a34a; --green-soft: #dcfce7;
-      --blue: #2563eb; --blue-soft: #dbeafe;
-      --font: 'Segoe UI', -apple-system, sans-serif;
-    }
-    body { font-family: var(--font); background: var(--warm-white); color: var(--text); }
-    a { text-decoration: none; color: inherit; }
-    button { cursor: pointer; font-family: var(--font); }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Admin Panel | VAGT Security Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    /* ── LAYOUT ── */
-    .portal-layout { display: flex; min-height: 100vh; }
+        :root {
+            --navy: #0b1120;
+            --navy-light: #1a1f3a;
+            --amber: #f5c400;
+            --amber-light: #ffd966;
+            --red: #e63946;
+            --grey-50: #f9fafb;
+            --grey-100: #f3f4f6;
+            --grey-200: #e5e7eb;
+            --grey-500: #6b7280;
+            --grey-600: #4b5563;
+            --green: #10b981;
+            --white: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+        }
 
-    /* ── SIDEBAR ── */
-    .portal-sidebar {
-      width: 240px; min-width: 240px; background: var(--navy);
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; bottom: 0;
-      z-index: 50; overflow-y: auto;
-    }
-    .portal-sidebar-header { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-    .portal-logo-wrap {
-      width: 48px; height: 48px; background: transparent; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
-    }
-    .portal-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
-    .portal-user-chip { display: flex; align-items: center; gap: 10px; }
-    .portal-avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: rgba(230,57,70,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; color: var(--red); flex-shrink: 0;
-    }
-    .portal-user-name { font-size: 13px; font-weight: 600; color: var(--white); }
-    .portal-user-role { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--grey-50);
+            color: var(--text-primary);
+        }
 
-    .portal-nav { flex: 1; padding: 10px 0; }
-    .portal-nav-label { font-size: 9px; font-weight: 700; color: rgba(245,196,0,0.6); text-transform: uppercase; letter-spacing: 2px; padding: 10px 18px 4px; }
-    .portal-nav-link {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 18px; font-size: 13px; font-weight: 500;
-      color: rgba(255,255,255,0.55); transition: background 0.15s, color 0.15s;
-      border: none; background: none; width: 100%; text-align: left; position: relative;
-    }
-    .portal-nav-link:hover { background: rgba(255,255,255,0.05); color: var(--white); }
-    .portal-nav-link.active { color: var(--amber); background: rgba(245,196,0,0.07); }
-    .portal-nav-link.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber); }
-    .portal-nav-link svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; opacity: 0.65; }
-    .portal-nav-link.active svg, .portal-nav-link:hover svg { opacity: 1; }
-    .admin-badge { background: rgba(230,57,70,0.15); color: var(--red); font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; margin-left: auto; }
+        /* LAYOUT */
+        .admin-container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    .portal-sidebar-footer { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .btn-signout {
-      width: 100%; padding: 9px; font-size: 12px; font-weight: 600;
-      color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);
-      border: none; border-radius: 6px; cursor: pointer; font-family: var(--font);
-      transition: color 0.2s, background 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center;
-    }
-    .btn-signout:hover { color: var(--white); background: rgba(255,255,255,0.1); }
-    .btn-signout svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+        /* SIDEBAR */
+        .sidebar {
+            width: 240px;
+            background-color: var(--navy);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
 
-    /* ── MAIN ── */
-    .portal-main { margin-left: 240px; flex: 1; background: var(--warm-white); min-height: 100vh; }
-    .portal-topbar {
-      background: var(--white); border-bottom: 1px solid var(--border);
-      padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 10;
-    }
-    .portal-topbar h1 { font-size: 18px; font-weight: 700; color: var(--text); }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-    .topbar-date { font-size: 12px; color: var(--text-faint); }
-    .portal-content { padding: 28px 32px; }
+        .sidebar-logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    /* ── PANELS ── */
-    .panel { display: none; }
-    .panel.active { display: block; }
+        .sidebar-logo img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+        }
 
-    /* ── KPI CARDS ── */
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-    .kpi-card { background: var(--white); border-radius: 10px; padding: 20px; border: 1px solid var(--border); }
-    .kpi-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
-    .kpi-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
-    .kpi-icon.amber { background: var(--amber-soft); } .kpi-icon.amber svg { stroke: var(--amber-dark); }
-    .kpi-icon.green { background: var(--green-soft); } .kpi-icon.green svg { stroke: var(--green); }
-    .kpi-icon.blue { background: var(--blue-soft); } .kpi-icon.blue svg { stroke: var(--blue); }
-    .kpi-icon.red { background: rgba(230,57,70,0.08); } .kpi-icon.red svg { stroke: var(--red); }
-    .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-    .kpi-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
-    .kpi-sub { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
 
-    /* ── SECTION CARD ── */
-    .section-card { background: var(--white); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
-    .section-card-head { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
-    .section-card-head h2 { font-size: 14px; font-weight: 700; color: var(--text); }
-    .section-card-body { padding: 20px 22px; }
-    .section-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .nav-item {
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            font-weight: 500;
+        }
 
-    /* ── TABLE ── */
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .data-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 2px solid var(--border); background: #fafafa; }
-    .data-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: #fafafa; }
-    .data-table td:first-child { color: var(--text); font-weight: 500; }
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
 
-    /* ── BADGES ── */
-    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
-    .badge-green { background: var(--green-soft); color: var(--green); }
-    .badge-amber { background: rgba(245,196,0,0.12); color: var(--amber-dark); }
-    .badge-red { background: rgba(230,57,70,0.1); color: var(--red); }
-    .badge-grey { background: #f3f4f6; color: #6b7280; }
-    .badge-blue { background: var(--blue-soft); color: var(--blue); }
+        .nav-item.active {
+            background-color: var(--amber);
+            color: var(--navy);
+        }
 
-    /* ── BUTTONS ── */
-    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 7px; font-size: 13px; font-weight: 600; border: none; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.85; }
-    .btn-primary { background: var(--amber); color: var(--navy); }
-    .btn-secondary { background: var(--white); color: var(--text-mid); border: 1px solid var(--border); }
-    .btn-danger { background: rgba(230,57,70,0.1); color: var(--red); }
-    .btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+        .nav-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
 
-    /* ── SEARCH BAR ── */
-    .search-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .search-input {
-      flex: 1; min-width: 200px; padding: 9px 14px;
-      border: 1px solid var(--border); border-radius: 7px;
-      font-size: 13px; font-family: var(--font); color: var(--text);
-      background: var(--white);
-    }
-    .search-input:focus { outline: none; border-color: var(--amber); }
-    .filter-select {
-      padding: 9px 14px; border: 1px solid var(--border); border-radius: 7px;
-      font-size: 13px; font-family: var(--font); color: var(--text-mid);
-      background: var(--white);
-    }
-    .filter-select:focus { outline: none; border-color: var(--amber); }
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
 
-    /* ── EMPLOYEE TABLE AVATAR ── */
-    .emp-cell { display: flex; align-items: center; gap: 10px; }
-    .emp-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--amber-soft); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--amber-dark); flex-shrink: 0; }
-    .emp-name { font-size: 13px; font-weight: 600; color: var(--text); }
-    .emp-id { font-size: 11px; color: var(--text-faint); }
+        .portal-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--white);
+        }
 
-    /* ── ATTENDANCE BAR ── */
-    .att-bar-wrap { background: #f3f4f6; border-radius: 20px; height: 6px; }
-    .att-bar { height: 6px; border-radius: 20px; background: var(--green); }
+        .user-info {
+            text-align: center;
+            width: 100%;
+        }
 
-    /* ── PAYROLL TOTAL ROW ── */
-    .payroll-total td { font-weight: 700; color: var(--text); background: #fafafa; border-top: 2px solid var(--border); }
+        #user-name {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--white);
+        }
 
-    /* ── FORM (announcements) ── */
-    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-mid); }
-    .form-input, .form-textarea, .form-select {
-      padding: 10px 14px; border: 1px solid var(--border); border-radius: 7px;
-      font-size: 13px; font-family: var(--font); color: var(--text);
-      background: var(--white); width: 100%;
-    }
-    .form-textarea { resize: vertical; min-height: 100px; }
-    .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: var(--amber); }
+        .user-role {
+            display: block;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-    /* ── ACTIVITY FEED ── */
-    .activity-list { display: flex; flex-direction: column; gap: 0; }
-    .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-    .activity-text { font-size: 13px; color: var(--text-mid); line-height: 1.5; flex: 1; }
-    .activity-text strong { color: var(--text); }
-    .activity-time { font-size: 11px; color: var(--text-faint); white-space: nowrap; }
+        #signout-btn {
+            width: 100%;
+            padding: 10px 16px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
 
-    /* ── MOBILE ── */
-    .mobile-menu-btn { display: none; position: fixed; top: 14px; left: 14px; z-index: 60; background: var(--navy); border: none; border-radius: 8px; padding: 8px; cursor: pointer; }
-    .mobile-menu-btn svg { width: 20px; height: 20px; stroke: var(--white); fill: none; stroke-width: 2; display: block; }
-    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45; }
+        #signout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
 
-    @media (max-width: 1100px) {
-      .kpi-grid { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 900px) {
-      .portal-sidebar { transform: translateX(-240px); transition: transform 0.28s ease; }
-      .portal-sidebar.open { transform: translateX(0); }
-      .portal-main { margin-left: 0; }
-      .portal-content { padding: 20px; }
-      .portal-topbar { padding: 14px 20px; padding-left: 56px; }
-      .mobile-menu-btn { display: block; }
-      .sidebar-overlay.open { display: block; }
-      .section-2col { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 600px) {
-      .kpi-grid { grid-template-columns: 1fr; }
-    }
-  </style>
+        /* MAIN CONTENT */
+        .main-content {
+            margin-left: 240px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background-color: var(--white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .topbar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .today-date {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .admin-badge {
+            background-color: var(--red);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* PANELS */
+        .panels-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* OVERVIEW PANEL */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .kpi-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: var(--amber);
+        }
+
+        .kpi-icon {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--amber);
+            opacity: 0.3;
+        }
+
+        .kpi-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .kpi-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .kpi-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* CARD SECTIONS */
+        .section-card {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ACTIVITY */
+        .activity-row {
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .activity-row:last-child {
+            border-bottom: none;
+        }
+
+        .activity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 4px;
+            flex-shrink: 0;
+        }
+
+        .activity-dot.blue {
+            background-color: #3b82f6;
+        }
+
+        .activity-dot.green {
+            background-color: var(--green);
+        }
+
+        .activity-dot.amber {
+            background-color: var(--amber);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-desc {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* QUICK ACTIONS */
+        .action-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        .action-btn.primary {
+            background-color: var(--amber);
+            color: var(--navy);
+        }
+
+        .action-btn.primary:hover {
+            background-color: var(--amber-light);
+        }
+
+        .action-btn.outline {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .action-btn.outline:hover {
+            background-color: var(--grey-100);
+            border-color: var(--text-secondary);
+        }
+
+        .badge-phase2 {
+            background-color: var(--grey-100);
+            color: var(--grey-500);
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-left: auto;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        /* EMPLOYEES PANEL */
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .search-input {
+            flex: 1;
+            max-width: 300px;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--amber);
+            box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.1);
+        }
+
+        .stat-chips {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-chip {
+            background-color: var(--grey-100);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        /* TABLE */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table thead {
+            background-color: #f8fafc;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .data-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--navy-light);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .data-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: var(--grey-50);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--green);
+        }
+
+        .status-badge.inactive {
+            background-color: rgba(107, 114, 128, 0.1);
+            color: var(--grey-600);
+        }
+
+        .status-badge.pending {
+            background-color: rgba(245, 196, 0, 0.1);
+            color: #d97706;
+        }
+
+        .table-action-btn {
+            padding: 6px 12px;
+            background-color: var(--grey-100);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .table-action-btn:hover {
+            background-color: var(--grey-200);
+        }
+
+        .empty-state {
+            padding: 32px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            background-color: var(--grey-50);
+            border-radius: 6px;
+            margin-top: 16px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background-color: var(--white);
+            border-radius: 10px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            font-size: 20px;
+        }
+
+        .modal-close:hover {
+            background-color: var(--grey-100);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--amber);
+            box-shadow: 0 0 0 3px rgba(245, 196, 0, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-footer .btn-cancel {
+            background-color: var(--grey-100);
+            color: var(--text-primary);
+        }
+
+        .modal-footer .btn-cancel:hover {
+            background-color: var(--grey-200);
+        }
+
+        .modal-footer .btn-submit {
+            background-color: var(--amber);
+            color: var(--navy);
+        }
+
+        .modal-footer .btn-submit:hover {
+            background-color: var(--amber-light);
+        }
+
+        /* PHASE 2 BANNER */
+        .phase2-banner {
+            background-color: rgba(245, 196, 0, 0.1);
+            border: 1px solid rgba(245, 196, 0, 0.3);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #92400e;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* ANNOUNCEMENTS */
+        .announcement-form {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .announcement-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .announcement-card {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            border-left: 4px solid var(--amber);
+        }
+
+        .announcement-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .announcement-category {
+            background-color: var(--grey-100);
+            color: var(--grey-600);
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .announcement-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .announcement-body {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .announcement-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* HAMBURGER */
+        .sidebar-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            z-index: 101;
+        }
+
+        .sidebar-toggle span {
+            width: 24px;
+            height: 2px;
+            background-color: var(--navy);
+            display: block;
+            margin: 4px 0;
+            transition: all 0.3s ease;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+
+            .topbar-title {
+                font-size: 16px;
+            }
+
+            .topbar-right {
+                gap: 12px;
+            }
+
+            .panels-container {
+                padding: 16px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input {
+                max-width: 100%;
+            }
+
+            .data-table {
+                font-size: 12px;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+        }
+
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
+    <div class="admin-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="../assets/images/logos/vagt-logo.png" alt="VAGT Logo">
+            </div>
 
-<button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
-  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-</button>
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-panel="overview">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" data-panel="employees">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span>Employees</span>
+                </div>
+                <div class="nav-item" data-panel="clients">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    </svg>
+                    <span>Clients</span>
+                </div>
+                <div class="nav-item" data-panel="payroll">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    <span>Payroll</span>
+                </div>
+                <div class="nav-item" data-panel="announcements">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span>Announcements</span>
+                </div>
+            </nav>
 
-<div class="portal-layout">
+            <div class="sidebar-footer">
+                <div class="portal-avatar">A</div>
+                <div class="user-info">
+                    <span id="user-name">Administrator</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+                <button id="signout-btn">Sign Out</button>
+            </div>
+        </aside>
 
-  <!-- ── SIDEBAR ── -->
-  <aside class="portal-sidebar" id="portalSidebar">
-    <div class="portal-sidebar-header">
-      <a href="../index.html" class="portal-logo-wrap">
-        <img src="../assets/images/logos/vagt-logo.png" alt="VAGT">
-      </a>
-      <div class="portal-user-chip">
-        <div class="portal-avatar">N</div>
-        <div>
-          <div class="portal-user-name" id="user-name">Nikhil Jha</div>
-          <div class="portal-user-role">Administrator</div>
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- TOPBAR -->
+            <div class="topbar">
+                <button class="sidebar-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <h1 class="topbar-title">Admin Dashboard</h1>
+                <div class="topbar-right">
+                    <span class="today-date" id="today-date"></span>
+                    <span class="admin-badge">Admin</span>
+                </div>
+            </div>
+
+            <!-- PANELS -->
+            <div class="panels-container">
+                <!-- OVERVIEW PANEL -->
+                <div id="panel-overview" class="panel active">
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">—</div>
+                            <div class="kpi-label">Total Employees</div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">—</div>
+                            <div class="kpi-label">Active Clients</div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2.5"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">—</div>
+                            <div class="kpi-label">Guards on Duty</div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">0</div>
+                            <div class="kpi-label">Pending Actions</div>
+                        </div>
+                    </div>
+
+                    <div class="content-grid">
+                        <!-- RECENT ACTIVITY -->
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                    <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+                                </svg>
+                                Recent Activity
+                            </h3>
+                            <div class="activity-row">
+                                <div class="activity-dot blue"></div>
+                                <div class="activity-content">
+                                    <div class="activity-desc">Employee record updated</div>
+                                    <div class="activity-time">—</div>
+                                </div>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-dot green"></div>
+                                <div class="activity-content">
+                                    <div class="activity-desc">Client report generated</div>
+                                    <div class="activity-time">—</div>
+                                </div>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-dot amber"></div>
+                                <div class="activity-content">
+                                    <div class="activity-desc">New assignment created</div>
+                                    <div class="activity-time">—</div>
+                                </div>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-dot blue"></div>
+                                <div class="activity-content">
+                                    <div class="activity-desc">Attendance marked</div>
+                                    <div class="activity-time">—</div>
+                                </div>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-dot green"></div>
+                                <div class="activity-content">
+                                    <div class="activity-desc">Payroll batch processed</div>
+                                    <div class="activity-time">—</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- QUICK ACTIONS -->
+                        <div class="section-card">
+                            <h3 class="section-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                                Quick Actions
+                            </h3>
+                            <button class="action-btn primary" onclick="document.getElementById('add-employee-modal').classList.add('open')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Add Employee
+                            </button>
+                            <button class="action-btn outline" onclick="alert('Connect to Firestore to add clients.')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                                Add Client
+                            </button>
+                            <button class="action-btn outline disabled" onclick="alert('Phase 2: Payroll engine coming soon.')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                    <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                                </svg>
+                                Generate Payroll Report
+                                <span class="badge-phase2">Phase 2</span>
+                            </button>
+                            <button class="action-btn outline" onclick="window.postAnnouncement()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                </svg>
+                                Post Announcement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMPLOYEES PANEL -->
+                <div id="panel-employees" class="panel">
+                    <div class="panel-header">
+                        <input type="text" class="search-input" placeholder="Search employees...">
+                        <button class="action-btn primary" onclick="document.getElementById('add-employee-modal').classList.add('open')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Add Employee
+                        </button>
+                    </div>
+
+                    <div class="stat-chips">
+                        <div class="stat-chip">Total: <span class="stat-value">—</span></div>
+                        <div class="stat-chip">Active: <span class="stat-value">—</span></div>
+                        <div class="stat-chip">On Leave: <span class="stat-value">—</span></div>
+                    </div>
+
+                    <div class="section-card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Employee ID</th>
+                                    <th>Designation</th>
+                                    <th>Site</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="status-badge active">Active</span></td>
+                                    <td><button class="table-action-btn" onclick="alert('Connect to Firestore to edit records.')">Edit</button></td>
+                                </tr>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="status-badge active">Active</span></td>
+                                    <td><button class="table-action-btn" onclick="alert('Connect to Firestore to edit records.')">Edit</button></td>
+                                </tr>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="status-badge active">Active</span></td>
+                                    <td><button class="table-action-btn" onclick="alert('Connect to Firestore to edit records.')">Edit</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="empty-state">
+                        Employee records will populate once connected to the backend.
+                    </div>
+                </div>
+
+                <!-- CLIENTS PANEL -->
+                <div id="panel-clients" class="panel">
+                    <div class="panel-header">
+                        <input type="text" class="search-input" placeholder="Search clients...">
+                        <button class="action-btn primary" onclick="alert('Connect to Firestore to add clients.')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Add Client
+                        </button>
+                    </div>
+
+                    <div class="stat-chips">
+                        <div class="stat-chip">Total Clients: <span class="stat-value">—</span></div>
+                        <div class="stat-chip">Active Contracts: <span class="stat-value">—</span></div>
+                        <div class="stat-chip">Revenue MTD: <span class="stat-value">₹—</span></div>
+                    </div>
+
+                    <div class="section-card">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Client Name</th>
+                                    <th>Contract No.</th>
+                                    <th>Site</th>
+                                    <th>Contract Period</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="status-badge active">Active</span></td>
+                                    <td><button class="table-action-btn" onclick="alert('Connect to Firestore for client details.')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="status-badge active">Active</span></td>
+                                    <td><button class="table-action-btn" onclick="alert('Connect to Firestore for client details.')">View</button></td>
+                                </tr>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td><span class="status-badge pending">Pending</span></td>
+                                    <td><button class="table-action-btn" onclick="alert('Connect to Firestore for client details.')">View</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="empty-state">
+                        Client records and contract details will sync from the billing engine in Phase 2.
+                    </div>
+                </div>
+
+                <!-- PAYROLL PANEL -->
+                <div id="panel-payroll" class="panel">
+                    <div class="phase2-banner">
+                        Payroll engine coming in Phase 2 — will connect to attendance data and generate payslips automatically.
+                    </div>
+
+                    <div class="kpi-grid">
+                        <div class="kpi-card disabled">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">₹—</div>
+                            <div class="kpi-label">Total Payroll MTD</div>
+                        </div>
+
+                        <div class="kpi-card disabled">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">—</div>
+                            <div class="kpi-label">Payslips Generated</div>
+                        </div>
+
+                        <div class="kpi-card disabled">
+                            <div class="kpi-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M9 16.17L4.83 12"/>
+                                </svg>
+                            </div>
+                            <div class="kpi-value">—%</div>
+                            <div class="kpi-label">PF/ESI Compliance</div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <h3 class="section-title">Payroll Summary</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Employee</th>
+                                    <th>Days Present</th>
+                                    <th>OT Hours</th>
+                                    <th>Gross Pay</th>
+                                    <th>Deductions</th>
+                                    <th>Net Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                </tr>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                </tr>
+                                <tr>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                    <td>—</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <button class="action-btn primary disabled" style="cursor: not-allowed;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Process Payroll
+                            <span class="badge-phase2">Phase 2</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ANNOUNCEMENTS PANEL -->
+                <div id="panel-announcements" class="panel">
+                    <div class="announcement-form">
+                        <h3 class="section-title" style="margin-bottom: 16px;">Post New Announcement</h3>
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" placeholder="Announcement title">
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select>
+                                <option value="">Select Category</option>
+                                <option value="general">General</option>
+                                <option value="security">Security Alert</option>
+                                <option value="hr">HR</option>
+                                <option value="operations">Operations</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea placeholder="Enter announcement message..."></textarea>
+                        </div>
+                        <button class="action-btn primary" onclick="window.postAnnouncement()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                            </svg>
+                            Post Announcement
+                        </button>
+                    </div>
+
+                    <h3 class="section-title">Recent Announcements</h3>
+                    <div class="announcement-list">
+                        <div class="announcement-card">
+                            <div class="announcement-header">
+                                <span class="announcement-category">General</span>
+                            </div>
+                            <div class="announcement-title">—</div>
+                            <div class="announcement-body">—</div>
+                            <div class="announcement-time">—</div>
+                        </div>
+
+                        <div class="announcement-card">
+                            <div class="announcement-header">
+                                <span class="announcement-category">Security Alert</span>
+                            </div>
+                            <div class="announcement-title">—</div>
+                            <div class="announcement-body">—</div>
+                            <div class="announcement-time">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <nav class="portal-nav">
-      <div class="portal-nav-label">Overview</div>
-      <button class="portal-nav-link active" data-panel="panel-dashboard">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-        <span class="admin-badge">Admin</span>
-      </button>
+    <!-- ADD EMPLOYEE MODAL -->
+    <div id="add-employee-modal" class="modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Employee</h2>
+                <button class="modal-close" onclick="document.getElementById('add-employee-modal').classList.remove('open')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input type="text" placeholder="First name">
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input type="text" placeholder="Last name">
+                    </div>
+                </div>
 
-      <div class="portal-nav-label">People</div>
-      <button class="portal-nav-link" data-panel="panel-employees">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        Employees
-      </button>
-      <button class="portal-nav-link" data-panel="panel-attendance">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Attendance
-      </button>
-      <button class="portal-nav-link" data-panel="panel-payroll">
-        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        Payroll
-      </button>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" placeholder="employee@vagt.com">
+                </div>
 
-      <div class="portal-nav-label">Operations</div>
-      <button class="portal-nav-link" data-panel="panel-clients">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Clients
-      </button>
-      <button class="portal-nav-link" data-panel="panel-announcements">
-        <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        Announcements
-      </button>
-    </nav>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Employee ID (CLK No.)</label>
+                        <input type="text" placeholder="CLK-2024-001">
+                    </div>
+                    <div class="form-group">
+                        <label>Designation</label>
+                        <input type="text" placeholder="e.g., Security Guard">
+                    </div>
+                </div>
 
-    <div class="portal-sidebar-footer">
-      <a href="employee-portal.html" style="display:block;margin-bottom:8px;font-size:12px;color:rgba(255,255,255,0.35);text-align:center">← Employee Portal</a>
-      <button class="btn-signout" id="signout-btn">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign out
-      </button>
+                <div class="form-group">
+                    <label>Deployment Site</label>
+                    <input type="text" placeholder="Site location">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Date of Joining</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" placeholder="+91 9876543210">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-footer button btn-cancel" onclick="document.getElementById('add-employee-modal').classList.remove('open')">Cancel</button>
+                <button class="modal-footer button btn-submit" onclick="alert('Firebase Admin SDK required to create Auth accounts programmatically. Use Firebase Console for now.')">Create Account</button>
+            </div>
+        </div>
     </div>
-  </aside>
 
-  <!-- ── MAIN ── -->
-  <main class="portal-main">
-    <div class="portal-topbar">
-      <h1 id="panel-title">Admin Dashboard</h1>
-      <div class="topbar-right">
-        <span class="topbar-date" id="today-date"></span>
-      </div>
-    </div>
-
-    <div class="portal-content">
-
-      <!-- ══ PANEL: DASHBOARD ══ -->
-      <div class="panel active" id="panel-dashboard">
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-icon amber"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-            <div class="kpi-label">Total Employees</div>
-            <div class="kpi-value">148</div>
-            <div class="kpi-sub">↑ 6 new this month</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon green"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-            <div class="kpi-label">Present Today</div>
-            <div class="kpi-value">132</div>
-            <div class="kpi-sub">89% attendance · 16 absent</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon blue"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
-            <div class="kpi-label">Active Clients</div>
-            <div class="kpi-value">22</div>
-            <div class="kpi-sub">3 contracts up for renewal</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon red"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-            <div class="kpi-label">Payroll — March</div>
-            <div class="kpi-value">₹26.4L</div>
-            <div class="kpi-sub">Processing on 31 March</div>
-          </div>
-        </div>
-
-        <div class="section-2col">
-          <div class="section-card" style="margin-bottom:0">
-            <div class="section-card-head"><h2>Today's Attendance Snapshot</h2><span class="badge badge-green">5 Mar 2026</span></div>
-            <div class="section-card-body" style="padding:0">
-              <table class="data-table">
-                <thead><tr><th>Site</th><th>Deployed</th><th>Present</th><th>Rate</th></tr></thead>
-                <tbody>
-                  <tr><td>Prestige Tech Park</td><td>18</td><td>17</td><td><div style="display:flex;align-items:center;gap:8px"><div class="att-bar-wrap" style="flex:1"><div class="att-bar" style="width:94%"></div></div><span>94%</span></div></td></tr>
-                  <tr><td>Embassy Golf Links</td><td>24</td><td>21</td><td><div style="display:flex;align-items:center;gap:8px"><div class="att-bar-wrap" style="flex:1"><div class="att-bar" style="width:88%;background:#f59e0b"></div></div><span>88%</span></div></td></tr>
-                  <tr><td>Manyata Tech Park</td><td>32</td><td>29</td><td><div style="display:flex;align-items:center;gap:8px"><div class="att-bar-wrap" style="flex:1"><div class="att-bar" style="width:91%"></div></div><span>91%</span></div></td></tr>
-                  <tr><td>Bagmane Tech Park</td><td>14</td><td>12</td><td><div style="display:flex;align-items:center;gap:8px"><div class="att-bar-wrap" style="flex:1"><div class="att-bar" style="width:86%;background:#f59e0b"></div></div><span>86%</span></div></td></tr>
-                  <tr><td>Salarpuria Sattva</td><td>22</td><td>20</td><td><div style="display:flex;align-items:center;gap:8px"><div class="att-bar-wrap" style="flex:1"><div class="att-bar" style="width:91%"></div></div><span>91%</span></div></td></tr>
-                  <tr><td>Other Sites (8)</td><td>38</td><td>33</td><td><div style="display:flex;align-items:center;gap:8px"><div class="att-bar-wrap" style="flex:1"><div class="att-bar" style="width:87%;background:#f59e0b"></div></div><span>87%</span></div></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="section-card" style="margin-bottom:0">
-            <div class="section-card-head"><h2>Recent Activity</h2></div>
-            <div class="section-card-body" style="padding:16px 22px">
-              <div class="activity-list">
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:var(--green)"></div>
-                  <div class="activity-text"><strong>Suresh Nair</strong> marked attendance for Manyata Tech Park (32 guards)</div>
-                  <div class="activity-time">08:14</div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:var(--amber)"></div>
-                  <div class="activity-text"><strong>Ravi Kumar</strong> submitted leave request for 8 Mar</div>
-                  <div class="activity-time">07:52</div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:var(--red)"></div>
-                  <div class="activity-text"><strong>3 guards</strong> marked absent at Embassy Golf Links — no prior leave application</div>
-                  <div class="activity-time">07:30</div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:var(--blue)"></div>
-                  <div class="activity-text"><strong>Infosys BTP</strong> contract renewal reminder — expires 30 April 2026</div>
-                  <div class="activity-time">Yesterday</div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:var(--green)"></div>
-                  <div class="activity-text"><strong>6 new employees</strong> onboarded this month — profiles pending verification</div>
-                  <div class="activity-time">3 Mar</div>
-                </div>
-                <div class="activity-item">
-                  <div class="activity-dot" style="background:var(--amber)"></div>
-                  <div class="activity-text"><strong>February payroll</strong> processed — ₹25.8L credited to 144 accounts</div>
-                  <div class="activity-time">28 Feb</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div><!-- /panel-dashboard -->
-
-      <!-- ══ PANEL: EMPLOYEES ══ -->
-      <div class="panel" id="panel-employees">
-        <!-- TODO: Firebase — fetch from Firestore: db.collection('employees').orderBy('name').get() -->
-        <div class="section-card">
-          <div class="section-card-head">
-            <h2>All Employees <span style="font-weight:400;color:var(--text-faint);margin-left:6px">148 total</span></h2>
-            <button class="btn btn-primary" onclick="alert('Add Employee form — connect to Firestore to save')">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Employee
-            </button>
-          </div>
-          <div style="padding:16px 22px; border-bottom:1px solid var(--border)">
-            <div class="search-row">
-              <input class="search-input" type="text" placeholder="Search by name, ID or site…" id="emp-search"/>
-              <select class="filter-select" id="emp-filter-dept">
-                <option value="">All Departments</option>
-                <option>Manned Guarding</option>
-                <option>Surveillance</option>
-                <option>Facilities Management</option>
-                <option>Supervisor</option>
-              </select>
-              <select class="filter-select" id="emp-filter-status">
-                <option value="">All Status</option>
-                <option>Active</option>
-                <option>On Leave</option>
-                <option>Inactive</option>
-              </select>
-            </div>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="data-table" id="emp-table">
-              <thead>
-                <tr>
-                  <th>Employee</th><th>ID</th><th>Designation</th><th>Site</th>
-                  <th>Join Date</th><th>Status</th><th></th>
-                </tr>
-              </thead>
-              <tbody id="emp-tbody">
-                <!-- Populated by JS below -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /panel-employees -->
-
-      <!-- ══ PANEL: ATTENDANCE ══ -->
-      <div class="panel" id="panel-attendance">
-        <!-- TODO: Firebase — fetch from Firestore: db.collection('attendance').where('date','==',selectedDate).get() -->
-        <div class="section-card">
-          <div class="section-card-head">
-            <h2>Daily Attendance</h2>
-            <div style="display:flex;align-items:center;gap:10px">
-              <input type="date" class="form-input" style="width:auto;padding:7px 12px" value="2026-03-05" id="att-date"/>
-              <button class="btn btn-secondary"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
-            </div>
-          </div>
-          <div style="padding:12px 22px; border-bottom:1px solid var(--border); display:flex; gap:16px; flex-wrap:wrap">
-            <span style="font-size:13px;color:var(--text-mid)">Total: <strong>148</strong></span>
-            <span style="font-size:13px;color:var(--green)">Present: <strong>132</strong></span>
-            <span style="font-size:13px;color:var(--red)">Absent: <strong>16</strong></span>
-            <span style="font-size:13px;color:var(--amber-dark)">On Leave: <strong>0</strong></span>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Employee</th><th>Site</th><th>Shift</th><th>Check-in</th><th>Check-out</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">R</div><div><div class="emp-name">Ravi Kumar</div><div class="emp-id">VAGT-2025-047</div></div></div></td><td>Prestige Tech Park</td><td>Morning</td><td>05:58</td><td>14:07</td><td>8h 09m</td><td><span class="badge badge-green">Present</span></td><td>—</td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">S</div><div><div class="emp-name">Suresh Nair</div><div class="emp-id">VAGT-2024-012</div></div></div></td><td>Manyata Tech Park</td><td>Morning</td><td>06:02</td><td>14:05</td><td>8h 03m</td><td><span class="badge badge-green">Present</span></td><td>—</td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">A</div><div><div class="emp-name">Anand Pillai</div><div class="emp-id">VAGT-2024-019</div></div></div></td><td>Embassy Golf Links</td><td>Morning</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-red">Absent</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">Mark Leave</button></td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">P</div><div><div class="emp-name">Priya Menon</div><div class="emp-id">VAGT-2025-033</div></div></div></td><td>Bagmane Tech Park</td><td>Evening</td><td>13:55</td><td>22:03</td><td>8h 08m</td><td><span class="badge badge-green">Present</span></td><td>—</td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">M</div><div><div class="emp-name">Mohammed Rafiq</div><div class="emp-id">VAGT-2023-008</div></div></div></td><td>Salarpuria Sattva</td><td>Night</td><td>21:58</td><td>06:02</td><td>8h 04m</td><td><span class="badge badge-green">Present</span></td><td>—</td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">K</div><div><div class="emp-name">Kavitha Rao</div><div class="emp-id">VAGT-2025-051</div></div></div></td><td>Prestige Tech Park</td><td>Evening</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-red">Absent</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">Mark Leave</button></td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">V</div><div><div class="emp-name">Vijay Singh</div><div class="emp-id">VAGT-2022-003</div></div></div></td><td>Manyata Tech Park</td><td>Morning</td><td>05:49</td><td>14:00</td><td>8h 11m</td><td><span class="badge badge-green">Present</span></td><td>—</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /panel-attendance -->
-
-      <!-- ══ PANEL: PAYROLL ══ -->
-      <div class="panel" id="panel-payroll">
-        <!-- TODO: Firebase — fetch from Firestore: db.collection('payroll').where('month','==','2026-03').get() -->
-        <div class="section-card">
-          <div class="section-card-head">
-            <h2>Payroll — March 2026</h2>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <select class="filter-select">
-                <option>March 2026</option><option>February 2026</option><option>January 2026</option>
-              </select>
-              <button class="btn btn-secondary"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
-              <button class="btn btn-primary" onclick="alert('Process Payroll — connects to payroll engine once Supabase is wired')">Process Payroll</button>
-            </div>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Employee</th><th>Days Present</th><th>Basic Pay</th><th>Allowances</th><th>Overtime</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th></th></tr></thead>
-              <tbody>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">R</div><div><div class="emp-name">Ravi Kumar</div><div class="emp-id">VAGT-2025-047</div></div></div></td><td>23</td><td>₹15,000</td><td>₹2,500</td><td>₹1,800</td><td>₹800</td><td><strong>₹18,500</strong></td><td><span class="badge badge-amber">Pending</span></td><td><button class="payslip-dl-btn btn btn-secondary" style="padding:4px 10px;font-size:12px">Payslip</button></td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">S</div><div><div class="emp-name">Suresh Nair</div><div class="emp-id">VAGT-2024-012</div></div></div></td><td>25</td><td>₹22,000</td><td>₹3,500</td><td>₹2,100</td><td>₹1,200</td><td><strong>₹26,400</strong></td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">Payslip</button></td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">A</div><div><div class="emp-name">Anand Pillai</div><div class="emp-id">VAGT-2024-019</div></div></div></td><td>21</td><td>₹15,000</td><td>₹2,500</td><td>₹0</td><td>₹1,600</td><td><strong>₹15,900</strong></td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">Payslip</button></td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">P</div><div><div class="emp-name">Priya Menon</div><div class="emp-id">VAGT-2025-033</div></div></div></td><td>24</td><td>₹15,000</td><td>₹2,500</td><td>₹900</td><td>₹800</td><td><strong>₹17,600</strong></td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">Payslip</button></td></tr>
-                <tr><td><div class="emp-cell"><div class="emp-avatar">M</div><div><div class="emp-name">Mohammed Rafiq</div><div class="emp-id">VAGT-2023-008</div></div></div></td><td>25</td><td>₹18,000</td><td>₹3,000</td><td>₹1,500</td><td>₹1,000</td><td><strong>₹21,500</strong></td><td><span class="badge badge-amber">Pending</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">Payslip</button></td></tr>
-                <tr class="payroll-total"><td colspan="6" style="text-align:right;font-size:12px;letter-spacing:0.5px">TOTAL PAYROLL — 148 EMPLOYEES</td><td>₹26,40,000</td><td colspan="2"><span class="badge badge-amber">Pending</span></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /panel-payroll -->
-
-      <!-- ══ PANEL: CLIENTS ══ -->
-      <div class="panel" id="panel-clients">
-        <!-- TODO: Firebase — fetch from Firestore: db.collection('clients').orderBy('name').get() -->
-        <div class="section-card">
-          <div class="section-card-head">
-            <h2>Active Clients <span style="font-weight:400;color:var(--text-faint);margin-left:6px">22 accounts</span></h2>
-            <button class="btn btn-primary" onclick="alert('Add Client form — connect to Firestore to save')">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Client
-            </button>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="data-table">
-              <thead><tr><th>Client</th><th>Contract Type</th><th>Site(s)</th><th>Guards</th><th>Contract End</th><th>Status</th><th></th></tr></thead>
-              <tbody>
-                <tr><td>Prestige Group</td><td>Manned Guarding</td><td>Prestige Tech Park</td><td>18</td><td>31 Dec 2026</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>Embassy Group</td><td>Manned Guarding + Surveillance</td><td>Embassy Golf Links</td><td>24</td><td>30 Jun 2026</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>Infosys Ltd</td><td>Manned Guarding</td><td>Manyata Tech Park</td><td>32</td><td>30 Apr 2026</td><td><span class="badge badge-amber">Renewal Due</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>Bagmane Developers</td><td>Facilities + Guarding</td><td>Bagmane Tech Park</td><td>14</td><td>31 Mar 2027</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>Salarpuria Sattva</td><td>Manned Guarding</td><td>Salarpuria Sattva Knowledge City</td><td>22</td><td>31 Aug 2026</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>RMZ Corp</td><td>Surveillance + Guarding</td><td>RMZ Ecospace</td><td>16</td><td>31 May 2026</td><td><span class="badge badge-amber">Renewal Due</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>Brigade Group</td><td>Manned Guarding</td><td>Brigade Tech Park</td><td>12</td><td>31 Jan 2027</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-                <tr><td>Godrej Properties</td><td>Facilities Management</td><td>Godrej Splendour</td><td>8</td><td>31 Oct 2026</td><td><span class="badge badge-green">Active</span></td><td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px">View</button></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div><!-- /panel-clients -->
-
-      <!-- ══ PANEL: ANNOUNCEMENTS ══ -->
-      <div class="panel" id="panel-announcements">
-        <!-- TODO: Firebase — save to Firestore: db.collection('announcements').add({...}) -->
-        <div class="section-2col">
-          <div>
-            <div class="section-card" style="margin-bottom:0">
-              <div class="section-card-head"><h2>Post New Announcement</h2></div>
-              <div class="section-card-body">
-                <div class="form-group">
-                  <label>Category</label>
-                  <select class="form-select" id="ann-category">
-                    <option>General</option><option>Policy</option><option>Safety</option><option>Payroll</option><option>Event</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Title</label>
-                  <input class="form-input" type="text" id="ann-title" placeholder="Announcement title…"/>
-                </div>
-                <div class="form-group">
-                  <label>Message</label>
-                  <textarea class="form-textarea" id="ann-body" placeholder="Write your announcement here…"></textarea>
-                </div>
-                <div style="display:flex;gap:10px">
-                  <button class="btn btn-primary" style="flex:1" onclick="postAnnouncement()">
-                    <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                    Post to All Employees
-                  </button>
-                </div>
-                <p id="ann-confirm" style="font-size:12px;color:var(--green);margin-top:10px;display:none">✓ Announcement posted successfully.</p>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="section-card" style="margin-bottom:0">
-              <div class="section-card-head"><h2>Recent Announcements</h2></div>
-              <div class="section-card-body" style="padding:0" id="ann-list-admin">
-                <div style="padding:14px 22px;border-bottom:1px solid var(--border)">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span class="badge badge-amber">Policy</span>
-                    <span style="font-size:11px;color:var(--text-faint)">1 Mar 2026</span>
-                  </div>
-                  <div style="font-size:13px;font-weight:600">Updated Uniform Standards — Effective 15 March</div>
-                </div>
-                <div style="padding:14px 22px;border-bottom:1px solid var(--border)">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span class="badge badge-green">Safety</span>
-                    <span style="font-size:11px;color:var(--text-faint)">22 Feb 2026</span>
-                  </div>
-                  <div style="font-size:13px;font-weight:600">Mandatory Fire Drill — All Sites, 10 March</div>
-                </div>
-                <div style="padding:14px 22px;border-bottom:1px solid var(--border)">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span class="badge badge-grey">General</span>
-                    <span style="font-size:11px;color:var(--text-faint)">10 Feb 2026</span>
-                  </div>
-                  <div style="font-size:13px;font-weight:600">Salary Revision — Effective April 2026</div>
-                </div>
-                <div style="padding:14px 22px">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-                    <span class="badge badge-amber">Policy</span>
-                    <span style="font-size:11px;color:var(--text-faint)">1 Feb 2026</span>
-                  </div>
-                  <div style="font-size:13px;font-weight:600">Leave Application Process Update</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div><!-- /panel-announcements -->
-
-    </div><!-- /portal-content -->
-  </main>
-</div>
-
-<script type="module">
+    <script type="module">
   import { requireAuth, signOutUser } from "../assets/js/vagt-auth.js";
-
-  // ── FIREBASE AUTH — runs first (top-level await) ──
   const { user, profile } = await requireAuth('admin', 'admin-portal.html');
   document.querySelector('.portal-avatar').textContent = profile.name.charAt(0).toUpperCase();
-  document.getElementById('user-name').textContent     = profile.name;
+  document.getElementById('user-name').textContent = profile.name;
   document.getElementById('signout-btn').addEventListener('click', () => signOutUser('admin-portal.html'));
-  // ── MOCK EMPLOYEE DATA ──
-  // TODO: Replace with Firestore fetch — db.collection('employees').orderBy('name').get()
-  const EMPLOYEES = [
-    { name:'Ravi Kumar', id:'VAGT-2025-047', designation:'Security Officer II', site:'Prestige Tech Park', joined:'03 Apr 2025', status:'Active' },
-    { name:'Suresh Nair', id:'VAGT-2024-012', designation:'Site Supervisor', site:'Manyata Tech Park', joined:'15 Jan 2024', status:'Active' },
-    { name:'Anand Pillai', id:'VAGT-2024-019', designation:'Security Officer I', site:'Embassy Golf Links', joined:'22 Mar 2024', status:'Active' },
-    { name:'Priya Menon', id:'VAGT-2025-033', designation:'Security Officer I', site:'Bagmane Tech Park', joined:'10 Jul 2025', status:'Active' },
-    { name:'Mohammed Rafiq', id:'VAGT-2023-008', designation:'Senior Guard', site:'Salarpuria Sattva', joined:'08 Jun 2023', status:'Active' },
-    { name:'Kavitha Rao', id:'VAGT-2025-051', designation:'Security Officer I', site:'Prestige Tech Park', joined:'01 Oct 2025', status:'Active' },
-    { name:'Vijay Singh', id:'VAGT-2022-003', designation:'Senior Supervisor', site:'Manyata Tech Park', joined:'12 Feb 2022', status:'Active' },
-    { name:'Deepa Krishnan', id:'VAGT-2025-039', designation:'Security Officer I', site:'RMZ Ecospace', joined:'18 Aug 2025', status:'Active' },
-    { name:'Rajesh Verma', id:'VAGT-2023-015', designation:'Security Officer II', site:'Brigade Tech Park', joined:'03 Sep 2023', status:'Active' },
-    { name:'Sunita Devi', id:'VAGT-2024-027', designation:'Security Officer I', site:'Godrej Splendour', joined:'25 May 2024', status:'On Leave' },
-    { name:'Arun Kumar', id:'VAGT-2022-007', designation:'Senior Guard', site:'Embassy Golf Links', joined:'01 Nov 2022', status:'Active' },
-    { name:'Meena Iyer', id:'VAGT-2026-001', designation:'Security Officer I', site:'Prestige Tech Park', joined:'02 Feb 2026', status:'Active' },
-  ];
+  // expose postAnnouncement for inline onclick
+  window.postAnnouncement = function() { /* stub */ alert('Connect to Firestore to post announcements.'); };
 
-  function renderEmployees(list) {
-    const tbody = document.getElementById('emp-tbody');
-    const statusColor = { 'Active':'badge-green', 'On Leave':'badge-amber', 'Inactive':'badge-red' };
-    tbody.innerHTML = list.map(e => `
-      <tr>
-        <td><div class="emp-cell">
-          <div class="emp-avatar">${e.name.charAt(0)}</div>
-          <div><div class="emp-name">${e.name}</div><div class="emp-id">${e.id}</div></div>
-        </div></td>
-        <td>${e.id}</td>
-        <td>${e.designation}</td>
-        <td>${e.site}</td>
-        <td>${e.joined}</td>
-        <td><span class="badge ${statusColor[e.status]||'badge-grey'}">${e.status}</span></td>
-        <td><button class="btn btn-secondary" style="padding:4px 10px;font-size:12px" onclick="alert('Edit employee — connect to Firestore to save changes')">Edit</button></td>
-      </tr>`).join('');
-  }
-  renderEmployees(EMPLOYEES);
+        // Set today's date
+        const todayDate = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('today-date').textContent = todayDate;
 
-  document.getElementById('emp-search').addEventListener('input', function() {
-    const q = this.value.toLowerCase();
-    renderEmployees(EMPLOYEES.filter(e =>
-      e.name.toLowerCase().includes(q) || e.id.toLowerCase().includes(q) || e.site.toLowerCase().includes(q)
-    ));
-  });
+        // Panel switching
+        const navItems = document.querySelectorAll('.nav-item');
+        const panels = document.querySelectorAll('.panel');
 
-  // ── TAB SWITCHING ──
-  const navLinks = document.querySelectorAll('.portal-nav-link[data-panel]');
-  const panels = document.querySelectorAll('.panel');
-  const panelTitle = document.getElementById('panel-title');
-  const titleMap = {
-    'panel-dashboard':'Admin Dashboard','panel-employees':'Employees',
-    'panel-attendance':'Attendance','panel-payroll':'Payroll',
-    'panel-clients':'Clients','panel-announcements':'Announcements',
-  };
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      const target = link.dataset.panel;
-      navLinks.forEach(l => l.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
-      link.classList.add('active');
-      document.getElementById(target).classList.add('active');
-      panelTitle.textContent = titleMap[target] || 'Admin Dashboard';
-      document.getElementById('portalSidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    });
-  });
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const panelId = item.getAttribute('data-panel');
 
-  // ── MOBILE SIDEBAR ──
-  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-    document.getElementById('portalSidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('open');
-  });
-  document.getElementById('sidebarOverlay').addEventListener('click', () => {
-    document.getElementById('portalSidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('open');
-  });
+                // Update active nav
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
 
-  // ── DATE ──
-  document.getElementById('today-date').textContent =
-    new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+                // Update active panel
+                panels.forEach(panel => panel.classList.remove('active'));
+                document.getElementById(`panel-${panelId}`).classList.add('active');
 
-  // ── ANNOUNCEMENT POST ──
-  // Exposed on window so inline onclick="postAnnouncement()" in HTML can reach it (modules have their own scope)
-  window.postAnnouncement = function() {
-    const title = document.getElementById('ann-title').value.trim();
-    const body = document.getElementById('ann-body').value.trim();
-    const cat = document.getElementById('ann-category').value;
-    if (!title || !body) { alert('Please fill in both title and message.'); return; }
-    // TODO: Firebase — db.collection('announcements').add({ title, body, category: cat, date: new Date(), postedBy: user.uid })
-    const confirm = document.getElementById('ann-confirm');
-    confirm.style.display = 'block';
-    document.getElementById('ann-title').value = '';
-    document.getElementById('ann-body').value = '';
-    setTimeout(() => confirm.style.display = 'none', 4000);
-  }
+                // Close sidebar on mobile
+                if (window.innerWidth <= 768) {
+                    document.querySelector('.sidebar').classList.remove('open');
+                }
+            });
+        });
 
-</script>
+        // Mobile hamburger
+        const hamburger = document.querySelector('.sidebar-toggle');
+        const sidebar = document.querySelector('.sidebar');
 
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && !e.target.closest('.sidebar') && !e.target.closest('.sidebar-toggle')) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // Modal close on backdrop click
+        const modal = document.getElementById('add-employee-modal');
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+            }
+        });
+    </script>
 </body>
 </html>
