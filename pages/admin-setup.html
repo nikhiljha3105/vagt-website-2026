@@ -201,9 +201,8 @@
 <script type="module">
   import { auth, db } from "../assets/js/firebase-config.js";
   import { checkSetupRequired, createUserProfile } from "../assets/js/vagt-auth.js";
-  import { createUserWithEmailAndPassword }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { onAuthStateChanged, signOut }
+  import { createUserWithEmailAndPassword, signInWithEmailAndPassword,
+           onAuthStateChanged, signOut }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   // ── Helpers ──
@@ -289,17 +288,25 @@
     btn.textContent = 'Creating account…';
 
     try {
-      // Double-check setup is still required (race condition guard)
-      const stillNeeded = await checkSetupRequired();
-      if (!stillNeeded) {
-        showState('state-configured');
-        return;
+      let user;
+
+      try {
+        // Try creating a new Auth account
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        user = cred.user;
+      } catch (authErr) {
+        if (authErr.code === 'auth/email-already-in-use') {
+          // Auth account exists from a previous failed attempt — sign in and
+          // continue to write/overwrite the Firestore profile
+          btn.textContent = 'Recovering previous attempt…';
+          const cred = await signInWithEmailAndPassword(auth, email, password);
+          user = cred.user;
+        } else {
+          throw authErr;
+        }
       }
 
-      // Create Firebase Auth user
-      const { user } = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Create Firestore profile
+      // Write (or overwrite) the Firestore admin profile
       await createUserProfile(user.uid, {
         role:  'admin',
         name:  fullName,
@@ -315,9 +322,10 @@
 
     } catch (err) {
       const FIREBASE_ERRORS = {
-        'auth/email-already-in-use': 'That email address is already registered.',
-        'auth/invalid-email':        'Please enter a valid email address.',
-        'auth/weak-password':        'Password is too weak. Use at least 8 characters.',
+        'auth/invalid-email':   'Please enter a valid email address.',
+        'auth/weak-password':   'Password is too weak. Use at least 8 characters.',
+        'auth/wrong-password':  'Account exists but password is wrong. Use the same password as your first attempt.',
+        'auth/invalid-credential': 'Account exists but password is wrong. Use the same password as your first attempt.',
       };
       showError(FIREBASE_ERRORS[err.code] || `Setup failed: ${err.message}`);
       btn.disabled = false;
