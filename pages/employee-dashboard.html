@@ -4,68 +4,71 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Account | VAGT Security Services</title>
+  <meta name="robots" content="noindex"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0b1120; --amber: #f5c400; --amber-dark: #c49a00;
+      --amber-soft: rgba(245,196,0,0.1); --red: #e63946;
+      --white: #ffffff; --warm-white: #f8f9fa;
+      --border: #e5e7eb; --text: #111827; --text-mid: #4b5563; --text-faint: #9ca3af;
+      --green: #16a34a; --green-soft: #dcfce7;
+      --font: 'Segoe UI', -apple-system, sans-serif;
+    }
+    body { font-family: var(--font); background: var(--warm-white); color: var(--text); }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── LAYOUT ── */
     .portal-layout { display: flex; min-height: 100vh; }
 
-    /* Portal Sidebar */
+    /* ── SIDEBAR ── */
     .portal-sidebar {
-      width: 240px; min-width: 240px;
-      background: var(--navy);
+      width: 240px; min-width: 240px; background: var(--navy);
       display: flex; flex-direction: column;
       position: fixed; top: 0; left: 0; bottom: 0;
       z-index: 50; overflow-y: auto;
     }
     .portal-sidebar-header {
-      padding: 24px 20px;
+      padding: 20px 18px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.07);
     }
     .portal-logo-wrap {
-      width: 80px; height: 36px;
-      background: var(--amber); border-radius: 5px;
+      width: 76px; height: 34px; background: var(--amber); border-radius: 5px;
       display: flex; align-items: center; justify-content: center;
       padding: 4px 8px; margin-bottom: 14px;
     }
     .portal-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
-    .portal-user-chip {
-      display: flex; align-items: center; gap: 10px;
-    }
+    .portal-user-chip { display: flex; align-items: center; gap: 10px; }
     .portal-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       background: rgba(245,196,0,0.15);
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: var(--amber);
-      flex-shrink: 0;
+      font-size: 13px; font-weight: 700; color: var(--amber); flex-shrink: 0;
     }
     .portal-user-name { font-size: 13px; font-weight: 600; color: var(--white); }
-    .portal-user-role { font-size: 11px; color: rgba(255,255,255,0.35); }
-
-    .portal-nav { flex: 1; padding: 12px 0; }
+    .portal-user-role { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    .portal-nav { flex: 1; padding: 10px 0; }
     .portal-nav-label {
-      font-size: 9px; font-weight: 700;
-      color: rgba(245,196,0,0.6);
-      text-transform: uppercase; letter-spacing: 2px;
-      padding: 10px 20px 4px;
+      font-size: 9px; font-weight: 700; color: rgba(245,196,0,0.6);
+      text-transform: uppercase; letter-spacing: 2px; padding: 10px 18px 4px;
     }
     .portal-nav-link {
       display: flex; align-items: center; gap: 10px;
-      padding: 10px 20px;
-      font-size: 13px; font-weight: 500;
+      padding: 10px 18px; font-size: 13px; font-weight: 500;
       color: rgba(255,255,255,0.55);
-      transition: background 0.15s, color 0.15s;
+      transition: background 0.15s, color 0.15s; cursor: pointer;
+      border: none; background: none; width: 100%; text-align: left;
       position: relative;
     }
     .portal-nav-link:hover { background: rgba(255,255,255,0.05); color: var(--white); }
     .portal-nav-link.active { color: var(--amber); background: rgba(245,196,0,0.07); }
-    .portal-nav-link.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber); }
+    .portal-nav-link.active::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber);
+    }
     .portal-nav-link svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; opacity: 0.65; }
     .portal-nav-link.active svg, .portal-nav-link:hover svg { opacity: 1; }
-    .coming-tag { margin-left: auto; font-size: 8px; font-weight: 700; background: rgba(245,196,0,0.12); color: var(--amber); padding: 2px 7px; letter-spacing: 0.5px; text-transform: uppercase; }
-
-    .portal-sidebar-footer {
-      padding: 16px 20px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
+    .portal-sidebar-footer { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,0.06); }
     .btn-signout {
       width: 100%; padding: 9px; font-size: 12px; font-weight: 600;
       color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);
@@ -75,83 +78,142 @@
     .btn-signout:hover { color: var(--white); background: rgba(255,255,255,0.1); }
     .btn-signout svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-    /* Main content */
-    .portal-main {
-      margin-left: 240px;
-      flex: 1;
-      background: var(--warm-white);
-      min-height: 100vh;
-    }
+    /* ── MAIN ── */
+    .portal-main { margin-left: 240px; flex: 1; background: var(--warm-white); min-height: 100vh; }
     .portal-topbar {
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 36px;
-      display: flex; align-items: center; justify-content: space-between;
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 16px 32px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
     }
-    .portal-topbar h1 { font-size: 20px; font-weight: 700; color: var(--text); }
-    .topbar-date { font-size: 13px; color: var(--text-faint); }
+    .portal-topbar h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+    .topbar-date { font-size: 12px; color: var(--text-faint); }
+    .portal-content { padding: 28px 32px; }
 
-    .portal-content { padding: 32px 36px; }
+    /* ── PANELS ── */
+    .panel { display: none; }
+    .panel.active { display: block; }
 
-    /* Cards */
-    .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
+    /* ── CARDS ── */
+    .dash-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
     .dash-card {
-      background: var(--white);
-      border-radius: 10px;
-      padding: 24px;
-      border: 1px solid var(--border);
+      background: var(--white); border-radius: 10px;
+      padding: 20px; border: 1px solid var(--border);
     }
-    .dash-card-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-    .dash-card-value { font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
-    .dash-card-sub { font-size: 12px; color: var(--text-muted); margin-top: 5px; }
     .dash-card-icon {
-      width: 40px; height: 40px; border-radius: 8px;
+      width: 38px; height: 38px; border-radius: 8px;
       background: var(--amber-soft); display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
-    .dash-card-icon svg { width: 20px; height: 20px; stroke: var(--amber-dark); fill: none; stroke-width: 1.8; }
+    .dash-card-icon svg { width: 18px; height: 18px; stroke: var(--amber-dark); fill: none; stroke-width: 1.8; }
+    .dash-card-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+    .dash-card-value { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+    .dash-card-sub { font-size: 11px; color: var(--text-faint); margin-top: 4px; }
 
-    .section-card {
-      background: var(--white);
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-    .section-card-head {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .section-card-head h2 { font-size: 15px; font-weight: 700; color: var(--text); }
-    .section-card-body { padding: 24px; }
+    /* ── SECTION CARD ── */
+    .section-card { background: var(--white); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+    .section-card-head { padding: 16px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .section-card-head h2 { font-size: 14px; font-weight: 700; color: var(--text); }
+    .section-card-body { padding: 20px 22px; }
+    .section-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
-    .coming-soon-block {
-      text-align: center; padding: 32px 24px;
-      color: var(--text-faint);
-    }
-    .coming-soon-block svg { width: 40px; height: 40px; stroke: var(--border); fill: none; stroke-width: 1.5; margin: 0 auto 12px; display: block; }
-    .coming-soon-block p { font-size: 14px; }
-    .coming-soon-block span { font-size: 12px; color: var(--amber); font-weight: 600; }
+    /* ── TABLE ── */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 2px solid var(--border); background: #fafafa; }
+    .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text-mid); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #fafafa; }
+    .data-table td:first-child { color: var(--text); font-weight: 500; }
 
-    .notice-bar {
-      background: rgba(245,196,0,0.1);
-      border: 1px solid rgba(245,196,0,0.3);
-      border-radius: 8px;
-      padding: 14px 18px;
-      display: flex; gap: 12px; align-items: flex-start;
-      margin-bottom: 24px;
+    /* ── BADGES ── */
+    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge-green { background: var(--green-soft); color: var(--green); }
+    .badge-amber { background: rgba(245,196,0,0.12); color: var(--amber-dark); }
+    .badge-red { background: rgba(230,57,70,0.1); color: var(--red); }
+    .badge-grey { background: #f3f4f6; color: #6b7280; }
+
+    /* ── SCHEDULE LIST ── */
+    .shift-list { display: flex; flex-direction: column; gap: 10px; }
+    .shift-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; border-radius: 8px; border: 1px solid var(--border);
     }
-    .notice-bar svg { width: 18px; height: 18px; stroke: var(--amber-dark); fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 1px; }
-    .notice-bar p { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+    .shift-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .shift-dot.morning { background: #f59e0b; }
+    .shift-dot.evening { background: #3b82f6; }
+    .shift-dot.night { background: #6366f1; }
+    .shift-label { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+    .shift-time { font-size: 12px; color: var(--text-faint); }
+    .shift-site { font-size: 12px; color: var(--text-mid); margin-top: 2px; }
+    .shift-date { font-size: 12px; font-weight: 600; color: var(--amber-dark); min-width: 80px; text-align: right; }
+
+    /* ── ATTENDANCE CALENDAR ── */
+    .att-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .att-day-name { font-size: 10px; font-weight: 700; color: var(--text-faint); text-align: center; padding: 4px 0; }
+    .att-day {
+      aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 500; cursor: default;
+    }
+    .att-day.empty { background: transparent; }
+    .att-day.present { background: var(--green-soft); color: var(--green); font-weight: 700; }
+    .att-day.absent { background: rgba(230,57,70,0.08); color: var(--red); }
+    .att-day.leave { background: rgba(245,196,0,0.12); color: var(--amber-dark); }
+    .att-day.future { background: #f9fafb; color: var(--text-faint); }
+    .att-day.today { outline: 2px solid var(--amber); outline-offset: -2px; }
+
+    .att-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+    .att-legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-mid); }
+    .att-legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+    .att-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .att-stat { background: #fafafa; border-radius: 8px; padding: 14px; text-align: center; border: 1px solid var(--border); }
+    .att-stat-val { font-size: 22px; font-weight: 800; color: var(--text); }
+    .att-stat-lbl { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+
+    /* ── DETAILS FORM ── */
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field-group { display: flex; flex-direction: column; gap: 5px; }
+    .field-group label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.7px; }
+    .field-val { font-size: 14px; color: var(--text); font-weight: 500; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .field-note { font-size: 11px; color: var(--text-faint); margin-top: 3px; }
+
+    /* ── PAYSLIP ── */
+    .payslip-dl-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text-mid);
+      background: var(--white); cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .payslip-dl-btn:hover { border-color: var(--amber); color: var(--amber-dark); }
+    .payslip-dl-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+    /* ── ANNOUNCEMENTS ── */
+    .ann-list { display: flex; flex-direction: column; gap: 12px; }
+    .ann-item { padding: 16px; border-radius: 8px; border: 1px solid var(--border); }
+    .ann-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .ann-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .ann-body { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+    .ann-date { font-size: 11px; color: var(--text-faint); }
+
+    /* ── MOBILE ── */
+    .mobile-menu-btn {
+      display: none; position: fixed; top: 14px; left: 14px; z-index: 60;
+      background: var(--navy); border: none; border-radius: 8px;
+      padding: 8px; cursor: pointer;
+    }
+    .mobile-menu-btn svg { width: 20px; height: 20px; stroke: var(--white); fill: none; stroke-width: 2; display: block; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 45; }
 
     @media (max-width: 900px) {
       .portal-sidebar { transform: translateX(-240px); transition: transform 0.28s ease; }
       .portal-sidebar.open { transform: translateX(0); }
       .portal-main { margin-left: 0; }
       .dash-grid { grid-template-columns: 1fr 1fr; }
+      .section-2col { grid-template-columns: 1fr; }
       .portal-content { padding: 20px; }
-      .portal-topbar { padding: 16px 20px; }
+      .portal-topbar { padding: 14px 20px; padding-left: 56px; }
+      .mobile-menu-btn { display: block; }
+      .sidebar-overlay.open { display: block; }
+      .att-summary { grid-template-columns: 1fr 1fr; }
+      .details-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 560px) {
       .dash-grid { grid-template-columns: 1fr; }
@@ -160,58 +222,58 @@
 </head>
 <body>
 
+<button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Open menu">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <div class="portal-layout">
 
-  <!-- Sidebar -->
+  <!-- ── SIDEBAR ── -->
   <aside class="portal-sidebar" id="portalSidebar">
     <div class="portal-sidebar-header">
       <a href="../index.html" class="portal-logo-wrap">
         <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT">
       </a>
       <div class="portal-user-chip">
-        <div class="portal-avatar" id="user-avatar">—</div>
+        <div class="portal-avatar" id="user-avatar">R</div>
         <div>
-          <div class="portal-user-name" id="user-name">Loading…</div>
-          <div class="portal-user-role">VAGT Employee</div>
+          <div class="portal-user-name" id="user-name">Ravi Kumar</div>
+          <div class="portal-user-role">Security Officer</div>
         </div>
       </div>
     </div>
 
     <nav class="portal-nav">
       <div class="portal-nav-label">My Account</div>
-      <a href="employee-dashboard.html" class="portal-nav-link active">
+      <button class="portal-nav-link active" data-panel="panel-dashboard">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         Dashboard
-      </a>
-      <a href="#" class="portal-nav-link">
-        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      </button>
+      <button class="portal-nav-link" data-panel="panel-details">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         My Details
-        <span class="coming-tag">Soon</span>
-      </a>
+      </button>
 
       <div class="portal-nav-label">Work</div>
-      <a href="#" class="portal-nav-link">
+      <button class="portal-nav-link" data-panel="panel-schedule">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         My Schedule
-        <span class="coming-tag">Soon</span>
-      </a>
-      <a href="#" class="portal-nav-link">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </button>
+      <button class="portal-nav-link" data-panel="panel-payslips">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         Payslips
-        <span class="coming-tag">Soon</span>
-      </a>
-      <a href="#" class="portal-nav-link">
+      </button>
+      <button class="portal-nav-link" data-panel="panel-attendance">
         <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Attendance
-        <span class="coming-tag">Soon</span>
-      </a>
+      </button>
 
       <div class="portal-nav-label">Company</div>
-      <a href="#" class="portal-nav-link">
+      <button class="portal-nav-link" data-panel="panel-announcements">
         <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
         Announcements
-        <span class="coming-tag">Soon</span>
-      </a>
+      </button>
     </nav>
 
     <div class="portal-sidebar-footer">
@@ -222,100 +284,486 @@
     </div>
   </aside>
 
-  <!-- Main -->
+  <!-- ── MAIN ── -->
   <main class="portal-main">
     <div class="portal-topbar">
-      <h1>Good to see you, <span id="greeting-name">—</span></h1>
+      <h1 id="panel-title">Dashboard</h1>
       <span class="topbar-date" id="today-date"></span>
     </div>
 
     <div class="portal-content">
 
-      <div class="notice-bar">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p>Your full portal is being set up. Payslips, scheduling, and attendance tracking are coming soon. Your account manager will notify you when each feature goes live.</p>
-      </div>
-
-      <div class="dash-grid">
-        <div class="dash-card">
-          <div class="dash-card-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-          <div class="dash-card-label">Account</div>
-          <div class="dash-card-value" id="account-email" style="font-size:14px; word-break:break-all;">—</div>
-          <div class="dash-card-sub">Logged in employee</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="dash-card-label">Upcoming Shifts</div>
-          <div class="dash-card-value">—</div>
-          <div class="dash-card-sub">Scheduling coming soon</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="dash-card-label">Latest Payslip</div>
-          <div class="dash-card-value">—</div>
-          <div class="dash-card-sub">Payslips coming soon</div>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <div class="section-card-head">
-          <h2>Announcements</h2>
-        </div>
-        <div class="section-card-body">
-          <div class="coming-soon-block">
-            <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/></svg>
-            <p>No announcements yet.</p>
-            <span>Check back soon.</span>
+      <!-- ══ PANEL: DASHBOARD ══ -->
+      <div class="panel active" id="panel-dashboard">
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dash-card-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="dash-card-label">Attendance — March</div>
+            <div class="dash-card-value">92%</div>
+            <div class="dash-card-sub">23 of 25 working days present</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="dash-card-label">Next Shift</div>
+            <div class="dash-card-value" style="font-size:18px;">Tomorrow</div>
+            <div class="dash-card-sub">Morning · 06:00 – 14:00</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="dash-card-label">Last Payslip</div>
+            <div class="dash-card-value" style="font-size:18px;">₹18,500</div>
+            <div class="dash-card-sub">February 2026 · Credited</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="dash-card-label">With VAGT</div>
+            <div class="dash-card-value">394</div>
+            <div class="dash-card-sub">Days · Joined Apr 2025</div>
           </div>
         </div>
-      </div>
 
-      <div class="section-card">
-        <div class="section-card-head">
-          <h2>Need help?</h2>
-        </div>
-        <div class="section-card-body">
-          <p style="font-size:14px; color:var(--text-mid); line-height:1.7;">Contact your supervisor or reach the VAGT office directly.</p>
-          <p style="margin-top:12px; font-size:14px;">
-            <a href="tel:+919008977711" style="color:var(--amber); font-weight:600;">+91 90089 77711</a> &nbsp;·&nbsp;
-            <a href="mailto:info@vagtsecurityservices.com" style="color:var(--amber); font-weight:600;">info@vagtsecurityservices.com</a>
-          </p>
-        </div>
-      </div>
+        <div class="section-2col">
+          <div class="section-card" style="margin-bottom:0">
+            <div class="section-card-head"><h2>Upcoming Shifts</h2></div>
+            <div class="section-card-body">
+              <div class="shift-list">
+                <div class="shift-item">
+                  <div class="shift-dot morning"></div>
+                  <div style="flex:1">
+                    <div class="shift-label">Morning Shift</div>
+                    <div class="shift-site">Prestige Tech Park, Outer Ring Rd</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="shift-time">06:00 – 14:00</div>
+                    <div class="shift-date">Thu, 6 Mar</div>
+                  </div>
+                </div>
+                <div class="shift-item">
+                  <div class="shift-dot evening"></div>
+                  <div style="flex:1">
+                    <div class="shift-label">Evening Shift</div>
+                    <div class="shift-site">Prestige Tech Park, Outer Ring Rd</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="shift-time">14:00 – 22:00</div>
+                    <div class="shift-date">Sat, 8 Mar</div>
+                  </div>
+                </div>
+                <div class="shift-item">
+                  <div class="shift-dot night"></div>
+                  <div style="flex:1">
+                    <div class="shift-label">Night Shift</div>
+                    <div class="shift-site">Prestige Tech Park, Outer Ring Rd</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="shift-time">22:00 – 06:00</div>
+                    <div class="shift-date">Mon, 10 Mar</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-    </div>
+          <div class="section-card" style="margin-bottom:0">
+            <div class="section-card-head"><h2>Latest Announcements</h2></div>
+            <div class="section-card-body">
+              <div class="ann-list">
+                <div class="ann-item">
+                  <div class="ann-meta">
+                    <span class="badge badge-amber">Policy</span>
+                    <span class="ann-date">1 Mar 2026</span>
+                  </div>
+                  <div class="ann-title">Updated Uniform Standards — Effective 15 March</div>
+                  <div class="ann-body" style="margin-top:6px">New uniform guidelines are in effect from 15th March. Please report to your supervisor to collect updated ID cards and belt accessories.</div>
+                </div>
+                <div class="ann-item">
+                  <div class="ann-meta">
+                    <span class="badge badge-green">Safety</span>
+                    <span class="ann-date">22 Feb 2026</span>
+                  </div>
+                  <div class="ann-title">Fire Drill — All Sites, 10 March</div>
+                  <div class="ann-body" style="margin-top:6px">Mandatory fire drill scheduled for all deployment sites on 10 March. Attendance is compulsory. Site supervisors will brief teams.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card" style="margin-top:20px">
+          <div class="section-card-head"><h2>Need Help?</h2></div>
+          <div class="section-card-body">
+            <p style="font-size:13px; color:var(--text-mid); line-height:1.7; margin-bottom:12px">Contact your supervisor or reach the VAGT office directly.</p>
+            <p style="font-size:14px">
+              <a href="tel:+919008977711" style="color:var(--amber); font-weight:600;">+91 90089 77711</a>
+              &nbsp;·&nbsp;
+              <a href="mailto:hello@vagtservices.com" style="color:var(--amber); font-weight:600;">hello@vagtservices.com</a>
+            </p>
+          </div>
+        </div>
+      </div><!-- /panel-dashboard -->
+
+      <!-- ══ PANEL: MY DETAILS ══ -->
+      <div class="panel" id="panel-details">
+        <!-- TODO: Firebase — fetch employee doc from Firestore: db.collection('employees').doc(user.uid).get() -->
+        <div class="section-card">
+          <div class="section-card-head">
+            <h2>Personal Information</h2>
+            <span class="badge badge-grey">Read-only · Contact HR to update</span>
+          </div>
+          <div class="section-card-body">
+            <div class="details-grid">
+              <div class="field-group"><label>Full Name</label><div class="field-val">Ravi Kumar</div></div>
+              <div class="field-group"><label>Employee ID</label><div class="field-val">VAGT-2025-047</div></div>
+              <div class="field-group"><label>Date of Birth</label><div class="field-val">14 August 1992</div></div>
+              <div class="field-group"><label>Gender</label><div class="field-val">Male</div></div>
+              <div class="field-group"><label>Phone Number</label><div class="field-val">+91 98765 43210</div></div>
+              <div class="field-group"><label>Email Address</label><div class="field-val" id="details-email">ravi.kumar@vagtservices.com</div></div>
+              <div class="field-group"><label>Address</label><div class="field-val">42/3, Marathahalli, Bengaluru – 560037</div></div>
+              <div class="field-group"><label>Aadhaar Number</label><div class="field-val">XXXX XXXX 4821 <span style="font-size:11px;color:var(--text-faint)">(masked)</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-head"><h2>Emergency Contact</h2></div>
+          <div class="section-card-body">
+            <div class="details-grid">
+              <div class="field-group"><label>Name</label><div class="field-val">Sunita Kumar</div></div>
+              <div class="field-group"><label>Relationship</label><div class="field-val">Spouse</div></div>
+              <div class="field-group"><label>Phone</label><div class="field-val">+91 97654 32109</div></div>
+              <div class="field-group"><label>Address</label><div class="field-val">Same as above</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-head"><h2>Assignment Details</h2></div>
+          <div class="section-card-body">
+            <div class="details-grid">
+              <div class="field-group"><label>Designation</label><div class="field-val">Security Officer – Grade II</div></div>
+              <div class="field-group"><label>Department</label><div class="field-val">Manned Guarding</div></div>
+              <div class="field-group"><label>Deployment Site</label><div class="field-val">Prestige Tech Park, Outer Ring Road</div></div>
+              <div class="field-group"><label>Site Supervisor</label><div class="field-val">Suresh Nair · +91 98456 21230</div></div>
+              <div class="field-group"><label>Date of Joining</label><div class="field-val">3 April 2025</div></div>
+              <div class="field-group"><label>Contract Type</label><div class="field-val">Full-Time, Permanent</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-head"><h2>Bank & Salary Account</h2></div>
+          <div class="section-card-body">
+            <div class="details-grid">
+              <div class="field-group"><label>Bank Name</label><div class="field-val">State Bank of India</div></div>
+              <div class="field-group"><label>Account Number</label><div class="field-val">XXXX XXXX 7732 <span style="font-size:11px;color:var(--text-faint)">(masked)</span></div></div>
+              <div class="field-group"><label>IFSC Code</label><div class="field-val">SBIN0012345</div></div>
+              <div class="field-group"><label>PAN Number</label><div class="field-val">XXXXX3821X <span style="font-size:11px;color:var(--text-faint)">(masked)</span></div></div>
+            </div>
+            <p style="font-size:12px;color:var(--text-faint);margin-top:16px">To update bank details, contact HR at <a href="mailto:hello@vagtservices.com" style="color:var(--amber)">hello@vagtservices.com</a> with supporting documents.</p>
+          </div>
+        </div>
+      </div><!-- /panel-details -->
+
+      <!-- ══ PANEL: MY SCHEDULE ══ -->
+      <div class="panel" id="panel-schedule">
+        <!-- TODO: Firebase — fetch from Firestore: db.collection('schedules').where('employeeId','==',user.uid).orderBy('date') -->
+        <div class="section-card">
+          <div class="section-card-head">
+            <h2>This Week · 3 – 9 March 2026</h2>
+            <span class="badge badge-amber">3 shifts</span>
+          </div>
+          <div class="section-card-body">
+            <div class="shift-list">
+              <div class="shift-item" style="background:#fafafa">
+                <div class="shift-dot" style="background:#d1d5db"></div>
+                <div style="flex:1"><div class="shift-label" style="color:var(--text-faint)">Day Off</div><div class="shift-site" style="color:var(--text-faint)">—</div></div>
+                <div class="shift-date" style="color:var(--text-faint)">Mon, 3 Mar</div>
+              </div>
+              <div class="shift-item" style="background:#fafafa">
+                <div class="shift-dot" style="background:#d1d5db"></div>
+                <div style="flex:1"><div class="shift-label" style="color:var(--text-faint)">Day Off</div><div class="shift-site" style="color:var(--text-faint)">—</div></div>
+                <div class="shift-date" style="color:var(--text-faint)">Tue, 4 Mar</div>
+              </div>
+              <div class="shift-item">
+                <div class="shift-dot morning"></div>
+                <div style="flex:1"><div class="shift-label">Morning Shift</div><div class="shift-site">Prestige Tech Park, Outer Ring Rd</div></div>
+                <div style="text-align:right"><div class="shift-time">06:00 – 14:00</div><div class="shift-date">Wed, 5 Mar</div></div>
+              </div>
+              <div class="shift-item">
+                <div class="shift-dot morning"></div>
+                <div style="flex:1"><div class="shift-label">Morning Shift</div><div class="shift-site">Prestige Tech Park, Outer Ring Rd</div></div>
+                <div style="text-align:right"><div class="shift-time">06:00 – 14:00</div><div class="shift-date">Thu, 6 Mar</div></div>
+              </div>
+              <div class="shift-item" style="background:#fafafa">
+                <div class="shift-dot" style="background:#d1d5db"></div>
+                <div style="flex:1"><div class="shift-label" style="color:var(--text-faint)">Day Off</div><div class="shift-site" style="color:var(--text-faint)">—</div></div>
+                <div class="shift-date" style="color:var(--text-faint)">Fri, 7 Mar</div>
+              </div>
+              <div class="shift-item">
+                <div class="shift-dot evening"></div>
+                <div style="flex:1"><div class="shift-label">Evening Shift</div><div class="shift-site">Prestige Tech Park, Outer Ring Rd</div></div>
+                <div style="text-align:right"><div class="shift-time">14:00 – 22:00</div><div class="shift-date">Sat, 8 Mar</div></div>
+              </div>
+              <div class="shift-item" style="background:#fafafa">
+                <div class="shift-dot" style="background:#d1d5db"></div>
+                <div style="flex:1"><div class="shift-label" style="color:var(--text-faint)">Day Off</div><div class="shift-site" style="color:var(--text-faint)">—</div></div>
+                <div class="shift-date" style="color:var(--text-faint)">Sun, 9 Mar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-head"><h2>Upcoming — Next 2 Weeks</h2></div>
+          <div class="section-card-body">
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>Shift</th><th>Time</th><th>Site</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Thu, 6 Mar</td><td>Morning</td><td>06:00 – 14:00</td><td>Prestige Tech Park</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+                <tr><td>Sat, 8 Mar</td><td>Evening</td><td>14:00 – 22:00</td><td>Prestige Tech Park</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+                <tr><td>Mon, 10 Mar</td><td>Night</td><td>22:00 – 06:00</td><td>Prestige Tech Park</td><td><span class="badge badge-amber">Upcoming</span></td></tr>
+                <tr><td>Wed, 12 Mar</td><td>Morning</td><td>06:00 – 14:00</td><td>Prestige Tech Park</td><td><span class="badge badge-grey">Scheduled</span></td></tr>
+                <tr><td>Thu, 13 Mar</td><td>Morning</td><td>06:00 – 14:00</td><td>Prestige Tech Park</td><td><span class="badge badge-grey">Scheduled</span></td></tr>
+                <tr><td>Sat, 15 Mar</td><td>Evening</td><td>14:00 – 22:00</td><td>Prestige Tech Park</td><td><span class="badge badge-grey">Scheduled</span></td></tr>
+                <tr><td>Mon, 17 Mar</td><td>Night</td><td>22:00 – 06:00</td><td>Prestige Tech Park</td><td><span class="badge badge-grey">Scheduled</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /panel-schedule -->
+
+      <!-- ══ PANEL: PAYSLIPS ══ -->
+      <div class="panel" id="panel-payslips">
+        <!-- TODO: Firebase — fetch from Firestore: db.collection('payslips').where('employeeId','==',user.uid).orderBy('month','desc') -->
+        <div class="section-card">
+          <div class="section-card-head">
+            <h2>Payslips — FY 2025–26</h2>
+            <span class="badge badge-green">All credited</span>
+          </div>
+          <div class="section-card-body" style="padding:0">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Month</th><th>Basic Pay</th><th>Allowances</th><th>Overtime</th><th>Deductions</th><th>Net Pay</th><th>Status</th><th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>February 2026</td><td>₹15,000</td><td>₹2,500</td><td>₹1,800</td><td>₹800</td>
+                  <td><strong>₹18,500</strong></td>
+                  <td><span class="badge badge-green">Credited</span></td>
+                  <td><button class="payslip-dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></td>
+                </tr>
+                <tr>
+                  <td>January 2026</td><td>₹15,000</td><td>₹2,500</td><td>₹900</td><td>₹800</td>
+                  <td><strong>₹17,600</strong></td>
+                  <td><span class="badge badge-green">Credited</span></td>
+                  <td><button class="payslip-dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></td>
+                </tr>
+                <tr>
+                  <td>December 2025</td><td>₹15,000</td><td>₹2,500</td><td>₹2,400</td><td>₹800</td>
+                  <td><strong>₹19,100</strong></td>
+                  <td><span class="badge badge-green">Credited</span></td>
+                  <td><button class="payslip-dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></td>
+                </tr>
+                <tr>
+                  <td>November 2025</td><td>₹15,000</td><td>₹2,500</td><td>₹600</td><td>₹800</td>
+                  <td><strong>₹17,300</strong></td>
+                  <td><span class="badge badge-green">Credited</span></td>
+                  <td><button class="payslip-dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></td>
+                </tr>
+                <tr>
+                  <td>October 2025</td><td>₹15,000</td><td>₹2,500</td><td>₹0</td><td>₹800</td>
+                  <td><strong>₹16,700</strong></td>
+                  <td><span class="badge badge-green">Credited</span></td>
+                  <td><button class="payslip-dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></td>
+                </tr>
+                <tr>
+                  <td>September 2025</td><td>₹15,000</td><td>₹2,500</td><td>₹1,200</td><td>₹800</td>
+                  <td><strong>₹17,900</strong></td>
+                  <td><span class="badge badge-green">Credited</span></td>
+                  <td><button class="payslip-dl-btn"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--text-faint);padding:0 4px">Download buttons will generate PDF payslips once the payroll module is fully activated. Contact HR for older payslips.</p>
+      </div><!-- /panel-payslips -->
+
+      <!-- ══ PANEL: ATTENDANCE ══ -->
+      <div class="panel" id="panel-attendance">
+        <!-- TODO: Firebase — fetch from Firestore: db.collection('attendance').where('employeeId','==',user.uid).where('month','==','2026-03').get() -->
+        <div class="att-summary">
+          <div class="att-stat"><div class="att-stat-val" style="color:var(--green)">23</div><div class="att-stat-lbl">Present</div></div>
+          <div class="att-stat"><div class="att-stat-val" style="color:var(--red)">2</div><div class="att-stat-lbl">Absent</div></div>
+          <div class="att-stat"><div class="att-stat-val" style="color:var(--amber-dark)">0</div><div class="att-stat-lbl">Leave Taken</div></div>
+          <div class="att-stat"><div class="att-stat-val">14</div><div class="att-stat-lbl">OT Hours</div></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-head">
+            <h2>March 2026 — Attendance Calendar</h2>
+            <span class="badge badge-green">92% present</span>
+          </div>
+          <div class="section-card-body">
+            <div class="att-calendar">
+              <div class="att-day-name">Sun</div><div class="att-day-name">Mon</div><div class="att-day-name">Tue</div>
+              <div class="att-day-name">Wed</div><div class="att-day-name">Thu</div><div class="att-day-name">Fri</div><div class="att-day-name">Sat</div>
+              <!-- March 2026 starts on Sunday -->
+              <div class="att-day present">1</div><div class="att-day absent">2</div><div class="att-day present">3</div>
+              <div class="att-day present">4</div><div class="att-day present today">5</div><div class="att-day future">6</div><div class="att-day future">7</div>
+              <div class="att-day future">8</div><div class="att-day future">9</div><div class="att-day future">10</div>
+              <div class="att-day future">11</div><div class="att-day future">12</div><div class="att-day future">13</div><div class="att-day future">14</div>
+              <div class="att-day future">15</div><div class="att-day future">16</div><div class="att-day future">17</div>
+              <div class="att-day future">18</div><div class="att-day future">19</div><div class="att-day future">20</div><div class="att-day future">21</div>
+              <div class="att-day future">22</div><div class="att-day future">23</div><div class="att-day future">24</div>
+              <div class="att-day future">25</div><div class="att-day future">26</div><div class="att-day future">27</div><div class="att-day future">28</div>
+              <div class="att-day future">29</div><div class="att-day future">30</div><div class="att-day future">31</div>
+            </div>
+            <div class="att-legend">
+              <div class="att-legend-item"><div class="att-legend-dot" style="background:var(--green-soft);border:1px solid #86efac"></div>Present</div>
+              <div class="att-legend-item"><div class="att-legend-dot" style="background:rgba(230,57,70,0.08);border:1px solid #fca5a5"></div>Absent</div>
+              <div class="att-legend-item"><div class="att-legend-dot" style="background:rgba(245,196,0,0.12);border:1px solid #fcd34d"></div>Leave</div>
+              <div class="att-legend-item"><div class="att-legend-dot" style="background:#f9fafb;border:1px solid #e5e7eb"></div>Upcoming</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-head"><h2>Attendance Log — March 2026</h2></div>
+          <div class="section-card-body" style="padding:0">
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>Check-in</th><th>Check-out</th><th>Hours</th><th>OT</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Wed, 4 Mar</td><td>05:52</td><td>14:07</td><td>8h 15m</td><td>15m</td><td><span class="badge badge-green">Present</span></td></tr>
+                <tr><td>Tue, 3 Mar</td><td>05:58</td><td>14:02</td><td>8h 04m</td><td>—</td><td><span class="badge badge-green">Present</span></td></tr>
+                <tr><td>Mon, 2 Mar</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge badge-red">Absent</span></td></tr>
+                <tr><td>Sun, 1 Mar</td><td>06:01</td><td>14:05</td><td>8h 04m</td><td>—</td><td><span class="badge badge-green">Present</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /panel-attendance -->
+
+      <!-- ══ PANEL: ANNOUNCEMENTS ══ -->
+      <div class="panel" id="panel-announcements">
+        <!-- TODO: Firebase — fetch from Firestore: db.collection('announcements').orderBy('date','desc').limit(20).get() -->
+        <div class="ann-list">
+          <div class="ann-item section-card" style="padding:0;overflow:hidden">
+            <div style="padding:18px 22px">
+              <div class="ann-meta">
+                <span class="badge badge-amber">Policy</span>
+                <span class="ann-date">1 March 2026</span>
+              </div>
+              <div class="ann-title">Updated Uniform Standards — Effective 15 March 2026</div>
+              <div class="ann-body" style="margin-top:8px">New uniform guidelines are in effect from 15th March. All guards must report to their site supervisor to collect updated ID cards, new belt accessories, and the revised VAGT badge placement guide. Non-compliance from 15th March will be noted in your attendance record. Questions? Contact your supervisor or HR directly.</div>
+            </div>
+          </div>
+          <div class="ann-item section-card" style="padding:0;overflow:hidden">
+            <div style="padding:18px 22px">
+              <div class="ann-meta">
+                <span class="badge badge-green">Safety</span>
+                <span class="ann-date">22 February 2026</span>
+              </div>
+              <div class="ann-title">Mandatory Fire Drill — All Deployment Sites, 10 March 2026</div>
+              <div class="ann-body" style="margin-top:8px">A compulsory fire drill is scheduled for all VAGT deployment sites on 10th March 2026. Attendance is mandatory. Site supervisors will brief their teams 30 minutes before the drill. Please ensure you are familiar with the emergency exit routes at your deployment site before the drill date.</div>
+            </div>
+          </div>
+          <div class="ann-item section-card" style="padding:0;overflow:hidden">
+            <div style="padding:18px 22px">
+              <div class="ann-meta">
+                <span class="badge badge-grey">General</span>
+                <span class="ann-date">10 February 2026</span>
+              </div>
+              <div class="ann-title">Salary Revision — Effective April 2026</div>
+              <div class="ann-body" style="margin-top:8px">VAGT is pleased to announce a performance-linked salary revision for all permanent employees effective 1st April 2026. Revised salary letters will be shared via this portal by 20th March. The increment range is 6–12% based on your annual performance review. Your supervisor will discuss your individual assessment with you before 15th March.</div>
+            </div>
+          </div>
+          <div class="ann-item section-card" style="padding:0;overflow:hidden">
+            <div style="padding:18px 22px">
+              <div class="ann-meta">
+                <span class="badge badge-amber">Policy</span>
+                <span class="ann-date">1 February 2026</span>
+              </div>
+              <div class="ann-title">Leave Application Process Update</div>
+              <div class="ann-body" style="margin-top:8px">From March 2026, all leave applications must be submitted through this portal under the My Schedule section. Leave requests submitted via WhatsApp or phone will not be processed. Ensure you apply at least 72 hours in advance for planned leave. Emergency leave requests should be communicated to your supervisor directly and followed up with a portal application within 24 hours.</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /panel-announcements -->
+
+    </div><!-- /portal-content -->
   </main>
 </div>
 
-<!-- Firebase -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  // ── TAB SWITCHING ──
+  const navLinks = document.querySelectorAll('.portal-nav-link[data-panel]');
+  const panels = document.querySelectorAll('.panel');
+  const panelTitle = document.getElementById('panel-title');
+  const titleMap = {
+    'panel-dashboard': 'Dashboard',
+    'panel-details': 'My Details',
+    'panel-schedule': 'My Schedule',
+    'panel-payslips': 'Payslips',
+    'panel-attendance': 'Attendance',
+    'panel-announcements': 'Announcements',
+  };
 
-  import { firebaseConfig } from "../assets/js/firebase-config.js";
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-
-  onAuthStateChanged(auth, user => {
-    if (!user) {
-      window.location.href = 'employee-portal.html';
-      return;
-    }
-    const name = user.displayName || user.email.split('@')[0];
-    const initials = name.charAt(0).toUpperCase();
-    document.getElementById('user-avatar').textContent = initials;
-    document.getElementById('user-name').textContent = name;
-    document.getElementById('greeting-name').textContent = name;
-    document.getElementById('account-email').textContent = user.email;
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const target = link.dataset.panel;
+      navLinks.forEach(l => l.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      link.classList.add('active');
+      document.getElementById(target).classList.add('active');
+      panelTitle.textContent = titleMap[target] || 'Dashboard';
+      // close mobile sidebar
+      document.getElementById('portalSidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    });
   });
 
-  // Date
-  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  // ── MOBILE SIDEBAR ──
+  document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    document.getElementById('portalSidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  });
+  document.getElementById('sidebarOverlay').addEventListener('click', () => {
+    document.getElementById('portalSidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('open');
+  });
 
-  // Sign out
-  document.getElementById('signout-btn').addEventListener('click', async () => {
-    await signOut(auth);
+  // ── DATE ──
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // ── FIREBASE AUTH (swap mock data below once Firebase is configured) ──
+  // TODO: Uncomment when Firebase project is set up:
+  //
+  // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  // import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  // import { firebaseConfig } from "../assets/js/firebase-config.js";
+  //
+  // const app = initializeApp(firebaseConfig);
+  // const auth = getAuth(app);
+  //
+  // onAuthStateChanged(auth, user => {
+  //   if (!user) { window.location.href = 'employee-portal.html'; return; }
+  //   const name = user.displayName || user.email.split('@')[0];
+  //   document.getElementById('user-avatar').textContent = name.charAt(0).toUpperCase();
+  //   document.getElementById('user-name').textContent = name;
+  //   document.getElementById('details-email').textContent = user.email;
+  // });
+  //
+  // document.getElementById('signout-btn').addEventListener('click', async () => {
+  //   await signOut(auth);
+  //   window.location.href = 'employee-portal.html';
+  // });
+
+  // Mock sign out (remove once Firebase is live)
+  document.getElementById('signout-btn').addEventListener('click', () => {
     window.location.href = 'employee-portal.html';
   });
 </script>
