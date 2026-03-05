@@ -1,880 +1,1119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
   <title>Client Portal | VAGT Security Services</title>
-  <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    /* ── Layout ── */
-    body { background: var(--warm-white); margin: 0; }
-    .portal-layout { display: flex; min-height: 100vh; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    /* ── Sidebar ── */
-    .portal-sidebar {
-      width: 240px; min-width: 240px;
-      background: var(--navy);
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; bottom: 0;
-      z-index: 50; overflow-y: auto;
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
     }
-    .portal-sidebar-header {
-      padding: 22px 20px 18px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-    .portal-logo-wrap {
-      width: 48px; height: 48px;
-      background: transparent; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 14px; overflow: hidden;
-    }
-    .portal-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
-    .portal-user-chip { display: flex; align-items: center; gap: 10px; }
-    .portal-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: rgba(245,196,0,0.15);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: var(--amber); flex-shrink: 0;
-    }
-    .portal-user-name { font-size: 13px; font-weight: 600; color: var(--white); }
-    .portal-user-role { font-size: 11px; color: rgba(255,255,255,0.35); }
 
-    .portal-nav { flex: 1; padding: 12px 0; }
-    .portal-nav-label {
-      font-size: 9px; font-weight: 700;
-      color: rgba(245,196,0,0.5);
-      text-transform: uppercase; letter-spacing: 2px;
-      padding: 10px 20px 4px;
+    /* Layout Structure */
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
     }
-    .portal-nav-btn {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 20px;
-      font-size: 13px; font-weight: 500;
-      color: rgba(255,255,255,0.55);
-      transition: background 0.15s, color 0.15s;
-      position: relative; cursor: pointer;
-      background: none; border: none; width: 100%;
-      text-align: left; font-family: var(--font);
-    }
-    .portal-nav-btn:hover { background: rgba(255,255,255,0.05); color: var(--white); }
-    .portal-nav-btn.active { color: var(--amber); background: rgba(245,196,0,0.07); }
-    .portal-nav-btn.active::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber); border-radius: 0 2px 2px 0; }
-    .portal-nav-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; opacity: 0.65; }
-    .portal-nav-btn.active svg, .portal-nav-btn:hover svg { opacity: 1; }
 
-    .portal-sidebar-footer {
-      padding: 14px 20px 18px;
-      border-top: 1px solid rgba(255,255,255,0.06);
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background-color: #0b1120;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+      overflow-y: auto;
     }
-    .portal-footer-link {
-      font-size: 11px; color: rgba(255,255,255,0.25);
-      text-decoration: none; display: block; margin-bottom: 12px;
-    }
-    .portal-footer-link:hover { color: rgba(255,255,255,0.5); }
-    .btn-signout {
-      width: 100%; padding: 9px; font-size: 12px; font-weight: 600;
-      color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);
-      border: none; border-radius: 6px; cursor: pointer; font-family: var(--font);
-      transition: color 0.2s, background 0.2s; display: flex; align-items: center; gap: 8px; justify-content: center;
-    }
-    .btn-signout:hover { color: var(--white); background: rgba(255,255,255,0.1); }
-    .btn-signout svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-    /* ── Main ── */
-    .portal-main { margin-left: 240px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
-    .portal-topbar {
-      background: var(--white);
-      border-bottom: 1px solid var(--border);
-      padding: 16px 36px;
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; z-index: 30;
+    .sidebar-logo {
+      padding: 24px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .topbar-left { display: flex; align-items: center; gap: 14px; }
-    .btn-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--text); }
-    .btn-hamburger svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; }
-    .portal-topbar h1 { font-size: 19px; font-weight: 700; color: var(--text); }
-    .topbar-date { font-size: 13px; color: var(--text-faint); }
 
-    .portal-content { padding: 30px 36px; flex: 1; }
+    .sidebar-logo img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
 
-    /* ── Panels ── */
-    .panel { display: none; }
-    .panel.active { display: block; }
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+    }
 
-    /* ── KPI Cards ── */
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px; }
-    .kpi-card {
-      background: var(--white); border-radius: 10px;
-      padding: 22px 20px; border: 1px solid var(--border);
+    .nav-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+      user-select: none;
     }
-    .kpi-icon {
-      width: 38px; height: 38px; border-radius: 8px;
-      background: var(--amber-soft); display: flex; align-items: center; justify-content: center;
-      margin-bottom: 12px;
-    }
-    .kpi-icon svg { width: 19px; height: 19px; stroke: var(--amber-dark); fill: none; stroke-width: 1.8; }
-    .kpi-icon.red { background: rgba(230,57,70,0.1); }
-    .kpi-icon.red svg { stroke: var(--red); }
-    .kpi-icon.green { background: rgba(34,197,94,0.1); }
-    .kpi-icon.green svg { stroke: #16a34a; }
-    .kpi-icon.blue { background: rgba(59,130,246,0.1); }
-    .kpi-icon.blue svg { stroke: #2563eb; }
-    .kpi-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
-    .kpi-value { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
-    .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
 
-    /* ── Section card ── */
-    .sec-card {
-      background: var(--white); border-radius: 10px;
-      border: 1px solid var(--border); margin-bottom: 22px; overflow: hidden;
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: white;
     }
-    .sec-head {
-      padding: 16px 22px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .sec-head h2 { font-size: 14px; font-weight: 700; color: var(--text); }
-    .sec-head span { font-size: 12px; color: var(--text-faint); }
-    .sec-body { padding: 22px; }
-    .sec-body-flush { padding: 0; }
 
-    /* ── Table ── */
-    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .data-table th { padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-faint); background: var(--warm-white); border-bottom: 1px solid var(--border); white-space: nowrap; }
-    .data-table td { padding: 12px 14px; color: var(--text-mid); border-bottom: 1px solid rgba(0,0,0,0.04); }
-    .data-table tr:last-child td { border-bottom: none; }
-    .data-table tr:hover td { background: rgba(245,196,0,0.03); }
+    .nav-item.active {
+      background-color: rgba(245, 196, 0, 0.1);
+      color: #f5c400;
+      border-left-color: #f5c400;
+    }
 
-    /* ── Badges ── */
-    .badge {
-      display: inline-flex; align-items: center; gap: 4px;
-      font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px;
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .badge::before { content:''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .badge-green { background: rgba(34,197,94,0.12); color: #16a34a; }
-    .badge-green::before { background: #16a34a; }
-    .badge-amber { background: rgba(245,196,0,0.15); color: #92700a; }
-    .badge-amber::before { background: var(--amber); }
-    .badge-red { background: rgba(230,57,70,0.12); color: #c0392b; }
-    .badge-red::before { background: var(--red); }
-    .badge-blue { background: rgba(59,130,246,0.12); color: #1d4ed8; }
-    .badge-blue::before { background: #3b82f6; }
-    .badge-grey { background: rgba(0,0,0,0.06); color: var(--text-faint); }
-    .badge-grey::before { background: #9ca3af; }
 
-    /* ── Activity feed ── */
-    .activity-list { display: flex; flex-direction: column; gap: 0; }
-    .activity-item {
-      display: flex; gap: 14px; align-items: flex-start;
-      padding: 14px 22px; border-bottom: 1px solid rgba(0,0,0,0.04);
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .activity-item:last-child { border-bottom: none; }
-    .activity-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px;
-    }
-    .activity-dot.green { background: #16a34a; }
-    .activity-dot.amber { background: var(--amber); }
-    .activity-dot.red { background: var(--red); }
-    .activity-dot.grey { background: #9ca3af; }
-    .activity-body p { font-size: 13px; color: var(--text-mid); margin: 0 0 2px; line-height: 1.4; }
-    .activity-body span { font-size: 11px; color: var(--text-faint); }
 
-    /* ── Guard shift card ── */
-    .shift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-    .shift-card {
-      background: var(--warm-white); border: 1px solid var(--border);
-      border-radius: 8px; padding: 18px;
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f5c400;
+      color: #0b1120;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
     }
-    .shift-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-    .shift-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: rgba(245,196,0,0.15);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 700; color: var(--amber); flex-shrink: 0;
-    }
-    .shift-name { font-size: 13px; font-weight: 600; color: var(--text); }
-    .shift-id { font-size: 11px; color: var(--text-faint); }
-    .shift-rows { display: flex; flex-direction: column; gap: 7px; }
-    .shift-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-mid); }
-    .shift-row svg { width: 13px; height: 13px; stroke: var(--text-faint); fill: none; stroke-width: 2; flex-shrink: 0; }
 
-    /* ── Incident rows ── */
-    .incident-row { display: flex; gap: 14px; padding: 16px 22px; border-bottom: 1px solid rgba(0,0,0,0.04); align-items: flex-start; }
-    .incident-row:last-child { border-bottom: none; }
-    .incident-sev {
-      width: 6px; min-width: 6px; border-radius: 3px; margin-top: 4px;
-      align-self: stretch;
+    .user-info {
+      flex: 1;
+      min-width: 0;
     }
-    .incident-sev.high { background: var(--red); }
-    .incident-sev.medium { background: var(--amber); }
-    .incident-sev.low { background: #16a34a; }
-    .incident-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-    .incident-meta { font-size: 11px; color: var(--text-faint); }
-    .incident-tags { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
 
-    /* ── Surveillance log ── */
-    .surv-entry {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 12px 22px; border-bottom: 1px solid rgba(0,0,0,0.04);
+    .user-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .surv-entry:last-child { border-bottom: none; }
-    .surv-time { font-size: 12px; font-weight: 700; color: var(--text-mid); min-width: 52px; margin-top: 2px; }
-    .surv-msg { font-size: 13px; color: var(--text-mid); line-height: 1.4; }
-    .surv-tag { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 7px; border-radius: 4px; margin-top: 4px; display: inline-block; }
-    .surv-tag.patrol { background: rgba(59,130,246,0.1); color: #1d4ed8; }
-    .surv-tag.access { background: rgba(245,196,0,0.15); color: #92700a; }
-    .surv-tag.cctv { background: rgba(139,92,246,0.1); color: #6d28d9; }
-    .surv-tag.alert { background: rgba(230,57,70,0.1); color: #c0392b; }
-    .surv-tag.routine { background: rgba(34,197,94,0.1); color: #16a34a; }
 
-    /* ── Invoice ── */
-    .invoice-summary {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;
+    .user-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 2px;
     }
-    .inv-stat {
-      background: var(--warm-white); border: 1px solid var(--border);
-      border-radius: 8px; padding: 16px 18px;
-    }
-    .inv-stat-label { font-size: 11px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-    .inv-stat-val { font-size: 20px; font-weight: 800; color: var(--text); }
-    .btn-dl {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: var(--warm-white); border: 1px solid var(--border);
-      color: var(--text-mid); font-size: 11px; font-weight: 600;
-      padding: 5px 11px; border-radius: 5px; cursor: pointer; transition: border-color 0.15s, color 0.15s;
-      font-family: var(--font);
-    }
-    .btn-dl:hover { border-color: var(--amber); color: var(--amber-dark); }
-    .btn-dl svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2.2; }
 
-    /* ── Contact bar ── */
-    .contact-row { display: flex; gap: 14px; flex-wrap: wrap; }
-    .contact-card {
-      flex: 1; min-width: 170px;
-      background: var(--warm-white); border-radius: 8px; padding: 16px 18px;
-      border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px;
+    .signout-btn {
+      width: 100%;
+      padding: 8px 12px;
+      background-color: rgba(245, 196, 0, 0.1);
+      color: #f5c400;
+      border: 1px solid #f5c400;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
     }
-    .contact-card-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-faint); }
-    .contact-card a { font-size: 13px; font-weight: 600; color: var(--amber); text-decoration: none; }
-    .contact-card a:hover { text-decoration: underline; }
 
-    /* ── Contract info strip ── */
+    .signout-btn:hover {
+      background-color: #f5c400;
+      color: #0b1120;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-bar {
+      background-color: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .top-bar h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0b1120;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: #0b1120;
+      cursor: pointer;
+      font-size: 24px;
+    }
+
+    .panel-content {
+      flex: 1;
+      padding: 32px;
+      display: none;
+    }
+
+    .panel-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Contract Strip */
     .contract-strip {
-      background: rgba(245,196,0,0.07); border: 1px solid rgba(245,196,0,0.2);
-      border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;
-      display: flex; gap: 32px; flex-wrap: wrap;
+      background-color: #fffbeb;
+      border-bottom: 2px solid #f5c400;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 32px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
     }
-    .contract-item { display: flex; flex-direction: column; gap: 2px; }
-    .contract-item-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(146,112,10,0.7); }
-    .contract-item-val { font-size: 13px; font-weight: 600; color: var(--text); }
 
-    /* ── Overlay for mobile sidebar ── */
-    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 40; }
-    .sidebar-overlay.show { display: block; }
-
-    /* ── Responsive ── */
-    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 900px) {
-      .portal-sidebar { transform: translateX(-240px); transition: transform 0.28s cubic-bezier(.4,0,.2,1); }
-      .portal-sidebar.open { transform: translateX(0); }
-      .portal-main { margin-left: 0; }
-      .portal-content { padding: 20px; }
-      .portal-topbar { padding: 14px 20px; }
-      .btn-hamburger { display: flex; }
+    .contract-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    @media (max-width: 560px) {
-      .kpi-grid { grid-template-columns: 1fr 1fr; }
-      .shift-grid { grid-template-columns: 1fr; }
-      .invoice-summary { grid-template-columns: 1fr; }
+
+    .contract-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
+      letter-spacing: 0.5px;
+    }
+
+    .contract-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      padding: 6px 12px;
+      background-color: #dcfce7;
+      color: #166534;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: currentColor;
+    }
+
+    .account-manager-info {
+      font-size: 13px;
+      color: #4b5563;
+      line-height: 1.5;
+    }
+
+    .account-manager-email {
+      color: #0b1120;
+      font-weight: 600;
+    }
+
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-card {
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .kpi-card:hover {
+      border-color: #d1d5db;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0b1120;
+      margin-bottom: 8px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
+      letter-spacing: 0.5px;
+    }
+
+    /* Section Card */
+    .section-card {
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    .phase2-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: #f3f4f6;
+      color: #6b7280;
+      padding: 4px 10px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Activity Feed */
+    .activity-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .activity-item {
+      border-left: 3px solid #f5c400;
+      padding-left: 16px;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .activity-action {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .activity-time {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* Table Styles */
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background-color: #f9fafb;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 13px;
+      color: #4b5563;
+    }
+
+    tbody tr:hover {
+      background-color: #f9fafb;
+    }
+
+    .badge-pending {
+      display: inline-flex;
+      align-items: center;
+      background-color: #fef3c7;
+      color: #92400e;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-active {
+      display: inline-flex;
+      align-items: center;
+      background-color: #dcfce7;
+      color: #166534;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* Mini Stats Row */
+    .mini-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .mini-stat {
+      text-align: center;
+    }
+
+    .mini-stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0b1120;
+      margin-bottom: 4px;
+    }
+
+    .mini-stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
+      letter-spacing: 0.5px;
+    }
+
+    /* Two Column Layout */
+    .two-column {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .column-card {
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .column-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 16px;
+    }
+
+    .column-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .column-stat {
+      text-align: center;
+    }
+
+    .column-stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #0b1120;
+      margin-bottom: 4px;
+    }
+
+    .column-stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #6b7280;
+      letter-spacing: 0.3px;
+    }
+
+    .column-note {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.5;
+    }
+
+    /* Download Card */
+    .download-card {
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .download-info h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .download-month {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .download-btn {
+      padding: 10px 20px;
+      background-color: #f5c400;
+      color: #0b1120;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .download-btn:hover:not(:disabled) {
+      background-color: #f0bc00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(245, 196, 0, 0.3);
+    }
+
+    .download-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Note Text */
+    .note-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 16px;
+      padding: 12px;
+      background-color: #f9fafb;
+      border-left: 3px solid #d1d5db;
+      border-radius: 4px;
+      line-height: 1.5;
+    }
+
+    /* Contact Card */
+    .contact-card {
+      background-color: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      margin-top: 32px;
+    }
+
+    .contact-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 16px;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #4b5563;
+    }
+
+    .contact-item a {
+      color: #0b1120;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .contact-item a:hover {
+      color: #f5c400;
+    }
+
+    .contact-icon {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f5c400;
+      font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-nav {
+        display: none;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 8px 0;
+      }
+
+      .sidebar-nav.mobile-open {
+        display: flex;
+      }
+
+      .nav-item {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+        text-align: center;
+        border-left: none;
+        border-bottom: 2px solid transparent;
+      }
+
+      .nav-item.active {
+        border-left: none;
+        border-bottom-color: #f5c400;
+        background-color: transparent;
+      }
+
+      .sidebar-footer {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .top-bar {
+        padding: 16px 20px;
+      }
+
+      .top-bar h1 {
+        font-size: 20px;
+      }
+
+      .panel-content {
+        padding: 20px;
+      }
+
+      .contract-strip {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        margin-bottom: 20px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .two-column {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .download-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .top-bar {
+        padding: 12px 16px;
+      }
+
+      .panel-content {
+        padding: 16px;
+      }
+
+      .section-card {
+        padding: 16px;
+      }
+
+      .contact-card {
+        padding: 16px;
+      }
     }
   </style>
 </head>
 <body>
+  <script type="module">
+    import { requireAuth, signOutUser } from "../assets/js/vagt-auth.js";
+    const { user, profile } = await requireAuth('client', 'client-portal.html');
+    const initials = profile.clientName.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+    document.getElementById('user-avatar').textContent = initials;
+    document.getElementById('user-name').textContent = profile.clientName;
+    document.getElementById('signout-btn').addEventListener('click', () => signOutUser('client-portal.html'));
+  </script>
 
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="../assets/images/logos/vagt-logo.png" alt="VAGT Logo">
+      </div>
 
-<div class="portal-layout">
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="nav-item active" data-panel="overview">Overview</div>
+        <div class="nav-item" data-panel="deployment">Guard Deployment</div>
+        <div class="nav-item" data-panel="reports">Reports</div>
+        <div class="nav-item" data-panel="billing">Billing</div>
+      </nav>
 
-  <!-- ══ SIDEBAR ══ -->
-  <aside class="portal-sidebar" id="portalSidebar">
-    <div class="portal-sidebar-header">
-      <a href="../index.html" class="portal-logo-wrap">
-        <img src="../assets/images/logos/vagt-logo.png" alt="VAGT Security Services">
-      </a>
-      <div class="portal-user-chip">
-        <div class="portal-avatar" id="user-avatar">PT</div>
-        <div>
-          <div class="portal-user-name" id="user-name">Prestige Tech</div>
-          <div class="portal-user-role">VAGT Client Portal</div>
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="user-avatar" id="user-avatar">--</div>
+          <div class="user-info">
+            <div class="user-name" id="user-name">Client Name</div>
+            <div class="user-label">Client</div>
+          </div>
         </div>
+        <button class="signout-btn" id="signout-btn">Sign Out</button>
       </div>
-    </div>
+    </aside>
 
-    <nav class="portal-nav">
-      <div class="portal-nav-label">Overview</div>
-      <button class="portal-nav-btn active" data-panel="panel-overview">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-        Dashboard
-      </button>
-
-      <div class="portal-nav-label">Security</div>
-      <button class="portal-nav-btn" data-panel="panel-deployment">
-        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Guard Deployment
-      </button>
-      <button class="portal-nav-btn" data-panel="panel-incidents">
-        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Incident Reports
-      </button>
-      <button class="portal-nav-btn" data-panel="panel-surveillance">
-        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        Surveillance Logs
-      </button>
-
-      <div class="portal-nav-label">Billing</div>
-      <button class="portal-nav-btn" data-panel="panel-invoices">
-        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-        Invoices
-      </button>
-    </nav>
-
-    <div class="portal-sidebar-footer">
-      <a href="contact.html" class="portal-footer-link">Need help? Contact VAGT →</a>
-      <button class="btn-signout" id="signout-btn">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign out
-      </button>
-    </div>
-  </aside>
-
-  <!-- ══ MAIN ══ -->
-  <main class="portal-main">
-    <div class="portal-topbar">
-      <div class="topbar-left">
-        <button class="btn-hamburger" id="hamburgerBtn" aria-label="Open menu">
-          <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-        <h1 id="topbar-title">Dashboard</h1>
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <div class="top-bar">
+        <h1 id="panel-title">Overview</h1>
+        <button class="menu-toggle" id="menu-toggle">☰</button>
       </div>
-      <span class="topbar-date" id="today-date"></span>
-    </div>
 
-    <div class="portal-content">
-
-      <!-- ══════════════════════════════════════
-           PANEL 1 — OVERVIEW / DASHBOARD
-      ══════════════════════════════════════ -->
-      <div class="panel active" id="panel-overview">
-
+      <!-- PANEL 1: Overview -->
+      <div class="panel-content active" id="overview">
+        <!-- Contract Strip -->
         <div class="contract-strip">
           <div class="contract-item">
-            <div class="contract-item-label">Client</div>
-            <div class="contract-item-val">Prestige Tech Park</div>
+            <div class="contract-label">Client Name</div>
+            <div class="contract-value" id="contract-client">—</div>
           </div>
           <div class="contract-item">
-            <div class="contract-item-label">Contract No.</div>
-            <div class="contract-item-val">VAGT-C-2024-008</div>
+            <div class="contract-label">Contract Number</div>
+            <div class="contract-value" id="contract-no">—</div>
           </div>
           <div class="contract-item">
-            <div class="contract-item-label">Contract Period</div>
-            <div class="contract-item-val">01 Jan 2024 – 31 Dec 2026</div>
+            <div class="contract-label">Status</div>
+            <div class="status-badge">
+              <div class="status-dot"></div>
+              Active
+            </div>
           </div>
           <div class="contract-item">
-            <div class="contract-item-label">Account Manager</div>
-            <div class="contract-item-val">Nikhil Jha · +91 90089 77711</div>
-          </div>
-          <div class="contract-item">
-            <div class="contract-item-label">Status</div>
-            <div class="contract-item-val"><span class="badge badge-green">Active</span></div>
+            <div class="contract-label">Account Manager</div>
+            <div class="account-manager-info">
+              <div style="margin-bottom: 4px;">Nikhil Jha</div>
+              <div><a href="mailto:hello@vagtservices.com" class="account-manager-email">hello@vagtservices.com</a></div>
+            </div>
           </div>
         </div>
 
+        <!-- KPI Cards -->
         <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </div>
+            <div class="kpi-value">—</div>
             <div class="kpi-label">Guards Deployed</div>
-            <div class="kpi-value">12</div>
-            <div class="kpi-sub">At Prestige Tech Park today</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon red">
-              <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </div>
-            <div class="kpi-label">Open Incidents</div>
-            <div class="kpi-value">1</div>
-            <div class="kpi-sub">1 under investigation</div>
+            <div class="kpi-value">0</div>
+            <div class="kpi-label">Incidents This Month</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-icon blue">
-              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            </div>
-            <div class="kpi-label">Next Invoice</div>
-            <div class="kpi-value">₹4.8L</div>
-            <div class="kpi-sub">Due 01 Apr 2026</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-icon green">
-              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
+            <div class="kpi-value">—</div>
             <div class="kpi-label">SLA Compliance</div>
-            <div class="kpi-value">98.4%</div>
-            <div class="kpi-sub">Last 30 days</div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sec-head">
-            <h2>Recent Activity</h2>
-            <span>Last 7 days</span>
-          </div>
-          <div class="activity-list">
-            <div class="activity-item">
-              <div class="activity-dot green"></div>
-              <div class="activity-body">
-                <p>Day shift handover completed — Gate A, B &amp; C</p>
-                <span>Today · 07:02</span>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot amber"></div>
-              <div class="activity-body">
-                <p>Incident IR-2026-031 raised — Unauthorised vehicle in Lot 3</p>
-                <span>Yesterday · 14:37 · Under Investigation</span>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot green"></div>
-              <div class="activity-body">
-                <p>Monthly patrol compliance report submitted</p>
-                <span>02 Mar 2026 · 18:00</span>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot grey"></div>
-              <div class="activity-body">
-                <p>Invoice INV-2026-FEB issued — ₹4,80,000</p>
-                <span>01 Mar 2026</span>
-              </div>
-            </div>
-            <div class="activity-item">
-              <div class="activity-dot green"></div>
-              <div class="activity-body">
-                <p>Guard refresher training completed — 12 personnel</p>
-                <span>26 Feb 2026</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sec-head"><h2>Your VAGT Contact</h2></div>
-          <div class="sec-body">
-            <p style="font-size:13px; color:var(--text-mid); margin-bottom:16px; line-height:1.6;">Need to raise something urgently? We respond within 4 hours during business hours.</p>
-            <div class="contact-row">
-              <div class="contact-card">
-                <div class="contact-card-label">Phone</div>
-                <a href="tel:+919008977711">+91 90089 77711</a>
-              </div>
-              <div class="contact-card">
-                <div class="contact-card-label">Email</div>
-                <a href="mailto:sales@vagtservices.com">sales@vagtservices.com</a>
-              </div>
-              <div class="contact-card">
-                <div class="contact-card-label">WhatsApp</div>
-                <a href="https://wa.me/919008977711" target="_blank">Message us now →</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /panel-overview -->
-
-      <!-- ══════════════════════════════════════
-           PANEL 2 — GUARD DEPLOYMENT
-      ══════════════════════════════════════ -->
-      <div class="panel" id="panel-deployment">
-
-        <div class="kpi-grid" style="grid-template-columns: repeat(3,1fr); margin-bottom: 24px;">
-          <div class="kpi-card">
-            <div class="kpi-label">On Duty Now</div>
-            <div class="kpi-value">12</div>
-            <div class="kpi-sub">Across 4 posts</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Current Shift</div>
-            <div class="kpi-value">Day</div>
-            <div class="kpi-sub">07:00 – 19:00</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Night Shift</div>
-            <div class="kpi-value">8</div>
-            <div class="kpi-sub">Reporting at 19:00</div>
+            <div class="kpi-value">—</div>
+            <div class="kpi-label">Next Invoice Due</div>
           </div>
         </div>
 
-        <div class="sec-card">
-          <div class="sec-head">
-            <h2>Current Deployment — Prestige Tech Park</h2>
-            <span id="deploy-shift-label">Day Shift · 5 Mar 2026</span>
+        <!-- Recent Activity -->
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title">Recent Activity</h2>
           </div>
-          <div class="sec-body-flush">
-            <table class="data-table">
+          <div class="activity-feed">
+            <div class="activity-item">
+              <div class="activity-action">Patrol completed</div>
+              <div class="activity-time">—</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-action">Monthly report ready</div>
+              <div class="activity-time">—</div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-action">Invoice generated</div>
+              <div class="activity-time">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Contact -->
+        <div class="contact-card">
+          <h3 class="contact-title">Need assistance?</h3>
+          <div class="contact-item">
+            <div class="contact-icon">✉</div>
+            <div>Contact your account manager: <a href="mailto:hello@vagtservices.com">hello@vagtservices.com</a></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">☎</div>
+            <div><a href="tel:+919008977711">+91 90089 77711</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: Guard Deployment -->
+      <div class="panel-content" id="deployment">
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title">Guard Deployment Summary</h2>
+            <span class="phase2-badge">Phase 2</span>
+          </div>
+
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <div class="mini-stat-value">—</div>
+              <div class="mini-stat-label">Total Posted</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-value">—</div>
+              <div class="mini-stat-label">On Duty Now</div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-value">—</div>
+              <div class="mini-stat-label">Posts Covered</div>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
               <thead>
                 <tr>
-                  <th>Guard</th>
-                  <th>ID</th>
-                  <th>Designation</th>
+                  <th>Guard Name</th>
                   <th>Post</th>
                   <th>Shift</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td>Ravi Kumar</td><td>VAGT-2025-047</td><td>Security Officer II</td><td>Gate A — Main Entrance</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Suresh Nair</td><td>VAGT-2024-031</td><td>Senior Security Officer</td><td>Gate B — Staff Entry</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Priya Sharma</td><td>VAGT-2025-058</td><td>Security Officer I</td><td>Reception Lobby</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Mohammed Iqbal</td><td>VAGT-2024-019</td><td>Security Officer II</td><td>Car Park Lot 1–3</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Gopal Reddy</td><td>VAGT-2025-063</td><td>Security Officer I</td><td>Perimeter Patrol</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Kavita Singh</td><td>VAGT-2023-012</td><td>Senior Security Officer</td><td>CCTV Control Room</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Arjun Pillai</td><td>VAGT-2025-071</td><td>Security Officer I</td><td>Gate C — Visitor</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Santhosh Kumar</td><td>VAGT-2024-044</td><td>Security Officer II</td><td>Loading Bay</td><td>07:00–19:00</td><td><span class="badge badge-amber">Break</span></td></tr>
-                <tr><td>Deepa Menon</td><td>VAGT-2025-052</td><td>Security Officer I</td><td>Perimeter Patrol</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Ramesh Babu</td><td>VAGT-2024-027</td><td>Security Officer II</td><td>Gate A — Main Entrance</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Lakshmi Rao</td><td>VAGT-2025-066</td><td>Security Officer I</td><td>Reception Lobby</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
-                <tr><td>Vijay Murthy</td><td>VAGT-2024-038</td><td>Security Officer II</td><td>CCTV Control Room</td><td>07:00–19:00</td><td><span class="badge badge-green">On Duty</span></td></tr>
+                <tr>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><span class="badge-active">Active</span></td>
+                </tr>
+                <tr>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><span class="badge-active">Active</span></td>
+                </tr>
+                <tr>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><span class="badge-active">Active</span></td>
+                </tr>
+                <tr>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td><span class="badge-active">Active</span></td>
+                </tr>
               </tbody>
             </table>
           </div>
+
+          <div class="note-text">
+            Live guard tracking will be available in Phase 2 with digital check-in integration.
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 3: Reports -->
+      <div class="panel-content" id="reports">
+        <div class="two-column">
+          <!-- Incident Reports -->
+          <div class="column-card">
+            <div class="section-header">
+              <h3 class="column-title">Incident Reports</h3>
+              <span class="phase2-badge">Phase 2</span>
+            </div>
+
+            <div class="column-stats">
+              <div class="column-stat">
+                <div class="column-stat-value">0</div>
+                <div class="column-stat-label">Total Incidents</div>
+              </div>
+              <div class="column-stat">
+                <div class="column-stat-value">0</div>
+                <div class="column-stat-label">Open</div>
+              </div>
+            </div>
+
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Surveillance Logs -->
+          <div class="column-card">
+            <div class="section-header">
+              <h3 class="column-title">Surveillance Logs</h3>
+              <span class="phase2-badge">Phase 2</span>
+            </div>
+
+            <div class="column-stats">
+              <div class="column-stat">
+                <div class="column-stat-value">—</div>
+                <div class="column-stat-label">Patrols Logged</div>
+              </div>
+              <div class="column-stat">
+                <div class="column-stat-value">—</div>
+                <div class="column-stat-label">Cameras Online</div>
+              </div>
+            </div>
+
+            <div class="column-note">
+              Digital patrol logs available in Phase 2.
+            </div>
+          </div>
         </div>
 
-        <div class="sec-card">
-          <div class="sec-head">
-            <h2>Post Summary</h2>
+        <!-- Monthly Report Download -->
+        <div class="download-card">
+          <div class="download-info">
+            <h3>Monthly Security Report</h3>
+            <div class="download-month">February 2026</div>
           </div>
-          <div class="sec-body-flush">
-            <table class="data-table">
+          <button class="download-btn" disabled>Download PDF</button>
+        </div>
+      </div>
+
+      <!-- PANEL 4: Billing -->
+      <div class="panel-content" id="billing">
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-value">₹0</div>
+            <div class="kpi-label">Outstanding</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">₹—</div>
+            <div class="kpi-label">Paid YTD</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value">₹—</div>
+            <div class="kpi-label">Next Invoice</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <h2 class="section-title">Invoice History</h2>
+            <span class="phase2-badge">Phase 2</span>
+          </div>
+
+          <div class="table-wrapper">
+            <table>
               <thead>
-                <tr><th>Post / Location</th><th>Guards Assigned</th><th>Shift Coverage</th><th>Supervisor</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>Gate A — Main Entrance</td><td>2</td><td>24/7</td><td>Suresh Nair</td></tr>
-                <tr><td>Gate B — Staff Entry</td><td>1</td><td>07:00–22:00</td><td>Suresh Nair</td></tr>
-                <tr><td>Gate C — Visitor</td><td>1</td><td>09:00–19:00</td><td>Suresh Nair</td></tr>
-                <tr><td>Reception Lobby</td><td>2</td><td>07:00–21:00</td><td>Kavita Singh</td></tr>
-                <tr><td>Car Park Lot 1–3</td><td>1</td><td>07:00–22:00</td><td>Suresh Nair</td></tr>
-                <tr><td>Loading Bay</td><td>1</td><td>08:00–20:00</td><td>Kavita Singh</td></tr>
-                <tr><td>Perimeter Patrol</td><td>2</td><td>24/7</td><td>Kavita Singh</td></tr>
-                <tr><td>CCTV Control Room</td><td>2</td><td>24/7</td><td>Kavita Singh</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div><!-- /panel-deployment -->
-
-      <!-- ══════════════════════════════════════
-           PANEL 3 — INCIDENT REPORTS
-      ══════════════════════════════════════ -->
-      <div class="panel" id="panel-incidents">
-
-        <div class="kpi-grid" style="grid-template-columns: repeat(4,1fr); margin-bottom:24px;">
-          <div class="kpi-card"><div class="kpi-label">Total (2026)</div><div class="kpi-value">7</div><div class="kpi-sub">Incidents this year</div></div>
-          <div class="kpi-card"><div class="kpi-label">Open</div><div class="kpi-value">1</div><div class="kpi-sub">Under investigation</div></div>
-          <div class="kpi-card"><div class="kpi-label">Resolved</div><div class="kpi-value">6</div><div class="kpi-sub">Avg resolution: 3.2 days</div></div>
-          <div class="kpi-card"><div class="kpi-label">High Severity</div><div class="kpi-value">0</div><div class="kpi-sub">No critical incidents</div></div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sec-head">
-            <h2>Incident Log — 2026</h2>
-            <span>Most recent first</span>
-          </div>
-          <div>
-
-            <div class="incident-row">
-              <div class="incident-sev medium"></div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
-                  <div class="incident-title">Unauthorised vehicle found in Car Park Lot 3</div>
-                  <span class="badge badge-amber">Under Investigation</span>
-                </div>
-                <div class="incident-meta">IR-2026-031 · 04 Mar 2026, 14:37 · Reported by: Mohammed Iqbal (VAGT-2024-019)</div>
-                <div class="incident-tags">
-                  <span class="badge badge-amber" style="font-size:10px;">Medium Severity</span>
-                  <span class="badge badge-grey" style="font-size:10px;">Vehicle</span>
-                  <span class="badge badge-grey" style="font-size:10px;">Car Park</span>
-                </div>
-                <div style="margin-top:10px; font-size:13px; color:var(--text-mid); line-height:1.55;">A white Maruti Suzuki (KA-05-MR-4420) was found parked in a restricted zone without a visitor pass. Towing authority has been notified; CCTV footage retrieved. Investigation ongoing.</div>
-              </div>
-            </div>
-
-            <div class="incident-row">
-              <div class="incident-sev low"></div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
-                  <div class="incident-title">Tailgating at Gate A — visitor followed employee</div>
-                  <span class="badge badge-green">Resolved</span>
-                </div>
-                <div class="incident-meta">IR-2026-028 · 21 Feb 2026, 09:12 · Reported by: Ravi Kumar (VAGT-2025-047)</div>
-                <div class="incident-tags">
-                  <span class="badge badge-green" style="font-size:10px;">Low Severity</span>
-                  <span class="badge badge-grey" style="font-size:10px;">Access Control</span>
-                </div>
-                <div style="margin-top:10px; font-size:13px; color:var(--text-mid); line-height:1.55;">Individual followed an employee through Gate A without badging in. Guard intercepted, visitor was legitimately attending a scheduled meeting. Visitor registered and escorted. Resolved same day. Recommendation: reinforce anti-tailgating signage.</div>
-              </div>
-            </div>
-
-            <div class="incident-row">
-              <div class="incident-sev low"></div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
-                  <div class="incident-title">Visitor ID badge not returned at exit</div>
-                  <span class="badge badge-green">Resolved</span>
-                </div>
-                <div class="incident-meta">IR-2026-021 · 09 Feb 2026, 17:55 · Reported by: Priya Sharma (VAGT-2025-058)</div>
-                <div class="incident-tags">
-                  <span class="badge badge-green" style="font-size:10px;">Low Severity</span>
-                  <span class="badge badge-grey" style="font-size:10px;">Badge</span>
-                </div>
-                <div style="margin-top:10px; font-size:13px; color:var(--text-mid); line-height:1.55;">A visitor departed without returning their temporary access badge. Badge was deactivated in the system immediately. Visitor contacted — they returned the badge next working day. Badge inventory updated.</div>
-              </div>
-            </div>
-
-            <div class="incident-row">
-              <div class="incident-sev low"></div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap;">
-                  <div class="incident-title">Minor altercation between two vendors at Loading Bay</div>
-                  <span class="badge badge-green">Resolved</span>
-                </div>
-                <div class="incident-meta">IR-2026-014 · 29 Jan 2026, 11:30 · Reported by: Santhosh Kumar (VAGT-2024-044)</div>
-                <div class="incident-tags">
-                  <span class="badge badge-green" style="font-size:10px;">Low Severity</span>
-                  <span class="badge badge-grey" style="font-size:10px;">Loading Bay</span>
-                  <span class="badge badge-grey" style="font-size:10px;">Verbal</span>
-                </div>
-                <div style="margin-top:10px; font-size:13px; color:var(--text-mid); line-height:1.55;">Verbal altercation between two delivery vendor representatives over loading bay priority. Guard de-escalated within 5 minutes; no physical contact. Both vendors cautioned. Facility manager notified.</div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-      </div><!-- /panel-incidents -->
-
-      <!-- ══════════════════════════════════════
-           PANEL 4 — SURVEILLANCE LOGS
-      ══════════════════════════════════════ -->
-      <div class="panel" id="panel-surveillance">
-
-        <div class="sec-card" style="margin-bottom:20px;">
-          <div class="sec-head">
-            <h2>Patrol &amp; CCTV Log — 5 March 2026</h2>
-            <span>24-hour view · All posts</span>
-          </div>
-          <div>
-            <div class="surv-entry"><div class="surv-time">07:02</div><div><div class="surv-msg">Day shift handover complete. All 12 day-shift personnel signed in at Gate A muster point.</div><span class="surv-tag routine">Routine</span></div></div>
-            <div class="surv-entry"><div class="surv-time">07:15</div><div><div class="surv-msg">Opening sweep of all gates and car parks completed. No anomalies.</div><span class="surv-tag patrol">Patrol</span></div></div>
-            <div class="surv-entry"><div class="surv-time">08:00</div><div><div class="surv-msg">CCTV system check — all 28 cameras operational. Zone 4 camera C07 cleaned (dust on lens).</div><span class="surv-tag cctv">CCTV</span></div></div>
-            <div class="surv-entry"><div class="surv-time">08:32</div><div><div class="surv-msg">Large delivery truck (TN-09-GH-2234) cleared at Gate C — visitor manifest verified.</div><span class="surv-tag access">Access</span></div></div>
-            <div class="surv-entry"><div class="surv-time">09:00</div><div><div class="surv-msg">Perimeter patrol round 1 completed — no anomalies on north and east fences.</div><span class="surv-tag patrol">Patrol</span></div></div>
-            <div class="surv-entry"><div class="surv-time">10:15</div><div><div class="surv-msg">VIP visitor (3 persons) escorted from Gate A to Level 4 conference room. Escort completed.</div><span class="surv-tag access">Access</span></div></div>
-            <div class="surv-entry"><div class="surv-time">11:00</div><div><div class="surv-msg">Perimeter patrol round 2 — south fence OK. Small debris noted near back wall; maintenance notified.</div><span class="surv-tag patrol">Patrol</span></div></div>
-            <div class="surv-entry"><div class="surv-time">12:30</div><div><div class="surv-msg">Shift break rotation for Gate A — standby guard deployed to maintain coverage.</div><span class="surv-tag routine">Routine</span></div></div>
-            <div class="surv-entry"><div class="surv-time">13:00</div><div><div class="surv-msg">Perimeter patrol round 3 completed — all clear.</div><span class="surv-tag patrol">Patrol</span></div></div>
-            <div class="surv-entry"><div class="surv-time">14:37</div><div><div class="surv-msg">Unauthorised vehicle detected in Lot 3. Incident IR-2026-031 raised. CCTV footage saved.</div><span class="surv-tag alert">Alert</span></div></div>
-            <div class="surv-entry"><div class="surv-time">15:05</div><div><div class="surv-msg">Towing company contacted regarding IR-2026-031 vehicle. Awaiting response.</div><span class="surv-tag alert">Alert</span></div></div>
-            <div class="surv-entry"><div class="surv-time">15:00</div><div><div class="surv-msg">Perimeter patrol round 4 — all clear. IR-2026-031 vehicle still in Lot 3, marked.</div><span class="surv-tag patrol">Patrol</span></div></div>
-            <div class="surv-entry"><div class="surv-time">17:00</div><div><div class="surv-msg">Perimeter patrol round 5 completed. West gate locks tested — all functional.</div><span class="surv-tag patrol">Patrol</span></div></div>
-            <div class="surv-entry"><div class="surv-time">18:45</div><div><div class="surv-msg">Night shift briefing commenced at Gate A muster point. 8 night personnel in attendance.</div><span class="surv-tag routine">Routine</span></div></div>
-            <div class="surv-entry"><div class="surv-time">19:00</div><div><div class="surv-msg">Day/Night shift handover complete. Outgoing supervisor: Kavita Singh. Incoming: Suresh Nair.</div><span class="surv-tag routine">Routine</span></div></div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sec-head">
-            <h2>CCTV Camera Status</h2>
-            <span>28 cameras · Last checked 08:00</span>
-          </div>
-          <div class="sec-body-flush">
-            <table class="data-table">
-              <thead>
-                <tr><th>Camera ID</th><th>Location</th><th>Type</th><th>Status</th><th>Last Review</th></tr>
-              </thead>
-              <tbody>
-                <tr><td>C01–C04</td><td>Gate A — Main Entrance</td><td>PTZ</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C05–C06</td><td>Gate B — Staff Entry</td><td>Fixed</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C07–C08</td><td>Gate C — Visitor</td><td>Fixed</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C09–C12</td><td>Lobby &amp; Reception</td><td>Dome</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C13–C16</td><td>Car Park Lot 1–3</td><td>PTZ</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C17–C20</td><td>Perimeter — North &amp; East</td><td>Fixed</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C21–C24</td><td>Perimeter — South &amp; West</td><td>Fixed</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C25–C26</td><td>Loading Bay</td><td>Dome</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-                <tr><td>C27–C28</td><td>CCTV Control Room</td><td>Fixed</td><td><span class="badge badge-green">Online</span></td><td>Today 08:00</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div><!-- /panel-surveillance -->
-
-      <!-- ══════════════════════════════════════
-           PANEL 5 — INVOICES
-      ══════════════════════════════════════ -->
-      <div class="panel" id="panel-invoices">
-
-        <div class="invoice-summary">
-          <div class="inv-stat">
-            <div class="inv-stat-label">Amount Due</div>
-            <div class="inv-stat-val">₹4,80,000</div>
-            <div style="font-size:12px; color:var(--text-faint); margin-top:3px;">Due 01 Apr 2026</div>
-          </div>
-          <div class="inv-stat">
-            <div class="inv-stat-label">Paid YTD (2026)</div>
-            <div class="inv-stat-val">₹9,60,000</div>
-            <div style="font-size:12px; color:var(--text-faint); margin-top:3px;">2 invoices cleared</div>
-          </div>
-          <div class="inv-stat">
-            <div class="inv-stat-label">Annual Contract Value</div>
-            <div class="inv-stat-val">₹57,60,000</div>
-            <div style="font-size:12px; color:var(--text-faint); margin-top:3px;">₹4,80,000 / month</div>
-          </div>
-        </div>
-
-        <div class="sec-card">
-          <div class="sec-head">
-            <h2>Invoice History</h2>
-            <span>Contract VAGT-C-2024-008</span>
-          </div>
-          <div class="sec-body-flush">
-            <table class="data-table">
-              <thead>
-                <tr><th>Invoice No.</th><th>Period</th><th>Amount</th><th>Issued</th><th>Due</th><th>Status</th><th></th></tr>
+                <tr>
+                  <th>Invoice No</th>
+                  <th>Period</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Download</th>
+                </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>INV-2026-MAR</strong></td><td>March 2026</td><td>₹4,80,000</td><td>01 Mar 2026</td><td>01 Apr 2026</td>
-                  <td><span class="badge badge-amber">Due</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>₹—</td>
+                  <td><span class="badge-pending">Pending</span></td>
+                  <td><a href="#" style="color: #0b1120; font-weight: 600; text-decoration: none;">—</a></td>
                 </tr>
                 <tr>
-                  <td><strong>INV-2026-FEB</strong></td><td>February 2026</td><td>₹4,80,000</td><td>01 Feb 2026</td><td>01 Mar 2026</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
-                </tr>
-                <tr>
-                  <td><strong>INV-2026-JAN</strong></td><td>January 2026</td><td>₹4,80,000</td><td>01 Jan 2026</td><td>01 Feb 2026</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
-                </tr>
-                <tr>
-                  <td>INV-2025-DEC</td><td>December 2025</td><td>₹4,80,000</td><td>01 Dec 2025</td><td>01 Jan 2026</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
-                </tr>
-                <tr>
-                  <td>INV-2025-NOV</td><td>November 2025</td><td>₹4,80,000</td><td>01 Nov 2025</td><td>01 Dec 2025</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
-                </tr>
-                <tr>
-                  <td>INV-2025-OCT</td><td>October 2025</td><td>₹4,80,000</td><td>01 Oct 2025</td><td>01 Nov 2025</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
-                </tr>
-                <tr>
-                  <td>INV-2025-SEP</td><td>September 2025</td><td>₹4,80,000</td><td>01 Sep 2025</td><td>01 Oct 2025</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
-                </tr>
-                <tr>
-                  <td>INV-2025-AUG</td><td>August 2025</td><td>₹4,80,000</td><td>01 Aug 2025</td><td>01 Sep 2025</td>
-                  <td><span class="badge badge-green">Paid</span></td>
-                  <td><button class="btn-dl"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</button></td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>₹—</td>
+                  <td><span class="badge-pending">Pending</span></td>
+                  <td><a href="#" style="color: #0b1120; font-weight: 600; text-decoration: none;">—</a></td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
 
-        <div class="sec-card">
-          <div class="sec-head"><h2>Payment Details</h2></div>
-          <div class="sec-body">
-            <p style="font-size:13px; color:var(--text-mid); line-height:1.7; margin-bottom:16px;">For payment queries or to request GST-compliant tax invoices, please contact your account manager directly.</p>
-            <div class="contact-row">
-              <div class="contact-card">
-                <div class="contact-card-label">Accounts</div>
-                <a href="mailto:accounts@vagtservices.com">accounts@vagtservices.com</a>
-              </div>
-              <div class="contact-card">
-                <div class="contact-card-label">Phone</div>
-                <a href="tel:+919008977711">+91 90089 77711</a>
-              </div>
-              <div class="contact-card">
-                <div class="contact-card-label">Payment Terms</div>
-                <span style="font-size:13px; font-weight:600; color:var(--text-mid);">Net 30 days</span>
-              </div>
-            </div>
+          <div class="note-text">
+            Invoices will be generated automatically once the billing engine is connected.
           </div>
         </div>
+      </div>
+    </main>
+  </div>
 
-      </div><!-- /panel-invoices -->
+  <script>
+    // Panel Switching
+    const navItems = document.querySelectorAll('.nav-item');
+    const panelContents = document.querySelectorAll('.panel-content');
+    const panelTitle = document.getElementById('panel-title');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuToggle = document.getElementById('menu-toggle');
 
-    </div><!-- /portal-content -->
-  </main>
-</div><!-- /portal-layout -->
+    const panelTitles = {
+      overview: 'Overview',
+      deployment: 'Guard Deployment',
+      reports: 'Reports',
+      billing: 'Billing'
+    };
 
-<script type="module">
-  import { requireAuth, signOutUser } from "../assets/js/vagt-auth.js";
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const panelId = item.getAttribute('data-panel');
 
-  // ── FIREBASE AUTH — runs first (top-level await) ──
-  const { user, profile } = await requireAuth('client', 'client-portal.html');
-  const initials = profile.clientName.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-  document.getElementById('user-avatar').textContent = initials;
-  document.getElementById('user-name').textContent   = profile.clientName;
-  document.getElementById('signout-btn').addEventListener('click', () => signOutUser('client-portal.html'));
+        // Update active nav item
+        navItems.forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
 
-  // ─── Date ─────────────────────────────────────
-  document.getElementById('today-date').textContent =
-    new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+        // Update active panel
+        panelContents.forEach(panel => panel.classList.remove('active'));
+        document.getElementById(panelId).classList.add('active');
 
-  // ─── Panel navigation ──────────────────────────
-  const PANEL_TITLES = {
-    'panel-overview':    'Dashboard',
-    'panel-deployment':  'Guard Deployment',
-    'panel-incidents':   'Incident Reports',
-    'panel-surveillance':'Surveillance Logs',
-    'panel-invoices':    'Invoices'
-  };
+        // Update title
+        panelTitle.textContent = panelTitles[panelId];
 
-  function switchPanel(panelId) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.portal-nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(panelId).classList.add('active');
-    document.querySelector(`[data-panel="${panelId}"]`).classList.add('active');
-    document.getElementById('topbar-title').textContent = PANEL_TITLES[panelId] || 'Portal';
-    // close sidebar on mobile
-    document.getElementById('portalSidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('show');
-    window.scrollTo(0, 0);
-  }
+        // Close mobile menu
+        sidebarNav.classList.remove('mobile-open');
+      });
+    });
 
-  document.querySelectorAll('.portal-nav-btn[data-panel]').forEach(btn => {
-    btn.addEventListener('click', () => switchPanel(btn.dataset.panel));
-  });
+    // Mobile Menu Toggle
+    menuToggle.addEventListener('click', () => {
+      sidebarNav.classList.toggle('mobile-open');
+    });
 
-  // ─── Mobile hamburger ─────────────────────────
-  document.getElementById('hamburgerBtn').addEventListener('click', () => {
-    document.getElementById('portalSidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('show');
-  });
-  document.getElementById('sidebarOverlay').addEventListener('click', () => {
-    document.getElementById('portalSidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('show');
-  });
+    // Populate contract info from profile
+    document.addEventListener('DOMContentLoaded', () => {
+      const clientNameEl = document.getElementById('contract-client');
+      const contractNoEl = document.getElementById('contract-no');
+      const userNameEl = document.getElementById('user-name');
 
-</script>
+      if (userNameEl.textContent !== 'Client Name') {
+        clientNameEl.textContent = userNameEl.textContent;
+      }
 
+      // Check if profile.contractNo is available and update
+      const existingContractNo = contractNoEl.textContent;
+      if (existingContractNo === '—') {
+        // Will be populated by auth script or leave as placeholder
+      }
+    });
+  </script>
 </body>
 </html>
