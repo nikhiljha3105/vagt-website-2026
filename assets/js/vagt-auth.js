@@ -28,19 +28,39 @@ import { doc, getDoc, setDoc, serverTimestamp, collection, query, where, getDocs
 // ─────────────────────────────────────────────────────────────────
 export function requireAuth(requiredRole, loginUrl) {
   return new Promise((resolve) => {
-    onAuthStateChanged(auth, async (user) => {
+    // Wait for Firebase to restore persisted auth state before acting.
+    // unsubscribe after first settled state to avoid double-firing.
+    let settled = false;
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!settled) {
+        settled = true;
+        unsub();
+      } else {
+        return;
+      }
+
       if (!user) {
         window.location.replace(loginUrl);
         return;
       }
+
       try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
+        const ref  = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+
         if (!snap.exists()) {
           await signOut(auth);
           window.location.replace(loginUrl + '?error=no_profile');
           return;
         }
+
         const profile = snap.data();
+
+        if (!profile.role) {
+          await signOut(auth);
+          window.location.replace(loginUrl + '?error=no_profile');
+          return;
+        }
         if (profile.role !== requiredRole) {
           await signOut(auth);
           window.location.replace(loginUrl + '?error=wrong_role');
@@ -51,9 +71,17 @@ export function requireAuth(requiredRole, loginUrl) {
           window.location.replace(loginUrl + '?error=inactive');
           return;
         }
+
         resolve({ user, profile });
+
       } catch (err) {
-        console.error('[VAGT Auth] requireAuth error:', err);
+        // Firestore read failed — log the real error so it shows in DevTools
+        console.error('[VAGT Auth] requireAuth Firestore error:', err.code, err.message);
+        // Don't redirect on network errors — show inline message instead
+        if (err.code === 'permission-denied') {
+          window.location.replace(loginUrl + '?error=permission');
+          return;
+        }
         window.location.replace(loginUrl);
       }
     });
@@ -171,9 +199,10 @@ export async function checkSetupRequired() {
 export function handleAuthError() {
   const params = new URLSearchParams(window.location.search);
   const errors = {
-    'no_profile': 'Your account has not been set up yet. Contact your VAGT admin.',
+    'no_profile':  'Your account has not been set up yet. Contact your VAGT admin.',
     'wrong_role':  'This account does not have access to this portal.',
     'inactive':    'Your account is currently inactive. Contact your VAGT admin.',
+    'permission':  'Access denied. Please check your account with your VAGT admin.',
   };
   return errors[params.get('error')] || null;
 }
