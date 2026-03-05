@@ -1,0 +1,23 @@
+# ── Internal / sensitive documents — never commit these ──
+*.xlsx
+*.docx
+*.pdf
+*.pages
+*.numbers
+*.csv
+
+# Keep VAGT's own public-facing brochure PDF
+!assets/brochures/VAGT*.pdf
+!assets/brochures/VAGT*.docx
+
+# Screenshots / temp files
+Screenshot*.png
+Screenshot*.jpg
+*.tmp
+*.DS_Store
+Thumbs.db
+
+# Firebase — if you ever add a local env file
+.env
+.env.local
+firebase-debug.log
