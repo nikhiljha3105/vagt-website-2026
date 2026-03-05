@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VAGT First-Time Setup</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    body { background: var(--navy); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+    .setup-card { background: #fff; border-radius: 12px; width: 100%; max-width: 480px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.45); }
+    .setup-header { background: #0b0e18; padding: 32px 36px 28px; text-align: center; border-bottom: 3px solid #e63946; }
+    .setup-logo-wrap { width: 52px; height: 52px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .setup-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .setup-badge { display: inline-block; background: rgba(230,57,70,0.18); color: #e63946; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
+    .setup-header h1 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .setup-header p { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .setup-body { padding: 32px 36px 36px; }
+
+    /* States */
+    .state { display: none; }
+    .state.active { display: block; }
+
+    /* Checking state */
+    .checking-wrap { text-align: center; padding: 20px 0; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #e5e7eb; border-top-color: #e63946; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .checking-wrap p { font-size: 14px; color: var(--text-mid); }
+
+    /* Already-configured state */
+    .configured-wrap { text-align: center; padding: 8px 0; }
+    .configured-icon { width: 48px; height: 48px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .configured-icon svg { width: 24px; height: 24px; stroke: #16a34a; fill: none; stroke-width: 2; }
+    .configured-wrap h2 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .configured-wrap p { font-size: 13px; color: var(--text-mid); margin-bottom: 24px; }
+
+    /* Setup form */
+    .section-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .section-desc { font-size: 12px; color: var(--text-faint); margin-bottom: 20px; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; }
+    .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; font-family: var(--font); color: var(--text); outline: none; transition: border-color 0.2s; background: var(--warm-white); box-sizing: border-box; }
+    .form-group input:focus { border-color: #e63946; background: #fff; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+    .btn-primary { width: 100%; padding: 14px; background: #e63946; color: #fff; font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; font-family: var(--font); }
+    .btn-primary:hover { background: #c0392b; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary { width: 100%; padding: 12px; background: transparent; color: var(--text-mid); font-size: 13px; font-weight: 600; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; font-family: var(--font); margin-top: 10px; }
+    .btn-secondary:hover { border-color: #e63946; color: #e63946; }
+
+    /* Messages */
+    .msg { font-size: 13px; padding: 11px 14px; border-radius: 6px; margin-bottom: 18px; display: none; }
+    .msg-error { background: #FEE2E2; color: #B91C1C; border-left: 3px solid #B91C1C; }
+    .msg-success { background: #D1FAE5; color: #065F46; border-left: 3px solid #065F46; }
+    .msg-info { background: #EFF6FF; color: #1D4ED8; border-left: 3px solid #1D4ED8; }
+
+    /* Password strength */
+    .pw-strength { display: flex; gap: 4px; margin-top: 6px; }
+    .pw-bar { height: 3px; flex: 1; background: #e5e7eb; border-radius: 2px; transition: background 0.3s; }
+    .pw-label { font-size: 11px; color: var(--text-faint); margin-top: 4px; text-align: right; }
+    .pw-weak .pw-bar:nth-child(1) { background: #ef4444; }
+    .pw-fair .pw-bar:nth-child(-n+2) { background: #f59e0b; }
+    .pw-good .pw-bar:nth-child(-n+3) { background: #10b981; }
+    .pw-strong .pw-bar { background: #059669; }
+
+    /* Warning note */
+    .warning-note { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; font-size: 12px; color: #9a3412; display: flex; gap: 8px; align-items: flex-start; }
+    .warning-note svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; margin-top: 1px; }
+
+    /* Step indicator */
+    .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: #e5e7eb; transition: background 0.3s; }
+    .step-dot.active { background: #e63946; }
+    .step-dot.done { background: #16a34a; }
+
+    /* Success state */
+    .success-wrap { text-align: center; padding: 8px 0; }
+    .success-icon { width: 56px; height: 56px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .success-icon svg { width: 28px; height: 28px; stroke: #16a34a; fill: none; stroke-width: 2; }
+    .success-wrap h2 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .success-wrap p { font-size: 13px; color: var(--text-mid); margin-bottom: 24px; line-height: 1.6; }
+
+    .setup-footer { padding: 14px 36px 18px; border-top: 1px solid var(--border); text-align: center; }
+    .setup-footer p { font-size: 11px; color: var(--text-faint); }
+    .back-link { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 24px; justify-content: center; text-decoration: none; }
+    .back-link:hover { color: rgba(255,255,255,0.6); }
+    .back-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+  </style>
+</head>
+<body>
+
+<div style="width:100%; max-width:480px;">
+  <a href="../index.html" class="back-link">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to vagtservices.com
+  </a>
+
+  <div class="setup-card">
+    <div class="setup-header">
+      <div class="setup-badge">First-Time Setup</div>
+      <div class="setup-logo-wrap">
+        <img src="../assets/images/logos/vagt-logo.png" alt="VAGT">
+      </div>
+      <h1>Create Admin Account</h1>
+      <p>Run once — locked after first admin is created</p>
+    </div>
+
+    <div class="setup-body">
+
+      <!-- ── STATE: Checking ── -->
+      <div class="state active" id="state-checking">
+        <div class="checking-wrap">
+          <div class="spinner"></div>
+          <p>Checking setup status…</p>
+        </div>
+      </div>
+
+      <!-- ── STATE: Already configured ── -->
+      <div class="state" id="state-configured">
+        <div class="configured-wrap">
+          <div class="configured-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </div>
+          <h2>Setup already complete</h2>
+          <p>An admin account exists. This setup page is now locked. Log in through the Admin Panel.</p>
+          <a href="admin-portal.html" class="btn-primary" style="display:block;text-align:center;text-decoration:none;padding:14px;border-radius:8px;">Go to Admin Panel →</a>
+        </div>
+      </div>
+
+      <!-- ── STATE: Setup form ── -->
+      <div class="state" id="state-form">
+        <div class="warning-note">
+          <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          This page will be permanently disabled once the first admin account is created. Do not share this URL.
+        </div>
+
+        <div class="msg msg-error" id="msg-error"></div>
+
+        <p class="section-title">Admin Account Details</p>
+        <p class="section-desc">This will be the master administrator for VAGT's internal portals.</p>
+
+        <form id="setup-form" autocomplete="off">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" placeholder="Nikhil" required/>
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" placeholder="Jha" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="setup-email">Admin Email</label>
+            <input type="email" id="setup-email" placeholder="admin@vagtservices.com" required autocomplete="off"/>
+          </div>
+          <div class="form-group">
+            <label for="setup-password">Password</label>
+            <input type="password" id="setup-password" placeholder="Min. 8 characters" required minlength="8" autocomplete="new-password"/>
+            <div class="pw-strength" id="pw-strength">
+              <div class="pw-bar"></div>
+              <div class="pw-bar"></div>
+              <div class="pw-bar"></div>
+              <div class="pw-bar"></div>
+            </div>
+            <div class="pw-label" id="pw-label"></div>
+          </div>
+          <div class="form-group">
+            <label for="setup-confirm">Confirm Password</label>
+            <input type="password" id="setup-confirm" placeholder="Repeat password" required autocomplete="new-password"/>
+          </div>
+
+          <hr class="divider"/>
+
+          <button type="submit" class="btn-primary" id="setup-btn">Create Admin Account</button>
+        </form>
+      </div>
+
+      <!-- ── STATE: Success ── -->
+      <div class="state" id="state-success">
+        <div class="success-wrap">
+          <div class="success-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <h2>Admin account created!</h2>
+          <p id="success-detail">Your account has been set up. You can now log in to the Admin Panel to manage employees and clients.</p>
+          <a href="admin-portal.html" class="btn-primary" style="display:block;text-align:center;text-decoration:none;padding:14px;border-radius:8px;">Go to Admin Panel →</a>
+          <p style="font-size:12px;color:var(--text-faint);margin-top:12px">This setup page is now permanently locked.</p>
+        </div>
+      </div>
+
+    </div><!-- /setup-body -->
+
+    <div class="setup-footer">
+      <p>VAGT Security Services · Internal Use Only</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "../assets/js/firebase-config.js";
+  import { checkSetupRequired, createUserProfile } from "../assets/js/vagt-auth.js";
+  import { createUserWithEmailAndPassword }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // ── Helpers ──
+  function showState(id) {
+    document.querySelectorAll('.state').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function showError(msg) {
+    const el = document.getElementById('msg-error');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideError() {
+    document.getElementById('msg-error').style.display = 'none';
+  }
+
+  // ── If someone is already logged in, sign them out first ──
+  const currentUser = await new Promise(r => onAuthStateChanged(auth, r));
+  if (currentUser) await signOut(auth);
+
+  // ── Check whether setup is still required ──
+  try {
+    const needed = await checkSetupRequired();
+    showState(needed ? 'state-form' : 'state-configured');
+  } catch (err) {
+    // Firebase not yet configured — show the form anyway with a helpful note
+    const errEl = document.getElementById('msg-error');
+    errEl.textContent = 'Could not connect to Firebase. Make sure firebase-config.js is filled in with your project credentials.';
+    errEl.style.display = 'block';
+    showState('state-form');
+  }
+
+  // ── Password strength indicator ──
+  document.getElementById('setup-password').addEventListener('input', function() {
+    const v = this.value;
+    const wrap = document.getElementById('pw-strength');
+    const label = document.getElementById('pw-label');
+    wrap.className = 'pw-strength';
+    if (!v) { label.textContent = ''; return; }
+    let score = 0;
+    if (v.length >= 8)  score++;
+    if (v.length >= 12) score++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    if (score <= 1) { wrap.classList.add('pw-weak');   label.textContent = 'Weak'; }
+    else if (score === 2) { wrap.classList.add('pw-fair');   label.textContent = 'Fair'; }
+    else if (score === 3) { wrap.classList.add('pw-good');   label.textContent = 'Good'; }
+    else                  { wrap.classList.add('pw-strong'); label.textContent = 'Strong'; }
+  });
+
+  // ── Submit handler ──
+  document.getElementById('setup-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    hideError();
+
+    const firstName = document.getElementById('first-name').value.trim();
+    const lastName  = document.getElementById('last-name').value.trim();
+    const email     = document.getElementById('setup-email').value.trim();
+    const password  = document.getElementById('setup-password').value;
+    const confirm   = document.getElementById('setup-confirm').value;
+    const fullName  = `${firstName} ${lastName}`.trim();
+
+    if (password !== confirm) {
+      showError('Passwords do not match. Please re-enter.');
+      return;
+    }
+    if (password.length < 8) {
+      showError('Password must be at least 8 characters.');
+      return;
+    }
+
+    const btn = document.getElementById('setup-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    try {
+      // Double-check setup is still required (race condition guard)
+      const stillNeeded = await checkSetupRequired();
+      if (!stillNeeded) {
+        showState('state-configured');
+        return;
+      }
+
+      // Create Firebase Auth user
+      const { user } = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Create Firestore profile
+      await createUserProfile(user.uid, {
+        role:  'admin',
+        name:  fullName,
+        email: email,
+      }, null);
+
+      // Sign out — let them log in properly via admin-portal.html
+      await signOut(auth);
+
+      document.getElementById('success-detail').textContent =
+        `Admin account created for ${fullName} (${email}). You can now log in to the Admin Panel.`;
+      showState('state-success');
+
+    } catch (err) {
+      const FIREBASE_ERRORS = {
+        'auth/email-already-in-use': 'That email address is already registered.',
+        'auth/invalid-email':        'Please enter a valid email address.',
+        'auth/weak-password':        'Password is too weak. Use at least 8 characters.',
+      };
+      showError(FIREBASE_ERRORS[err.code] || `Setup failed: ${err.message}`);
+      btn.disabled = false;
+      btn.textContent = 'Create Admin Account';
+    }
+  });
+</script>
+
+</body>
+</html>

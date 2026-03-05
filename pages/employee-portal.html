@@ -136,60 +136,47 @@
 
     <div class="login-footer">
       <p>Not an employee? <a href="client-portal.html">Client login →</a></p>
-      <p style="margin-top:6px;">Admin access? <a href="admin-dashboard.html">Admin panel →</a></p>
       <p style="margin-top:6px;">Problems signing in? <a href="contact.html">Get help</a></p>
     </div>
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { auth } from "../assets/js/firebase-config.js";
+  import { loginWithRole, handleAuthError }
+    from "../assets/js/vagt-auth.js";
+  import { onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { sendPasswordResetEmail }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-  import { firebaseConfig } from "../assets/js/firebase-config.js";
+  const btn     = document.getElementById('login-btn');
+  const errorEl = document.getElementById('error-msg');
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+  function showError(msg) { errorEl.textContent = msg; errorEl.style.cssText = 'display:block; background:#FEE2E2; color:#B91C1C; border-left-color:#B91C1C;'; }
+  function showSuccess(msg) { errorEl.textContent = msg; errorEl.style.cssText = 'display:block; background:#D1FAE5; color:#065F46; border-left-color:#065F46;'; }
 
-  // Redirect if already logged in
+  // Show error from redirect param (wrong_role, inactive, etc.)
+  const authErr = handleAuthError();
+  if (authErr) showError(authErr);
+
+  // Already logged in? Redirect immediately
   onAuthStateChanged(auth, user => {
     if (user) window.location.href = 'employee-dashboard.html';
   });
 
-  const form = document.getElementById('login-form');
-  const btn = document.getElementById('login-btn');
-  const errorMsg = document.getElementById('error-msg');
-
-  function showError(msg) {
-    errorMsg.textContent = msg;
-    errorMsg.style.display = 'block';
-  }
-
-  form.addEventListener('submit', async e => {
+  document.getElementById('login-form').addEventListener('submit', async e => {
     e.preventDefault();
-    btn.disabled = true;
-    btn.textContent = 'Signing in…';
-    errorMsg.style.display = 'none';
-
+    btn.disabled = true; btn.textContent = 'Signing in…';
+    errorEl.style.display = 'none';
     const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle redirect
-    } catch (err) {
-      btn.disabled = false;
-      btn.textContent = 'Sign In';
-      const codes = {
-        'auth/user-not-found': 'No account found with that email.',
-        'auth/wrong-password': 'Incorrect password. Please try again.',
-        'auth/invalid-email': 'Please enter a valid email address.',
-        'auth/too-many-requests': 'Too many attempts. Please wait a few minutes.',
-        'auth/invalid-credential': 'Invalid email or password.',
-      };
-      showError(codes[err.code] || 'Sign in failed. Please try again.');
-    }
+    const pass  = document.getElementById('password').value;
+    await loginWithRole(
+      email, pass,
+      'employee',
+      'employee-dashboard.html',
+      msg => { showError(msg); btn.disabled = false; btn.textContent = 'Sign In'; }
+    );
   });
 
   document.getElementById('forgot-link').addEventListener('click', async e => {
@@ -198,14 +185,8 @@
     if (!email) { showError('Enter your email address above first.'); return; }
     try {
       await sendPasswordResetEmail(auth, email);
-      errorMsg.style.background = '#D1FAE5';
-      errorMsg.style.color = '#065F46';
-      errorMsg.style.borderColor = '#065F46';
-      errorMsg.textContent = 'Password reset email sent. Check your inbox.';
-      errorMsg.style.display = 'block';
-    } catch (err) {
-      showError('Could not send reset email. Check the address and try again.');
-    }
+      showSuccess('Password reset email sent. Check your inbox.');
+    } catch (_) { showError('Could not send reset email. Check the address and try again.'); }
   });
 </script>
 

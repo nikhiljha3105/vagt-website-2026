@@ -582,7 +582,14 @@
   </main>
 </div>
 
-<script>
+<script type="module">
+  import { requireAuth, signOutUser } from "../assets/js/vagt-auth.js";
+
+  // ── FIREBASE AUTH — runs first (top-level await) ──
+  const { user, profile } = await requireAuth('admin', 'admin-portal.html');
+  document.querySelector('.portal-avatar').textContent = profile.name.charAt(0).toUpperCase();
+  document.getElementById('user-name').textContent     = profile.name;
+  document.getElementById('signout-btn').addEventListener('click', () => signOutUser('admin-portal.html'));
   // ── MOCK EMPLOYEE DATA ──
   // TODO: Replace with Firestore fetch — db.collection('employees').orderBy('name').get()
   const EMPLOYEES = [
@@ -663,7 +670,8 @@
     new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
 
   // ── ANNOUNCEMENT POST ──
-  function postAnnouncement() {
+  // Exposed on window so inline onclick="postAnnouncement()" in HTML can reach it (modules have their own scope)
+  window.postAnnouncement = function() {
     const title = document.getElementById('ann-title').value.trim();
     const body = document.getElementById('ann-body').value.trim();
     const cat = document.getElementById('ann-category').value;
@@ -676,11 +684,6 @@
     setTimeout(() => confirm.style.display = 'none', 4000);
   }
 
-  // ── SIGN OUT ──
-  document.getElementById('signout-btn').addEventListener('click', () => {
-    // TODO: Firebase — await signOut(auth); then redirect
-    window.location.href = 'employee-portal.html';
-  });
 </script>
 
 </body>
