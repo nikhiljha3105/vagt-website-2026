@@ -187,10 +187,11 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 /* ── HERO (homepage) ── */
 .hero {
   min-height: 100vh;
-  /* Replace with: background: linear-gradient(rgba(13,31,60,0.82),rgba(13,31,60,0.82)), url('../assets/images/hero-guard.jpg') center/cover; */
   background-image:
-    radial-gradient(ellipse at 75% 40%, rgba(29,61,107,0.55) 0%, transparent 60%),
-    linear-gradient(155deg, #0D1F3C 0%, #1A3461 55%, #0D1F3C 100%);
+    linear-gradient(to right, rgba(11,17,32,0.97) 0%, rgba(11,17,32,0.88) 50%, rgba(11,17,32,0.55) 100%),
+    url('../assets/images/hero/guards-access-control.jpg');
+  background-size: cover;
+  background-position: center right;
   position: relative;
   display: flex;
   align-items: center;
@@ -533,7 +534,9 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 
 /* ── PAGE HEADER (inner pages) ── */
 .page-header {
-  background: var(--navy);
+  background:
+    linear-gradient(to right, rgba(11,17,32,0.97) 0%, rgba(11,17,32,0.80) 55%, rgba(11,17,32,0.5) 100%),
+    url('../assets/images/hero/guards-patrol.jpg') center/cover no-repeat;
   padding: 60px 56px 48px;
   position: relative;
   overflow: hidden;
@@ -859,10 +862,9 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 
 /* ── REAL LOGO IMAGE IN SIDEBAR ── */
 .logo-img-wrap {
-  width: 88px; height: 40px; border-radius: 6px;
-  background: var(--amber); flex-shrink: 0;
+  width: 48px; height: 48px; border-radius: 8px;
+  background: transparent; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  padding: 5px 8px;
   overflow: hidden;
 }
 .logo-img {
