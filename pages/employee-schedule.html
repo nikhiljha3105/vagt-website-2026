@@ -3,143 +3,304 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Employee — Schedule | VAGT Security Services</title>
+  <title>My Schedule | VAGT Employee Portal</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <meta name="description" content="This section of the VAGT portal is temporarily unavailable while security configuration is completed. Please contact info@vagtsecurityservices.com for assistance."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    .maintenance-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg, #f5f5f5);
-      padding: 40px 20px;
+    .emp-sidebar-profile { padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    #authOverlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 9999; font-size: 13px; color: var(--text-muted); }
+    .dash-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 24px; } }
+    .dash-section-title { font-size: 9px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* Week navigator */
+    .week-nav {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
     }
-    .maintenance-card {
-      background: #fff;
-      border: 1px solid var(--border, #e0e0e0);
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      padding: 48px 40px 40px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    .week-nav-label { font-size: 15px; font-weight: 800; color: var(--navy); flex: 1; }
+    .week-nav-btn {
+      background: none; border: 1.5px solid var(--border); padding: 7px 14px;
+      font-size: 12px; font-weight: 600; color: var(--navy); cursor: pointer;
+      transition: border-color 0.15s;
     }
-    .maintenance-icon {
-      width: 64px;
-      height: 64px;
-      background: rgba(0,40,100,0.07);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
+    .week-nav-btn:hover { border-color: var(--navy); }
+
+    /* Schedule table */
+    .schedule-table { width: 100%; border-collapse: collapse; }
+    .schedule-table thead th {
+      font-size: 9px; font-weight: 700; color: var(--text-faint);
+      text-transform: uppercase; letter-spacing: 1.5px;
+      padding: 10px 16px; text-align: left;
+      border-bottom: 2px solid var(--border); background: var(--white);
     }
-    .maintenance-icon svg {
-      width: 28px;
-      height: 28px;
-      stroke: var(--navy, #002864);
-      fill: none;
-      stroke-width: 1.8;
+    .schedule-table tbody td {
+      padding: 16px; border-bottom: 1px solid var(--border);
+      vertical-align: top; font-size: 13px;
     }
-    .maintenance-badge {
-      display: inline-block;
-      background: rgba(245,196,0,0.15);
-      color: #7a5c00;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(245,196,0,0.35);
-      margin-bottom: 18px;
-    }
-    .maintenance-card h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--navy, #002864);
-      margin: 0 0 14px;
-      line-height: 1.3;
-    }
-    .maintenance-card p {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.75;
-      margin: 0 0 28px;
-    }
-    .maintenance-divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 0 0 24px;
-    }
-    .maintenance-contact {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.65;
-    }
-    .maintenance-contact a {
-      color: var(--navy, #002864);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .maintenance-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--navy, #002864);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      letter-spacing: 0.02em;
-      margin-bottom: 28px;
-    }
-    .maintenance-home-btn svg {
-      width: 14px; height: 14px;
-      stroke: currentColor; fill: none; stroke-width: 2.2;
+    .schedule-table tbody tr:last-child td { border-bottom: none; }
+    .schedule-table tbody tr.today-row { background: var(--amber-soft); }
+    .schedule-table tbody tr:hover { background: rgba(13,31,60,0.02); }
+    .schedule-table tbody tr.today-row:hover { background: rgba(245,196,0,0.14); }
+
+    .sched-day-col { font-weight: 700; color: var(--navy); white-space: nowrap; min-width: 90px; }
+    .sched-day-col .day-name  { font-size: 13px; }
+    .sched-day-col .day-date  { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .sched-day-col.today-day .day-name { color: var(--amber-dark); }
+
+    .sched-site    { font-size: 13.5px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .sched-time    { font-size: 12px; color: var(--text-muted); }
+    .sched-off     { font-size: 12px; color: var(--text-faint); font-style: italic; }
+    .sched-type    {
+      display: inline-block; font-size: 9px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 2px 9px; background: rgba(13,31,60,0.07); color: var(--navy);
+      margin-top: 4px;
     }
   </style>
 </head>
 <body>
-<div class="maintenance-wrap">
-  <div class="maintenance-card">
 
-    <div class="maintenance-icon">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Employee portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="employee-schedule.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+      </a>
+      <a href="employee-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incident Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Employee Portal</div>
+      <h1>My Schedule</h1>
+      <p>Your shift assignments for the selected week.</p>
     </div>
 
-    <div class="maintenance-badge">Portal Temporarily Disabled</div>
+    <div class="dash-content">
 
-    <h2>Portal Access Unavailable</h2>
+      <!-- Week navigator -->
+      <div class="week-nav">
+        <button class="week-nav-btn" id="prevWeekBtn">← Prev week</button>
+        <div class="week-nav-label" id="weekLabel">—</div>
+        <button class="week-nav-btn" id="nextWeekBtn">Next week →</button>
+      </div>
 
-    <p>
-      Our client, employee, and admin portals are currently offline
-      while we complete security configuration.
-      We will restore access as soon as the infrastructure is ready.
-    </p>
+      <!-- Schedule table -->
+      <div class="admin-table-wrap">
+        <table class="schedule-table" id="scheduleTable">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Site</th>
+              <th>Hours</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody">
+            <tr><td colspan="4" style="padding:24px 16px; color:var(--text-muted); font-size:13px;">Loading schedule…</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-    <a href="../index.html" class="maintenance-home-btn">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Back to VAGT Home
-    </a>
-
-    <hr class="maintenance-divider"/>
-
-    <div class="maintenance-contact">
-      Need immediate assistance?<br>
-      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
-      &nbsp;&middot;&nbsp;
-      <a href="tel:+919008977711">+91 90089 77711</a>
     </div>
-
-  </div>
+  </main>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+
+  // Week state (0 = current week, -1 = last, +1 = next)
+  let weekOffset = 0;
+  let currentUid = null;
+
+  function getWeekBounds(offset) {
+    const now = new Date();
+    const mon = new Date(now);
+    mon.setDate(now.getDate() - ((now.getDay() + 6) % 7) + offset * 7);
+    mon.setHours(0, 0, 0, 0);
+    const sun = new Date(mon);
+    sun.setDate(mon.getDate() + 6);
+    return { mon, sun };
+  }
+
+  function dateToStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function todayStr() { return dateToStr(new Date()); }
+
+  function fmtWeekLabel(mon, sun) {
+    const opts = { day: 'numeric', month: 'short' };
+    return mon.toLocaleDateString('en-IN', opts) + ' – ' + sun.toLocaleDateString('en-IN', { ...opts, year: 'numeric' });
+  }
+
+  async function loadSchedule(uid) {
+    const { mon, sun } = getWeekBounds(weekOffset);
+    setText('weekLabel', fmtWeekLabel(mon, sun));
+
+    const monStr = dateToStr(mon);
+    const sunStr = dateToStr(sun);
+
+    try {
+      const snap = await db.collection('shifts')
+        .where('employee_uid', '==', uid)
+        .where('date', '>=', monStr)
+        .where('date', '<=', sunStr)
+        .orderBy('date')
+        .get();
+
+      // Build a map: dateStr → shift data
+      const shiftMap = {};
+      snap.docs.forEach(function (doc) {
+        shiftMap[doc.data().date] = doc.data();
+      });
+
+      // Build 7-row table
+      const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(mon);
+        d.setDate(mon.getDate() + i);
+        const ds  = dateToStr(d);
+        const isToday = ds === todayStr();
+        const s   = shiftMap[ds];
+
+        const dayNum   = d.getDate();
+        const dayMonth = d.toLocaleString('en-IN', { month: 'short' });
+        const dayCls   = isToday ? 'sched-day-col today-day' : 'sched-day-col';
+        const rowCls   = isToday ? 'today-row' : '';
+
+        let siteCell, timeCell, typeCell;
+        if (s) {
+          siteCell = `<div class="sched-site">${s.site_name || 'Site TBC'}</div>`;
+          timeCell = `<div class="sched-time">${s.start_time || '—'} – ${s.end_time || '—'}</div>`;
+          typeCell = `<span class="sched-type">${s.shift_type || 'Day'}</span>`;
+        } else {
+          siteCell = `<span class="sched-off">Day off</span>`;
+          timeCell = '';
+          typeCell = '';
+        }
+
+        html += `
+          <tr class="${rowCls}">
+            <td class="${dayCls}">
+              <div class="day-name">${days[i]}${isToday ? ' <span style="font-size:9px; color:var(--amber-dark); font-weight:700;">TODAY</span>' : ''}</div>
+              <div class="day-date">${dayNum} ${dayMonth}</div>
+            </td>
+            <td>${siteCell}</td>
+            <td>${timeCell}</td>
+            <td>${typeCell}</td>
+          </tr>`;
+      }
+      setHTML('scheduleBody', html);
+    } catch (e) {
+      console.error('Schedule load failed:', e);
+      setHTML('scheduleBody', '<tr><td colspan="4" style="padding:24px 16px; color:var(--text-muted);">Could not load schedule. Please refresh.</td></tr>');
+    }
+  }
+
+  document.getElementById('prevWeekBtn').addEventListener('click', function () {
+    weekOffset--;
+    if (currentUid) loadSchedule(currentUid);
+  });
+  document.getElementById('nextWeekBtn').addEventListener('click', function () {
+    weekOffset++;
+    if (currentUid) loadSchedule(currentUid);
+  });
+
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role && token.claims.role !== 'employee') { window.location.href = 'portal.html'; return; }
+
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display = '';
+
+    currentUid = user.uid;
+
+    // Load sidebar profile
+    try {
+      const snap = await db.collection('employees').doc(user.uid).get();
+      if (snap.exists) {
+        const d = snap.data();
+        setText('sidebarName', d.name || '—');
+        setText('sidebarId',   d.employee_id || '—');
+        setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+      }
+    } catch (e) { /* sidebar profile not critical */ }
+
+    loadSchedule(user.uid);
+  });
+
+})();
+</script>
 </body>
 </html>

@@ -5,141 +5,506 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Employee Portal | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <meta name="description" content="This section of the VAGT portal is temporarily unavailable while security configuration is completed. Please contact info@vagtsecurityservices.com for assistance."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    .maintenance-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg, #f5f5f5);
-      padding: 40px 20px;
+    /* ── Employee sidebar profile block ── */
+    .emp-sidebar-profile {
+      padding: 14px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
     }
-    .maintenance-card {
-      background: #fff;
-      border: 1px solid var(--border, #e0e0e0);
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      padding: 48px 40px 40px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+
+    /* ── Full-page loading overlay ── */
+    #authOverlay {
+      position: fixed; inset: 0; background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; font-size: 13px; color: var(--text-muted);
     }
-    .maintenance-icon {
-      width: 64px;
-      height: 64px;
-      background: rgba(0,40,100,0.07);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
+
+    /* ── Dashboard content spacing ── */
+    .dash-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 24px; } }
+
+    .dash-section-title {
+      font-size: 9px; font-weight: 700; color: var(--text-faint);
+      text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;
     }
-    .maintenance-icon svg {
-      width: 28px;
-      height: 28px;
-      stroke: var(--navy, #002864);
-      fill: none;
-      stroke-width: 1.8;
+    .dash-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;
     }
-    .maintenance-badge {
-      display: inline-block;
-      background: rgba(245,196,0,0.15);
-      color: #7a5c00;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(245,196,0,0.35);
-      margin-bottom: 18px;
+    @media (max-width: 860px) { .dash-row { grid-template-columns: 1fr; } }
+
+    /* ── Shift preview list ── */
+    .shift-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0; border-bottom: 1px solid var(--border);
     }
-    .maintenance-card h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--navy, #002864);
-      margin: 0 0 14px;
-      line-height: 1.3;
+    .shift-item:last-child { border-bottom: none; }
+    .shift-date-box {
+      width: 40px; flex-shrink: 0; text-align: center;
+      background: var(--amber-soft); border: 1px solid rgba(245,196,0,0.25);
+      padding: 6px 4px;
     }
-    .maintenance-card p {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.75;
-      margin: 0 0 28px;
+    .shift-date-day   { font-size: 18px; font-weight: 900; color: var(--navy); line-height: 1; }
+    .shift-date-month { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .shift-info       { flex: 1; min-width: 0; }
+    .shift-site       { font-size: 13.5px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .shift-time       { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .shift-type-badge {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 2px 8px; background: rgba(13,31,60,0.07); color: var(--navy); flex-shrink: 0; margin-top: 2px;
     }
-    .maintenance-divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 0 0 24px;
+
+    /* ── Payslip preview ── */
+    .payslip-preview {
+      background: var(--white); border: 1px solid var(--border); padding: 24px;
     }
-    .maintenance-contact {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.65;
+    .payslip-preview-amount {
+      font-size: 32px; font-weight: 900; color: var(--navy); letter-spacing: -1.5px;
+      line-height: 1; margin: 8px 0 4px;
     }
-    .maintenance-contact a {
-      color: var(--navy, #002864);
-      font-weight: 600;
-      text-decoration: none;
+    .payslip-preview-label {
+      font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 18px;
     }
-    .maintenance-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--navy, #002864);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      letter-spacing: 0.02em;
-      margin-bottom: 28px;
+    .payslip-preview-row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
     }
-    .maintenance-home-btn svg {
-      width: 14px; height: 14px;
-      stroke: currentColor; fill: none; stroke-width: 2.2;
-    }
+    .payslip-preview-row:last-child { border-bottom: none; }
+    .payslip-preview-row .k { color: var(--text-muted); }
+    .payslip-preview-row .v { color: var(--navy); font-weight: 600; }
   </style>
 </head>
 <body>
-<div class="maintenance-wrap">
-  <div class="maintenance-card">
 
-    <div class="maintenance-icon">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+<!-- Auth loading overlay -->
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
     </div>
 
-    <div class="maintenance-badge">Portal Temporarily Disabled</div>
-
-    <h2>Portal Access Unavailable</h2>
-
-    <p>
-      Our client, employee, and admin portals are currently offline
-      while we complete security configuration.
-      We will restore access as soon as the infrastructure is ready.
-    </p>
-
-    <a href="../index.html" class="maintenance-home-btn">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Back to VAGT Home
-    </a>
-
-    <hr class="maintenance-divider"/>
-
-    <div class="maintenance-contact">
-      Need immediate assistance?<br>
-      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
-      &nbsp;&middot;&nbsp;
-      <a href="tel:+919008977711">+91 90089 77711</a>
+    <!-- Employee profile -->
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
     </div>
 
-  </div>
-</div>
+    <nav class="sidebar-nav" aria-label="Employee portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+      </a>
+      <a href="employee-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incident Reports
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <div class="page-header">
+      <div class="section-label">Employee Portal</div>
+      <h1 id="pageGreeting">Good day</h1>
+      <p id="pageSubtitle">Here's your overview for today.</p>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- Row 1: Attendance + Leave balance -->
+      <div class="dash-row">
+
+        <!-- Attendance card -->
+        <div>
+          <div class="dash-section-title">Today's Attendance</div>
+          <div class="attendance-card">
+            <div class="attendance-clock" id="liveClock">--:--</div>
+            <div class="attendance-date-label" id="liveDate">—</div>
+
+            <div class="attendance-status-wrap">
+              <span class="attendance-status-badge status-unknown" id="attendanceStatusBadge">Loading…</span>
+            </div>
+
+            <div class="attendance-actions" id="attendanceActions">
+              <!-- Populated by JS -->
+            </div>
+
+            <div class="attendance-log" id="attendanceLog">
+              <div class="attendance-log-label">Today's Record</div>
+              <div class="attendance-log-item">
+                <span class="log-key">Check-in</span>
+                <span class="log-val" id="logCheckIn">—</span>
+              </div>
+              <div class="attendance-log-item">
+                <span class="log-key">Check-out</span>
+                <span class="log-val" id="logCheckOut">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leave balance -->
+        <div>
+          <div class="dash-section-title">Leave Balance</div>
+          <div class="info-strip" style="max-width:100%; margin-bottom:20px;">
+            <div class="info-strip-cell">
+              <div class="info-strip-value" id="leaveCasual">—</div>
+              <div class="info-strip-label">Casual</div>
+            </div>
+            <div class="info-strip-cell">
+              <div class="info-strip-value" id="leaveSick">—</div>
+              <div class="info-strip-label">Sick</div>
+            </div>
+            <div class="info-strip-cell">
+              <div class="info-strip-value" id="leaveEarned">—</div>
+              <div class="info-strip-label">Earned</div>
+            </div>
+          </div>
+          <!-- Latest payslip -->
+          <div class="dash-section-title" style="margin-top:28px;">Latest Payslip</div>
+          <div class="payslip-preview" id="payslipBlock">
+            <div style="font-size:11px; color:var(--text-muted);">Loading…</div>
+          </div>
+        </div>
+
+      </div><!-- /dash-row -->
+
+      <!-- Row 2: Upcoming shifts -->
+      <div>
+        <div class="dash-section-title">Upcoming Shifts</div>
+        <div id="shiftsBlock">
+          <div style="font-size:13px; color:var(--text-muted);">Loading shifts…</div>
+        </div>
+        <div style="margin-top:14px;">
+          <a href="employee-schedule.html" style="font-size:12px; color:var(--navy); font-weight:600; text-decoration:none;">
+            View full schedule →
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </main>
+
+</div><!-- /layout -->
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+
+  function fmtTime(ts) {
+    if (!ts) return '—';
+    return ts.toDate().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  }
+  function fmtDate(d) {
+    return d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  }
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function greeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  // ── Live clock ────────────────────────────────────────────────────────────
+  function startClock() {
+    function tick() {
+      const now = new Date();
+      setText('liveClock', now.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false }));
+      setText('liveDate', fmtDate(now));
+    }
+    tick();
+    setInterval(tick, 1000);
+  }
+
+  // ── Mobile nav ────────────────────────────────────────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // ── Sign out ──────────────────────────────────────────────────────────────
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  // ── Auth guard ────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) {
+      window.location.href = 'portal.html';
+      return;
+    }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role && token.claims.role !== 'employee') {
+      window.location.href = 'portal.html';
+      return;
+    }
+
+    // Reveal UI
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display = '';
+
+    startClock();
+    await loadAll(user.uid);
+  });
+
+  // ── Load all dashboard data ───────────────────────────────────────────────
+  async function loadAll(uid) {
+    await Promise.allSettled([
+      loadProfile(uid),
+      loadAttendance(uid),
+      loadShifts(uid),
+      loadPayslip(uid),
+    ]);
+  }
+
+  // ── Profile ───────────────────────────────────────────────────────────────
+  async function loadProfile(uid) {
+    try {
+      const snap = await db.collection('employees').doc(uid).get();
+      if (!snap.exists) return;
+      const d = snap.data();
+      const firstName = (d.name || '').split(' ')[0];
+      setText('pageGreeting', greeting() + ', ' + firstName);
+      setText('pageSubtitle', "Here's your overview for today, " + todayStr() + '.');
+      setText('sidebarName', d.name || '—');
+      setText('sidebarId',   d.employee_id || '—');
+      setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+      // Leave balance
+      const lb = d.leave_balance || {};
+      setText('leaveCasual', lb.casual  != null ? lb.casual  : '—');
+      setText('leaveSick',   lb.sick    != null ? lb.sick    : '—');
+      setText('leaveEarned', lb.earned  != null ? lb.earned  : '—');
+    } catch (e) {
+      console.error('Profile load failed:', e);
+    }
+  }
+
+  // ── Today's attendance ────────────────────────────────────────────────────
+  let todayLogId = null;
+
+  async function loadAttendance(uid) {
+    try {
+      const snap = await db.collection('attendance_logs')
+        .where('employee_uid', '==', uid)
+        .where('date', '==', todayStr())
+        .limit(1)
+        .get();
+
+      renderAttendance(uid, snap.empty ? null : { id: snap.docs[0].id, ...snap.docs[0].data() });
+    } catch (e) {
+      console.error('Attendance load failed:', e);
+      setText('attendanceStatusBadge', 'Error loading');
+    }
+  }
+
+  function renderAttendance(uid, log) {
+    const badge   = document.getElementById('attendanceStatusBadge');
+    const actions = document.getElementById('attendanceActions');
+
+    if (!log) {
+      // Not checked in yet
+      badge.textContent = 'Not Checked In';
+      badge.className   = 'attendance-status-badge status-idle';
+      setText('logCheckIn',  '—');
+      setText('logCheckOut', '—');
+      actions.innerHTML = `
+        <button class="btn btn-amber" onclick="checkIn('${uid}')">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Check In
+        </button>`;
+    } else if (log.check_in && !log.check_out) {
+      // Checked in, not out
+      todayLogId = log.id;
+      badge.textContent = 'On Duty';
+      badge.className   = 'attendance-status-badge status-active';
+      setText('logCheckIn',  fmtTime(log.check_in));
+      setText('logCheckOut', '—');
+      actions.innerHTML = `
+        <button class="btn btn-outline-navy" onclick="checkOut('${uid}')">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Check Out
+        </button>`;
+    } else {
+      // Shift complete
+      todayLogId = log.id;
+      badge.textContent = 'Shift Complete';
+      badge.className   = 'attendance-status-badge status-done';
+      setText('logCheckIn',  fmtTime(log.check_in));
+      setText('logCheckOut', fmtTime(log.check_out));
+      actions.innerHTML = '';
+    }
+  }
+
+  window.checkIn = async function (uid) {
+    const btn = document.querySelector('#attendanceActions button');
+    if (btn) { btn.textContent = 'Checking in…'; btn.disabled = true; }
+    try {
+      const ref = await db.collection('attendance_logs').add({
+        employee_uid: uid,
+        date:         todayStr(),
+        check_in:     firebase.firestore.FieldValue.serverTimestamp(),
+        check_out:    null,
+      });
+      todayLogId = ref.id;
+      await loadAttendance(uid);
+    } catch (e) {
+      alert('Check-in failed. Please try again.\n' + e.message);
+      if (btn) { btn.textContent = 'Check In'; btn.disabled = false; }
+    }
+  };
+
+  window.checkOut = async function (uid) {
+    if (!todayLogId) return;
+    const btn = document.querySelector('#attendanceActions button');
+    if (btn) { btn.textContent = 'Checking out…'; btn.disabled = true; }
+    try {
+      await db.collection('attendance_logs').doc(todayLogId).update({
+        check_out: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      await loadAttendance(uid);
+    } catch (e) {
+      alert('Check-out failed. Please try again.\n' + e.message);
+      if (btn) { btn.textContent = 'Check Out'; btn.disabled = false; }
+    }
+  };
+
+  // ── Upcoming shifts ───────────────────────────────────────────────────────
+  async function loadShifts(uid) {
+    try {
+      const snap = await db.collection('shifts')
+        .where('employee_uid', '==', uid)
+        .where('date', '>=', todayStr())
+        .orderBy('date')
+        .limit(5)
+        .get();
+
+      if (snap.empty) {
+        setHTML('shiftsBlock', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>No upcoming shifts scheduled.</div>');
+        return;
+      }
+
+      const html = snap.docs.map(function (doc) {
+        const s = doc.data();
+        const dt = new Date(s.date + 'T00:00:00');
+        const day = dt.getDate();
+        const mon = dt.toLocaleString('en-IN', { month: 'short' }).toUpperCase();
+        const timeRange = (s.start_time || '—') + ' – ' + (s.end_time || '—');
+        return `
+          <div class="shift-item">
+            <div class="shift-date-box">
+              <div class="shift-date-day">${day}</div>
+              <div class="shift-date-month">${mon}</div>
+            </div>
+            <div class="shift-info">
+              <div class="shift-site">${s.site_name || 'Site TBC'}</div>
+              <div class="shift-time">${timeRange}</div>
+            </div>
+            <div class="shift-type-badge">${s.shift_type || 'Day'}</div>
+          </div>`;
+      }).join('');
+      setHTML('shiftsBlock', html);
+    } catch (e) {
+      console.error('Shifts load failed:', e);
+      setHTML('shiftsBlock', '<div style="font-size:13px; color:var(--text-muted);">Could not load shifts.</div>');
+    }
+  }
+
+  // ── Latest payslip ────────────────────────────────────────────────────────
+  async function loadPayslip(uid) {
+    try {
+      const snap = await db.collection('payslips')
+        .where('employee_uid', '==', uid)
+        .orderBy('period', 'desc')
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        setHTML('payslipBlock', '<div style="font-size:13px; color:var(--text-muted);">No payslips available yet.</div>');
+        return;
+      }
+
+      const s = snap.docs[0].data();
+      const fmt = function (n) {
+        return '₹' + Number(n || 0).toLocaleString('en-IN');
+      };
+      setHTML('payslipBlock', `
+        <div style="font-size:9px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px;">${s.period || '—'}</div>
+        <div class="payslip-preview-amount">${fmt(s.net_pay)}</div>
+        <div class="payslip-preview-label">Net pay</div>
+        <div class="payslip-preview-row"><span class="k">Basic</span><span class="v">${fmt(s.basic)}</span></div>
+        <div class="payslip-preview-row"><span class="k">Allowances</span><span class="v">${fmt(s.allowances)}</span></div>
+        <div class="payslip-preview-row"><span class="k">Deductions</span><span class="v">${fmt(s.deductions)}</span></div>
+        ${s.pdf_url ? `<div style="margin-top:14px;"><a href="${s.pdf_url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-navy" style="font-size:11px; padding:8px 16px;">Download PDF</a></div>` : ''}
+      `);
+    } catch (e) {
+      console.error('Payslip load failed:', e);
+      setHTML('payslipBlock', '<div style="font-size:13px; color:var(--text-muted);">Could not load payslip.</div>');
+    }
+  }
+
+})();
+</script>
 </body>
 </html>
