@@ -1,0 +1,155 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2868
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 Times-Bold;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat0\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid101\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid2}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww51000\viewh25040\viewkind0
+\deftab720
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 You are a senior frontend engineer, Firebase architect, and product designer.\
+You are working on an existing production website called 
+\f1\b vagtservices.com
+\f0\b0  for a security company called 
+\f1\b VAGT Services
+\f0\b0 .\
+The site already has:\
+\'95 a dark themed dashboard style layout\uc0\u8232 \'95 a left sidebar navigation\u8232 \'95 services including Security Services and Facilities Management\u8232 \'95 Firebase already integrated\u8232 \'95 an existing UI that must NOT be broken\
+Your job is to 
+\f1\b add a new premium service called "Security Audit"
+\f0\b0  with minimal disruption to the existing codebase.\
+Do NOT redesign the entire site.\
+Only add the necessary components.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 GOALS\
+Add a 
+\f1\b Security Audit feature
+\f0\b0  that:\
+\'95 stands out in the sidebar\uc0\u8232 \'95 opens a dedicated page\u8232 \'95 explains the audit service\u8232 \'95 allows users to request an audit\u8232 \'95 prepares the structure for a future audit inspection system\
+All changes must be lightweight and easy to integrate.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 SIDEBAR MODIFICATION\
+Under the SERVICES section of the sidebar, add:\
+Security Services\uc0\u8232 Facilities Management\u8232 \u11088  Security Audit\u8232 Intelligent Surveillance (Soon)\
+Security Audit should visually stand out with either:\
+\'95 a shield icon\uc0\u8232 \'95 a yellow badge labeled "NEW" or "AUDIT"\u8232 \'95 slightly highlighted styling\
+Do not break existing navigation.\
+Clicking Security Audit should navigate to:\
+/security-audit\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 SECURITY AUDIT PAGE\
+Create a new page:\
+/security-audit\
+This page should include the following sections.\
+SECTION 1 \'97 HERO\
+Title:\uc0\u8232 Security & Safety Audit\
+Subtitle:\uc0\u8232 Professional facility security assessments to identify risks before incidents occur.\
+Primary Button:\uc0\u8232 Request an Audit\
+Secondary Button:\uc0\u8232 Contact Us\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 SECTION 2 \'97 WHAT WE INSPECT\
+Display the audit domains as cards or list items.\
+Perimeter Security\uc0\u8232 Access Control Systems\u8232 CCTV Coverage\u8232 Security Guard Deployment\u8232 Fire Safety Compliance\u8232 Electrical Safety\u8232 Structural Safety\u8232 Industrial / Operational Safety\u8232 Environmental Safety\u8232 Emergency Preparedness\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 SECTION 3 \'97 SAMPLE AUDIT OUTPUT\
+Show a sample audit report preview.\
+Example:\
+Audit ID: VAGT/0326/Audit/Commercial/004\
+Facility Safety Score: 78 / 100\
+Key Findings:\uc0\u8232 \'95 CCTV blind spots in loading area\u8232 \'95 fire extinguisher inspection overdue\u8232 \'95 perimeter lighting insufficient\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 SECTION 4 \'97 AUDIT REQUEST FORM\
+Create a simple form with these fields.\
+Company / Facility Name\uc0\u8232 Property Type (Residential, Commercial, Industrial, Institutional)\u8232 Location / Address\u8232 Contact Name\u8232 Phone Number\u8232 Email\u8232 Approximate Facility Size\u8232 Additional Notes\
+On submission:\
+\'95 store request in Firebase Firestore\uc0\u8232 \'95 collection name: auditRequests\
+Firestore structure:\
+auditRequests\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 requestId\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 facilityName\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 propertyType\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 address\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 contactName\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 phone\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 email\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 facilitySize\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 notes\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 createdAt\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 status (new / contacted / scheduled)\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 OPTIONAL INTERNAL FEATURE PREPARATION\
+Prepare basic Firestore collections for future audits.\
+facilities\uc0\u8232 audits\u8232 auditQuestions\u8232 auditResponses\u8232 auditPhotos\
+These collections do not need full UI yet.\
+Only define their structure.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 FIREBASE STORAGE STRUCTURE\
+Prepare storage path for audit photos.\
+/audits/\{auditId\}/\{category\}/\{photoId\}.jpg\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 AUDIT ID FORMAT\
+Future audits should follow this ID structure.\
+VAGT/MMYY/Audit/(InfrastructureType)/(SequenceNumber)\
+Example:\
+VAGT/0326/Audit/Commercial/004\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 UI REQUIREMENTS\
+\'95 Must match the existing dark theme\uc0\u8232 \'95 Must use current typography and colors\u8232 \'95 Must work on mobile\u8232 \'95 Must integrate with existing sidebar layout\u8232 \'95 Must not break current pages\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 DELIVERABLES\
+Generate:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 sidebar navigation update\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 full code structure for the /security-audit page\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 audit request form\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	4	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Firestore write logic\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	5	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Firestore schema definitions\
+\ls2\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	6	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 minimal UI components needed\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 Focus on 
+\f1\b clean, minimal changes that integrate smoothly with the existing codebase.
+\f0\b0 \
+}

@@ -798,7 +798,7 @@
         <!-- KPI Cards -->
         <div class="kpi-grid">
           <div class="kpi-card">
-            <div class="kpi-value">—</div>
+            <div class="kpi-value">10</div>
             <div class="kpi-label">Guards Deployed</div>
           </div>
           <div class="kpi-card">
@@ -806,12 +806,12 @@
             <div class="kpi-label">Incidents This Month</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-value">—</div>
-            <div class="kpi-label">SLA Compliance</div>
+            <div class="kpi-value">88%</div>
+            <div class="kpi-label">Jan Attendance Rate</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-value">—</div>
-            <div class="kpi-label">Next Invoice Due</div>
+            <div class="kpi-value">229</div>
+            <div class="kpi-label">Guard-Days Jan 2026</div>
           </div>
         </div>
 
@@ -852,27 +852,183 @@
 
       <!-- PANEL 2: Guard Deployment -->
       <div class="panel-content" id="deployment">
+
+        <!-- HATS OFF LIVE TEAM INTELLIGENCE ─────────────────── -->
+        <style>
+          .team-header { margin-bottom: 24px; }
+          .team-header h2 { font-size: 20px; font-weight: 800; color: #111827; margin-bottom: 4px; }
+          .team-header p { font-size: 13px; color: #6b7280; }
+          .team-kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+          .team-kpi { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; text-align: center; }
+          .team-kpi-val { font-size: 28px; font-weight: 800; color: #0b1120; line-height: 1; margin-bottom: 4px; }
+          .team-kpi-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; color: #6b7280; }
+          .team-kpi-val.green { color: #059669; }
+          .guard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px; }
+          .guard-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px; position: relative; overflow: hidden; }
+          .guard-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: #f5c400; }
+          .guard-card.veteran::before { background: #0b1120; }
+          .guard-card-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+          .guard-avatar { width: 44px; height: 44px; border-radius: 50%; background: #0b1120; color: #f5c400; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+          .guard-card.veteran .guard-avatar { background: #1e3a5f; }
+          .guard-name { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 1px; }
+          .guard-desig { font-size: 12px; color: #6b7280; }
+          .guard-code { font-size: 10px; font-weight: 700; color: #9ca3af; font-family: monospace; letter-spacing: 0.5px; }
+          .guard-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+          .guard-stat { text-align: center; }
+          .guard-stat-val { font-size: 15px; font-weight: 800; color: #111827; line-height: 1; }
+          .guard-stat-val.amber { color: #d97706; }
+          .guard-stat-val.green { color: #059669; }
+          .guard-stat-label { font-size: 9px; font-weight: 600; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.3px; margin-top: 2px; }
+          .att-bar { height: 4px; background: #f3f4f6; border-radius: 2px; overflow: hidden; margin-bottom: 12px; }
+          .att-bar-fill { height: 100%; border-radius: 2px; background: #10b981; transition: width 0.6s; }
+          .att-bar-fill.medium { background: #f59e0b; }
+          .att-bar-fill.low { background: #ef4444; }
+          .guard-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+          .guard-tag { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+          .tag-veteran { background: #eff6ff; color: #1d4ed8; }
+          .tag-reliable { background: #f0fdf4; color: #15803d; }
+          .tag-ot { background: #fef3c7; color: #92400e; }
+          .tag-new { background: #f5f3ff; color: #6d28d9; }
+          .welfare-section { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 20px; }
+          .welfare-section h3 { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f3f4f6; }
+          .welfare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+          .welfare-tile { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; }
+          .welfare-tile-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #374151; margin-bottom: 8px; }
+          .welfare-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; margin-bottom: 4px; }
+          .pill-active { background: #d1fae5; color: #065f46; }
+          .pill-pending { background: #fef3c7; color: #92400e; }
+          .badge-digital-note { margin-top: 20px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #1e40af; line-height: 1.6; }
+          @media (max-width: 600px) { .team-kpi-strip { grid-template-columns: 1fr 1fr; } .welfare-grid { grid-template-columns: 1fr; } }
+        </style>
+
+        <div class="team-header">
+          <h2>Your Deployed Team — Hats Off</h2>
+          <p>January 2026 · Contract VAGT-C-2023-001 · 10 active guards · Data updated daily</p>
+        </div>
+
+        <!-- Summary KPIs -->
+        <div class="team-kpi-strip">
+          <div class="team-kpi">
+            <div class="team-kpi-val">10</div>
+            <div class="team-kpi-label">Active Guards</div>
+          </div>
+          <div class="team-kpi">
+            <div class="team-kpi-val green">229</div>
+            <div class="team-kpi-label">Guard-Days Jan</div>
+          </div>
+          <div class="team-kpi">
+            <div class="team-kpi-val">88%</div>
+            <div class="team-kpi-label">Avg Attendance</div>
+          </div>
+          <div class="team-kpi">
+            <div class="team-kpi-val">33</div>
+            <div class="team-kpi-label">Months Longest Tenure</div>
+          </div>
+        </div>
+
+        <!-- Guard Cards -->
+        <div class="guard-grid" id="guard-grid">
+          <!-- Injected by JS below -->
+        </div>
+
+        <!-- Welfare Management -->
+        <div class="welfare-section">
+          <h3>🛡 How We Manage Your Team's Welfare</h3>
+          <div class="welfare-grid">
+            <div class="welfare-tile">
+              <div class="welfare-tile-title">Provident Fund (PF)</div>
+              <div class="welfare-pill pill-active">● Tracked Digitally</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:6px;">Enrollment status per guard maintained in VAGT's digital HR system. Updated monthly alongside payroll.</div>
+            </div>
+            <div class="welfare-tile">
+              <div class="welfare-tile-title">ESIC Medical Cover</div>
+              <div class="welfare-pill pill-active">● Tracked Digitally</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:6px;">Each eligible guard's ESIC card status is recorded. Guards can self-enroll on first login.</div>
+            </div>
+            <div class="welfare-tile">
+              <div class="welfare-tile-title">Identity Verification</div>
+              <div class="welfare-pill pill-active">● Live QR Badges</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:6px;">Every guard carries a digital ID badge. Scan the QR to verify identity and active status in real time.</div>
+            </div>
+            <div class="welfare-tile">
+              <div class="welfare-tile-title">Payroll & Compliance</div>
+              <div class="welfare-pill pill-pending">● Phase 2</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:6px;">Full payroll ledger, TDS, and PF remittance reports will be available in Phase 2 of this portal.</div>
+            </div>
+          </div>
+          <div class="badge-digital-note">
+            ℹ️ <strong>Scanning a guard's badge</strong> — Each deployed guard's digital ID card includes a QR code. Point your phone camera at it to verify their name, designation, site, and employment status instantly.
+          </div>
+        </div>
+
+        <script>
+          const GUARDS = [
+            { name: "Abhilash Br",     code: "HTO-427", desig: "Field Officer",     att: 88, janDays: 26, otTotal: 272, months: 24 },
+            { name: "Arnab Nandi",     code: "HTO-868", desig: "Field Officer",     att: 96, janDays: 25, otTotal: 0,   months: 1  },
+            { name: "Arumugam",        code: "HTO-285", desig: "Security Guard",    att: 65, janDays: 17, otTotal: 163, months: 33 },
+            { name: "Kempa Raju",      code: "HTO-008", desig: "Security Guard",    att: 96, janDays: 25, otTotal: 109, months: 33 },
+            { name: "Lal Singh K",     code: "HTO-321", desig: "Security Officer",  att: 100,janDays: 27, otTotal: 0,   months: 33 },
+            { name: "Mohan Raj P",     code: "HTO-799", desig: "Security Guard",    att: 92, janDays: 24, otTotal: 29,  months: 13 },
+            { name: "Prashanta B",     code: "HTO-439", desig: "Security Guard",    att: 100,janDays: 27, otTotal: 42,  months: 11 },
+            { name: "Sambhu Manna",    code: "HTO-098", desig: "Security Guard",    att: 23, janDays: 6,  otTotal: 147, months: 30 },
+            { name: "Sandeep S",       code: "HTO-SDS", desig: "Field Officer",     att: 96, janDays: 25, otTotal: 205, months: 18 },
+            { name: "Vikram Bv",       code: "HTO-009", desig: "Security Guard",    att: 100,janDays: 27, otTotal: 45,  months: 10 }
+          ];
+
+          function renderGuards() {
+            const grid = document.getElementById('guard-grid');
+            if (!grid) return;
+            grid.innerHTML = GUARDS.map(g => {
+              const initials = g.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+              const veteran = g.months >= 12;
+              const attColor = g.att >= 85 ? 'green' : g.att >= 60 ? 'medium' : 'low';
+              const attValColor = g.att >= 85 ? 'green' : g.att >= 60 ? 'amber' : 'amber';
+              const tags = [];
+              if (g.months >= 24) tags.push('<span class="guard-tag tag-veteran">Veteran</span>');
+              if (g.att >= 90) tags.push('<span class="guard-tag tag-reliable">Reliable</span>');
+              if (g.otTotal > 100) tags.push('<span class="guard-tag tag-ot">OT Heavy</span>');
+              if (g.months <= 2) tags.push('<span class="guard-tag tag-new">New</span>');
+              return `
+                <div class="guard-card ${veteran ? 'veteran' : ''}">
+                  <div class="guard-card-top">
+                    <div class="guard-avatar">${initials}</div>
+                    <div>
+                      <div class="guard-name">${g.name}</div>
+                      <div class="guard-desig">${g.desig}</div>
+                      <div class="guard-code">${g.code}</div>
+                    </div>
+                  </div>
+                  <div class="guard-stats">
+                    <div class="guard-stat">
+                      <div class="guard-stat-val ${attValColor}">${g.att}%</div>
+                      <div class="guard-stat-label">Avg Att.</div>
+                    </div>
+                    <div class="guard-stat">
+                      <div class="guard-stat-val">${g.janDays}</div>
+                      <div class="guard-stat-label">Jan Days</div>
+                    </div>
+                    <div class="guard-stat">
+                      <div class="guard-stat-val">${g.months}</div>
+                      <div class="guard-stat-label">Months</div>
+                    </div>
+                  </div>
+                  <div class="att-bar">
+                    <div class="att-bar-fill ${attColor}" style="width:${g.att}%"></div>
+                  </div>
+                  <div class="guard-tags">${tags.join('') || '<span style="font-size:11px;color:#9ca3af;">—</span>'}</div>
+                </div>`;
+            }).join('');
+          }
+          document.addEventListener('DOMContentLoaded', renderGuards);
+          setTimeout(renderGuards, 100);
+        </script>
+
+        <!-- Legacy table kept hidden, replaced by guard-grid above -->
+        <div style="display:none">
         <div class="section-card">
           <div class="section-header">
             <h2 class="section-title">Guard Deployment Summary</h2>
-            <span class="phase2-badge">Phase 2</span>
           </div>
-
-          <div class="mini-stats">
-            <div class="mini-stat">
-              <div class="mini-stat-value">—</div>
-              <div class="mini-stat-label">Total Posted</div>
-            </div>
-            <div class="mini-stat">
-              <div class="mini-stat-value">—</div>
-              <div class="mini-stat-label">On Duty Now</div>
-            </div>
-            <div class="mini-stat">
-              <div class="mini-stat-value">—</div>
-              <div class="mini-stat-label">Posts Covered</div>
-            </div>
-          </div>
-
           <div class="table-wrapper">
             <table>
               <thead>

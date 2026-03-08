@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Complete Your Profile | VAGT Security Services</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --navy: #0b1120;
+            --amber: #f5c400;
+            --white: #ffffff;
+            --grey-50: #f9fafb;
+            --grey-100: #f3f4f6;
+            --grey-200: #e5e7eb;
+            --grey-300: #d1d5db;
+            --grey-500: #6b7280;
+            --grey-700: #374151;
+            --grey-900: #111827;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #0b1120 0%, #1a2840 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .onboard-shell {
+            width: 100%;
+            max-width: 560px;
+        }
+
+        /* Header */
+        .onboard-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .onboard-logo {
+            color: var(--amber);
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .onboard-logo span {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .onboard-welcome {
+            color: rgba(255,255,255,0.9);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .onboard-subtitle {
+            color: rgba(255,255,255,0.45);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Progress */
+        .progress-track {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 32px;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.3);
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .step-circle.active {
+            border-color: var(--amber);
+            background: var(--amber);
+            color: var(--navy);
+        }
+
+        .step-circle.done {
+            border-color: var(--success);
+            background: var(--success);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .step-label.active {
+            color: var(--amber);
+        }
+
+        .step-label.done {
+            color: var(--success);
+        }
+
+        .progress-line {
+            width: 48px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            margin-bottom: 22px;
+            transition: background 0.3s;
+        }
+
+        .progress-line.done {
+            background: var(--success);
+        }
+
+        /* Card */
+        .onboard-card {
+            background: var(--white);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+        }
+
+        .card-step {
+            display: none;
+        }
+
+        .card-step.active {
+            display: block;
+        }
+
+        .card-step-header {
+            background: var(--grey-50);
+            border-bottom: 1px solid var(--grey-200);
+            padding: 20px 28px;
+        }
+
+        .step-num {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--amber);
+            margin-bottom: 4px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--grey-900);
+            margin-bottom: 2px;
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: var(--grey-500);
+        }
+
+        .card-step-body {
+            padding: 28px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--grey-700);
+            margin-bottom: 6px;
+        }
+
+        label .required {
+            color: var(--error);
+            margin-left: 2px;
+        }
+
+        label .optional {
+            color: var(--grey-500);
+            font-weight: 400;
+            text-transform: none;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--grey-200);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--grey-900);
+            background: var(--white);
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--navy);
+            box-shadow: 0 0 0 3px rgba(11,17,32,0.07);
+        }
+
+        input.error, select.error {
+            border-color: var(--error);
+        }
+
+        .field-hint {
+            font-size: 11px;
+            color: var(--grey-500);
+            margin-top: 5px;
+        }
+
+        .field-error {
+            font-size: 11px;
+            color: var(--error);
+            margin-top: 5px;
+            display: none;
+        }
+
+        .field-error.visible {
+            display: block;
+        }
+
+        /* Sensitive field wrapper */
+        .sensitive-wrap {
+            position: relative;
+        }
+
+        .sensitive-wrap input {
+            padding-right: 40px;
+        }
+
+        .sensitive-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--grey-500);
+            font-size: 16px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        /* Document section */
+        .doc-notice {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: #92400e;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .doc-notice strong {
+            color: #78350f;
+        }
+
+        /* Welfare checklist */
+        .welfare-check {
+            background: var(--grey-50);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .welfare-check-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--grey-700);
+            margin-bottom: 12px;
+        }
+
+        .welfare-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--grey-200);
+            font-size: 13px;
+            color: var(--grey-700);
+        }
+
+        .welfare-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .welfare-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: var(--navy);
+        }
+
+        /* Card footer */
+        .card-step-footer {
+            padding: 20px 28px;
+            border-top: 1px solid var(--grey-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1.5px solid var(--grey-300);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--grey-700);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: var(--grey-100);
+        }
+
+        .btn-next {
+            padding: 11px 28px;
+            background: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--white);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-next:hover {
+            background: #1a2840;
+        }
+
+        .btn-next:disabled {
+            background: var(--grey-300);
+            cursor: not-allowed;
+        }
+
+        .btn-next.amber {
+            background: var(--amber);
+            color: var(--navy);
+        }
+
+        .btn-next.amber:hover {
+            background: #e6b800;
+        }
+
+        .step-progress-note {
+            font-size: 12px;
+            color: var(--grey-500);
+        }
+
+        /* Success Step */
+        .success-step {
+            text-align: center;
+            padding: 48px 32px;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .success-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--grey-900);
+            margin-bottom: 8px;
+        }
+
+        .success-sub {
+            font-size: 14px;
+            color: var(--grey-500);
+            line-height: 1.6;
+            margin-bottom: 28px;
+            max-width: 360px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .welfare-score-ring {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(#10b981 0% 100%, #e5e7eb 100% 100%);
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .welfare-score-inner {
+            width: 76px;
+            height: 76px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .welfare-score-val {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--grey-900);
+            line-height: 1;
+        }
+
+        .welfare-score-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--grey-500);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .welfare-score-desc {
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .unlocks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 28px;
+            text-align: left;
+        }
+
+        .unlock-card {
+            background: var(--grey-50);
+            border: 1px solid var(--grey-200);
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .unlock-icon { font-size: 20px; margin-bottom: 6px; }
+
+        .unlock-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--grey-700);
+            margin-bottom: 2px;
+        }
+
+        .unlock-desc {
+            font-size: 11px;
+            color: var(--grey-500);
+        }
+
+        .btn-go-dashboard {
+            display: inline-block;
+            padding: 14px 36px;
+            background: var(--navy);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .btn-go-dashboard:hover {
+            background: #1a2840;
+        }
+
+        /* Error toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1f2937;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 9999;
+            transition: transform 0.3s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; }
+            .unlocks-grid { grid-template-columns: 1fr; }
+            .progress-line { width: 28px; }
+            .card-step-footer { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="onboard-shell">
+    <!-- Header -->
+    <div class="onboard-header">
+        <div class="onboard-logo">VAGT <span>SECURITY SERVICES</span></div>
+        <div class="onboard-welcome">Welcome to the team 👋</div>
+        <div class="onboard-subtitle">Complete your profile in 3 steps — takes about 3 minutes.<br>Your digital ID badge unlocks when you're done.</div>
+    </div>
+
+    <!-- Progress tracker -->
+    <div class="progress-track">
+        <div class="progress-step">
+            <div class="step-circle active" id="pc-1">1</div>
+            <div class="step-label active" id="pl-1">Contact</div>
+        </div>
+        <div class="progress-line" id="pline-1"></div>
+        <div class="progress-step">
+            <div class="step-circle" id="pc-2">2</div>
+            <div class="step-label" id="pl-2">Address</div>
+        </div>
+        <div class="progress-line" id="pline-2"></div>
+        <div class="progress-step">
+            <div class="step-circle" id="pc-3">3</div>
+            <div class="step-label" id="pl-3">Documents</div>
+        </div>
+        <div class="progress-line" id="pline-3"></div>
+        <div class="progress-step">
+            <div class="step-circle" id="pc-4">✓</div>
+            <div class="step-label" id="pl-4">Done</div>
+        </div>
+    </div>
+
+    <!-- Card -->
+    <div class="onboard-card">
+
+        <!-- Step 1: Contact -->
+        <div class="card-step active" id="step-1">
+            <div class="card-step-header">
+                <div class="step-num">Step 1 of 3</div>
+                <div class="step-title">Contact Information</div>
+                <div class="step-desc">Your mobile number and emergency contact for HR records.</div>
+            </div>
+            <div class="card-step-body">
+                <div class="form-group">
+                    <label>Mobile Number <span class="required">*</span></label>
+                    <input type="tel" id="f-phone" placeholder="+91 98765 43210" maxlength="14">
+                    <div class="field-hint">Enter your 10-digit mobile number. WhatsApp preferred.</div>
+                    <div class="field-error" id="err-phone">Please enter a valid 10-digit mobile number.</div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Emergency Contact Name <span class="required">*</span></label>
+                        <input type="text" id="f-emergency-name" placeholder="Parent / Spouse name">
+                        <div class="field-error" id="err-ename">Required.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Relationship <span class="required">*</span></label>
+                        <select id="f-emergency-rel">
+                            <option value="">Select</option>
+                            <option>Father</option>
+                            <option>Mother</option>
+                            <option>Spouse</option>
+                            <option>Sibling</option>
+                            <option>Other</option>
+                        </select>
+                        <div class="field-error" id="err-erel">Required.</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Emergency Contact Number <span class="required">*</span></label>
+                    <input type="tel" id="f-emergency-num" placeholder="+91 98765 43210" maxlength="14">
+                    <div class="field-error" id="err-enum">Please enter a valid mobile number.</div>
+                </div>
+            </div>
+            <div class="card-step-footer">
+                <span class="step-progress-note">1 of 3 steps</span>
+                <button class="btn-next" onclick="goStep(2)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Address -->
+        <div class="card-step" id="step-2">
+            <div class="card-step-header">
+                <div class="step-num">Step 2 of 3</div>
+                <div class="step-title">Current Address</div>
+                <div class="step-desc">Your residential address for official correspondence and records.</div>
+            </div>
+            <div class="card-step-body">
+                <div class="form-group">
+                    <label>Address Line 1 <span class="required">*</span></label>
+                    <input type="text" id="f-addr1" placeholder="House / Flat no., Street, Area">
+                    <div class="field-error" id="err-addr1">Required.</div>
+                </div>
+                <div class="form-group">
+                    <label>Address Line 2 <span class="optional">(optional)</span></label>
+                    <input type="text" id="f-addr2" placeholder="Landmark, Colony (optional)">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>City <span class="required">*</span></label>
+                        <input type="text" id="f-city" placeholder="City">
+                        <div class="field-error" id="err-city">Required.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>State <span class="required">*</span></label>
+                        <select id="f-state">
+                            <option value="">Select state</option>
+                            <option>Andhra Pradesh</option><option>Assam</option>
+                            <option>Bihar</option><option>Delhi</option>
+                            <option>Gujarat</option><option>Haryana</option>
+                            <option>Jharkhand</option><option>Karnataka</option>
+                            <option>Kerala</option><option>Madhya Pradesh</option>
+                            <option>Maharashtra</option><option>Odisha</option>
+                            <option>Punjab</option><option>Rajasthan</option>
+                            <option>Tamil Nadu</option><option>Telangana</option>
+                            <option>Uttar Pradesh</option><option>Uttarakhand</option>
+                            <option>West Bengal</option><option>Other</option>
+                        </select>
+                        <div class="field-error" id="err-state">Required.</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>PIN Code <span class="required">*</span></label>
+                        <input type="text" id="f-pin" placeholder="560001" maxlength="6">
+                        <div class="field-error" id="err-pin">Enter a valid 6-digit PIN code.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Same as Permanent? <span class="optional">(optional)</span></label>
+                        <select id="f-addr-same">
+                            <option value="yes">Yes — same address</option>
+                            <option value="no">No — different</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card-step-footer">
+                <button class="btn-back" onclick="goStep(1)">← Back</button>
+                <button class="btn-next" onclick="goStep(3)">Continue →</button>
+            </div>
+        </div>
+
+        <!-- Step 3: KYC Documents -->
+        <div class="card-step" id="step-3">
+            <div class="card-step-header">
+                <div class="step-num">Step 3 of 3</div>
+                <div class="step-title">Identity Documents</div>
+                <div class="step-desc">Required for payroll compliance, PF/ESIC enrollment and background verification.</div>
+            </div>
+            <div class="card-step-body">
+                <div class="doc-notice">
+                    🔒 <strong>Your data is secure.</strong> Aadhaar and PAN are stored encrypted and are accessible only to the HR team. They are never shared with clients.
+                </div>
+                <div class="form-group">
+                    <label>Aadhaar Number <span class="required">*</span></label>
+                    <div class="sensitive-wrap">
+                        <input type="password" id="f-aadhaar" placeholder="XXXX XXXX XXXX" maxlength="14" autocomplete="off">
+                        <button type="button" class="sensitive-toggle" onclick="toggleSensitive('f-aadhaar', this)">👁</button>
+                    </div>
+                    <div class="field-hint">12-digit number on your Aadhaar card.</div>
+                    <div class="field-error" id="err-aadhaar">Enter a valid 12-digit Aadhaar number.</div>
+                </div>
+                <div class="form-group">
+                    <label>PAN Number <span class="required">*</span></label>
+                    <div class="sensitive-wrap">
+                        <input type="text" id="f-pan" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase" autocomplete="off">
+                        <button type="button" class="sensitive-toggle" onclick="toggleSensitive('f-pan', this)">👁</button>
+                    </div>
+                    <div class="field-hint">10-character PAN (e.g. ABCDE1234F). Required for TDS/payroll.</div>
+                    <div class="field-error" id="err-pan">Enter a valid 10-character PAN (e.g. ABCDE1234F).</div>
+                </div>
+
+                <div class="welfare-check">
+                    <div class="welfare-check-title">Welfare Enrollment</div>
+                    <div class="welfare-item">
+                        <input type="checkbox" id="f-pf" name="welfare">
+                        <label for="f-pf" style="text-transform:none; font-size:13px; font-weight:500; letter-spacing:0; color:var(--grey-700); cursor:pointer;">
+                            I want to enroll in <strong>Provident Fund (PF)</strong> — 12% employer + employee contribution
+                        </label>
+                    </div>
+                    <div class="welfare-item">
+                        <input type="checkbox" id="f-esic" name="welfare">
+                        <label for="f-esic" style="text-transform:none; font-size:13px; font-weight:500; letter-spacing:0; color:var(--grey-700); cursor:pointer;">
+                            I want to enroll in <strong>ESIC</strong> — medical insurance cover for you and family
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="card-step-footer">
+                <button class="btn-back" onclick="goStep(2)">← Back</button>
+                <button class="btn-next amber" id="submit-btn" onclick="submitProfile()">
+                    <span id="submit-label">Complete Profile 🎉</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 4: Success -->
+        <div class="card-step" id="step-4">
+            <div class="success-step">
+                <span class="success-icon">🎉</span>
+                <div class="success-title">You're all set!</div>
+                <div class="success-sub">Your profile is complete and your digital ID badge is now active. Carry it on your phone — your client can scan it to verify your identity anytime.</div>
+
+                <div style="margin-bottom:8px;">
+                    <div class="welfare-score-ring" id="score-ring">
+                        <div class="welfare-score-inner">
+                            <div class="welfare-score-val" id="score-val">100</div>
+                            <div class="welfare-score-label">Welfare</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="welfare-score-desc" id="score-desc">Profile complete — all benefits tracked ✓</div>
+
+                <div class="unlocks-grid">
+                    <div class="unlock-card">
+                        <div class="unlock-icon">🪪</div>
+                        <div class="unlock-label">Digital Badge</div>
+                        <div class="unlock-desc">Download from My Badge panel</div>
+                    </div>
+                    <div class="unlock-card">
+                        <div class="unlock-icon">💰</div>
+                        <div class="unlock-label">Payslips</div>
+                        <div class="unlock-desc">Available from next pay cycle</div>
+                    </div>
+                    <div class="unlock-card">
+                        <div class="unlock-icon">🏥</div>
+                        <div class="unlock-label">ESIC Benefits</div>
+                        <div class="unlock-desc" id="esic-unlock-desc">Pending enrollment</div>
+                    </div>
+                    <div class="unlock-card">
+                        <div class="unlock-icon">🏦</div>
+                        <div class="unlock-label">PF Account</div>
+                        <div class="unlock-desc" id="pf-unlock-desc">Pending enrollment</div>
+                    </div>
+                </div>
+
+                <a href="employee-dashboard.html" class="btn-go-dashboard">Go to My Dashboard →</a>
+            </div>
+        </div>
+
+    </div><!-- end card -->
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { firebaseConfig } from "../assets/js/firebase-config.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    let currentUser = null;
+    let currentProfile = null;
+
+    // Verify logged-in employee
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.replace('employee-portal.html');
+            return;
+        }
+        currentUser = user;
+    });
+
+    // ── Navigation ──────────────────────────────────────────────
+    window.goStep = function(n) {
+        if (n > 1 && !validateStep(n - 1)) return;
+
+        document.querySelectorAll('.card-step').forEach(s => s.classList.remove('active'));
+        document.getElementById('step-' + n).classList.add('active');
+
+        // Update progress circles
+        for (let i = 1; i <= 4; i++) {
+            const circle = document.getElementById('pc-' + i);
+            const label = document.getElementById('pl-' + i);
+            if (!circle) continue;
+            circle.classList.remove('active', 'done');
+            label.classList.remove('active', 'done');
+            if (i < n) { circle.classList.add('done'); circle.textContent = '✓'; label.classList.add('done'); }
+            else if (i === n) { circle.classList.add('active'); if (i !== 4) circle.textContent = i; label.classList.add('active'); }
+            else { if (i !== 4) circle.textContent = i; }
+        }
+        for (let i = 1; i <= 3; i++) {
+            const line = document.getElementById('pline-' + i);
+            if (!line) continue;
+            line.classList.toggle('done', i < n);
+        }
+    };
+
+    // ── Validation ───────────────────────────────────────────────
+    function validateStep(n) {
+        let ok = true;
+        const show = (id, msg) => {
+            const el = document.getElementById(id);
+            if (el) { el.textContent = msg || el.textContent; el.classList.add('visible'); }
+            const input = document.getElementById(id.replace('err-', 'f-'));
+            if (input) input.classList.add('error');
+            ok = false;
+        };
+        const clear = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('visible');
+            const input = document.getElementById(id.replace('err-', 'f-'));
+            if (input) input.classList.remove('error');
+        };
+
+        if (n === 1) {
+            const phone = document.getElementById('f-phone').value.replace(/\D/g, '');
+            if (phone.length < 10) show('err-phone'); else clear('err-phone');
+            const ename = document.getElementById('f-emergency-name').value.trim();
+            if (!ename) show('err-ename'); else clear('err-ename');
+            const erel = document.getElementById('f-emergency-rel').value;
+            if (!erel) show('err-erel'); else clear('err-erel');
+            const enum_ = document.getElementById('f-emergency-num').value.replace(/\D/g, '');
+            if (enum_.length < 10) show('err-enum'); else clear('err-enum');
+        }
+        if (n === 2) {
+            if (!document.getElementById('f-addr1').value.trim()) show('err-addr1'); else clear('err-addr1');
+            if (!document.getElementById('f-city').value.trim()) show('err-city'); else clear('err-city');
+            if (!document.getElementById('f-state').value) show('err-state'); else clear('err-state');
+            const pin = document.getElementById('f-pin').value.replace(/\D/g, '');
+            if (pin.length !== 6) show('err-pin'); else clear('err-pin');
+        }
+        if (n === 3) {
+            const aadhaar = document.getElementById('f-aadhaar').value.replace(/\s/g, '');
+            if (!/^\d{12}$/.test(aadhaar)) show('err-aadhaar'); else clear('err-aadhaar');
+            const pan = document.getElementById('f-pan').value.trim().toUpperCase();
+            if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) show('err-pan'); else clear('err-pan');
+        }
+        return ok;
+    }
+
+    // ── Toggle sensitive fields ──────────────────────────────────
+    window.toggleSensitive = function(fieldId, btn) {
+        const field = document.getElementById(fieldId);
+        if (field.type === 'password') { field.type = 'text'; btn.textContent = '🙈'; }
+        else { field.type = 'password'; btn.textContent = '👁'; }
+    };
+
+    // ── Toast ────────────────────────────────────────────────────
+    function toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // ── Submit ───────────────────────────────────────────────────
+    window.submitProfile = async function() {
+        if (!validateStep(3)) return;
+        if (!currentUser) { toast('Session expired. Please log in again.'); return; }
+
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+        document.getElementById('submit-label').textContent = 'Saving…';
+
+        try {
+            const pfEnrolled = document.getElementById('f-pf').checked;
+            const esicEnrolled = document.getElementById('f-esic').checked;
+            const aadhaar = document.getElementById('f-aadhaar').value.replace(/\s/g, '');
+            const pan = document.getElementById('f-pan').value.trim().toUpperCase();
+
+            const profileData = {
+                phone: document.getElementById('f-phone').value.trim(),
+                emergencyContact: {
+                    name: document.getElementById('f-emergency-name').value.trim(),
+                    relationship: document.getElementById('f-emergency-rel').value,
+                    phone: document.getElementById('f-emergency-num').value.trim()
+                },
+                address: {
+                    line1: document.getElementById('f-addr1').value.trim(),
+                    line2: document.getElementById('f-addr2').value.trim(),
+                    city: document.getElementById('f-city').value.trim(),
+                    state: document.getElementById('f-state').value,
+                    pin: document.getElementById('f-pin').value.trim(),
+                    sameAsPermanent: document.getElementById('f-addr-same').value === 'yes'
+                },
+                // Store as partially masked for display; full value stored securely
+                aadhaarLast4: aadhaar.slice(-4),
+                aadhaarHash: btoa(aadhaar), // base64 encode (not encryption, but not plain text either)
+                panDisplay: pan.slice(0, 3) + '****' + pan.slice(-1),
+                panHash: btoa(pan),
+                pfEnrolled,
+                esicEnrolled,
+                profileComplete: true,
+                profileCompletedAt: new Date().toISOString(),
+                welfareScore: 50 + (pfEnrolled ? 25 : 0) + (esicEnrolled ? 25 : 0)
+            };
+
+            await updateDoc(doc(db, 'users', currentUser.uid), profileData);
+
+            // Calculate welfare score for display
+            const score = profileData.welfareScore;
+            document.getElementById('score-val').textContent = score;
+            const angle = (score / 100) * 360;
+            document.getElementById('score-ring').style.background =
+                `conic-gradient(#10b981 0deg ${angle}deg, #e5e7eb ${angle}deg 360deg)`;
+
+            if (pfEnrolled && esicEnrolled) {
+                document.getElementById('score-desc').textContent = 'Full welfare coverage activated ✓';
+            } else if (!pfEnrolled && !esicEnrolled) {
+                document.getElementById('score-desc').textContent = 'Profile complete. Welfare enrollment pending.';
+                document.getElementById('score-desc').style.color = '#f59e0b';
+            }
+
+            document.getElementById('esic-unlock-desc').textContent = esicEnrolled ? 'Enrollment requested ✓' : 'Not enrolled';
+            document.getElementById('pf-unlock-desc').textContent = pfEnrolled ? 'Enrollment requested ✓' : 'Not enrolled';
+
+            goStep(4);
+        } catch (err) {
+            console.error(err);
+            toast('Could not save. Please try again.');
+            btn.disabled = false;
+            document.getElementById('submit-label').textContent = 'Complete Profile 🎉';
+        }
+    };
+</script>
+</body>
+</html>

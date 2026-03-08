@@ -72,6 +72,15 @@ export function requireAuth(requiredRole, loginUrl) {
           return;
         }
 
+        // Employee-only: redirect to onboarding wizard if profile not yet complete
+        if (profile.role === 'employee' && !profile.profileComplete) {
+          // Only redirect if we're NOT already on the onboard page
+          if (!window.location.pathname.includes('employee-onboard')) {
+            window.location.replace('employee-onboard.html');
+            return;
+          }
+        }
+
         resolve({ user, profile });
 
       } catch (err) {
