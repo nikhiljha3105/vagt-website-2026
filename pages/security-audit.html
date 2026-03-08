@@ -4,399 +4,195 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Security Audit | VAGT Security Services</title>
-  <meta name="description" content="Professional facility security assessments to identify risks before incidents occur. Request a VAGT Security Audit for your property."/>
-  <link rel="icon" href="../assets/img/favicon.png" type="image/png"/>
+  <meta name="description" content="Professional facility security assessments to identify risks before incidents occur. Request a VAGT Security Audit for your property in Bangalore."/>
+  <link rel="canonical" href="https://vagtservices.com/pages/security-audit.html"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://vagtservices.com/pages/security-audit.html"/>
+  <meta property="og:title" content="Security Audit | VAGT Security Services"/>
+  <meta property="og:description" content="Professional facility security assessments to identify risks before incidents occur. Request a VAGT Security Audit for your property in Bangalore."/>
+  <meta property="og:site_name" content="VAGT Security Services"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    /* ── Security Audit Page Styles ── */
+    /* ── Audit-specific additions (all inherit the light theme) ── */
 
-    /* Hero */
-    .audit-hero {
-      padding: 64px 0 56px;
-      position: relative;
-      overflow: hidden;
-    }
-    .audit-hero::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -80px;
-      width: 420px; height: 420px;
-      background: radial-gradient(circle, rgba(245,196,0,0.06) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .audit-hero-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: var(--amber);
-      background: rgba(245,196,0,0.1);
-      border: 1px solid rgba(245,196,0,0.2);
-      padding: 5px 12px;
-      border-radius: 20px;
-      margin-bottom: 24px;
-    }
-    .audit-hero-label svg {
-      width: 11px; height: 11px;
-      stroke: var(--amber); fill: none; stroke-width: 2;
-    }
-    .audit-hero h1 {
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      font-weight: 800;
-      color: var(--warm-white);
-      line-height: 1.15;
-      max-width: 640px;
-      margin-bottom: 18px;
-    }
-    .audit-hero h1 span {
-      color: var(--amber);
-    }
-    .audit-hero p {
-      font-size: 1.05rem;
-      color: rgba(247,246,242,0.65);
-      max-width: 520px;
-      line-height: 1.7;
-      margin-bottom: 36px;
-    }
-    .audit-hero-cta {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .audit-hero-cta .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      background: var(--amber);
+    /* Domain cards — icon matches existing .service-icon pattern */
+    .audit-domain-name {
+      font-size: 13.5px;
+      font-weight: 600;
       color: var(--navy);
-      font-weight: 700;
-      font-size: 0.88rem;
-      letter-spacing: 0.3px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.2s, transform 0.15s;
-    }
-    .audit-hero-cta .btn-primary:hover { background: var(--amber-dark); transform: translateY(-1px); }
-    .audit-hero-cta .btn-primary svg { width: 15px; height: 15px; stroke: var(--navy); fill: none; stroke-width: 2.2; }
-    .audit-hero-cta .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 28px;
-      background: transparent;
-      color: var(--warm-white);
-      font-weight: 600;
-      font-size: 0.88rem;
-      border: 1px solid rgba(247,246,242,0.2);
-      border-radius: 4px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .audit-hero-cta .btn-secondary:hover { border-color: var(--amber); color: var(--amber); }
-    .audit-hero-stats {
-      display: flex;
-      gap: 40px;
-      margin-top: 52px;
-      padding-top: 36px;
-      border-top: 1px solid rgba(247,246,242,0.08);
-      flex-wrap: wrap;
-    }
-    .audit-stat-item { text-align: left; }
-    .audit-stat-num {
-      font-size: 1.9rem;
-      font-weight: 800;
-      color: var(--amber);
-      line-height: 1;
-    }
-    .audit-stat-label {
-      font-size: 0.75rem;
-      color: rgba(247,246,242,0.45);
-      letter-spacing: 0.4px;
-      margin-top: 4px;
-    }
-
-    /* Section headers */
-    .audit-section {
-      padding: 56px 0;
-      border-top: 1px solid rgba(247,246,242,0.06);
-    }
-    .section-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 10px;
-    }
-    .section-title {
-      font-size: 1.65rem;
-      font-weight: 800;
-      color: var(--warm-white);
-      margin-bottom: 8px;
-    }
-    .section-sub {
-      font-size: 0.9rem;
-      color: rgba(247,246,242,0.5);
-      max-width: 480px;
-      line-height: 1.6;
-      margin-bottom: 36px;
-    }
-
-    /* Inspect cards */
-    .inspect-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 14px;
-    }
-    .inspect-card {
-      background: rgba(247,246,242,0.03);
-      border: 1px solid rgba(247,246,242,0.07);
-      border-radius: 6px;
-      padding: 18px 16px;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .inspect-card:hover {
-      border-color: rgba(245,196,0,0.25);
-      background: rgba(245,196,0,0.04);
-    }
-    .inspect-icon {
-      width: 32px; height: 32px;
-      background: rgba(245,196,0,0.1);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .inspect-icon svg {
-      width: 15px; height: 15px;
-      stroke: var(--amber); fill: none; stroke-width: 1.8;
-    }
-    .inspect-card-name {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--warm-white);
       line-height: 1.4;
     }
 
-    /* Sample report */
-    .sample-report {
-      background: rgba(13,31,60,0.6);
+    /* Sample report block */
+    .audit-report-wrap {
+      max-width: 620px;
+    }
+    .audit-report {
+      background: rgba(255,255,255,0.04);
       border: 1px solid rgba(245,196,0,0.18);
-      border-radius: 8px;
-      padding: 28px 32px;
-      max-width: 640px;
+      padding: 28px 30px;
       font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-      font-size: 0.8rem;
+      font-size: 12px;
     }
-    .report-header {
+    .report-top {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(247,246,242,0.08);
+      gap: 16px;
       flex-wrap: wrap;
-      gap: 10px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 18px;
     }
-    .report-id { color: rgba(247,246,242,0.4); font-size: 0.72rem; }
-    .report-id span { color: var(--amber); font-weight: 700; }
-    .report-score-badge {
-      background: rgba(245,196,0,0.12);
-      border: 1px solid rgba(245,196,0,0.25);
+    .report-id-line {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+    }
+    .report-id-line strong {
       color: var(--amber);
-      font-weight: 800;
-      font-size: 0.9rem;
-      padding: 5px 14px;
-      border-radius: 20px;
-    }
-    .report-score-label {
-      font-size: 0.65rem;
-      color: rgba(247,246,242,0.35);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-left: 6px;
-    }
-    .report-section-title {
-      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: rgba(247,246,242,0.3);
-      margin-bottom: 10px;
-      margin-top: 16px;
     }
-    .report-finding {
+    .report-date-line {
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      margin-top: 3px;
+    }
+    .report-score {
+      background: rgba(245,196,0,0.12);
+      border: 1px solid rgba(245,196,0,0.3);
+      color: var(--amber);
+      font-size: 18px;
+      font-weight: 900;
+      padding: 8px 16px;
+      white-space: nowrap;
+    }
+    .report-score span {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.3);
+      display: block;
+      text-align: center;
+      margin-top: 2px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .report-section-head {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+      margin-bottom: 10px;
+      margin-top: 18px;
+    }
+    .report-row {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(247,246,242,0.04);
-      font-family: inherit;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
+      line-height: 1.5;
     }
-    .report-finding:last-child { border-bottom: none; }
-    .finding-dot {
-      width: 6px; height: 6px;
+    .report-row:last-child { border-bottom: none; }
+    .report-dot {
+      width: 7px; height: 7px;
       border-radius: 50%;
-      background: var(--amber);
       margin-top: 5px;
       flex-shrink: 0;
     }
-    .finding-dot.red { background: #E05555; }
-    .finding-dot.orange { background: #E08A30; }
-    .report-finding span { color: rgba(247,246,242,0.65); }
-    .report-footer {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(247,246,242,0.06);
-      font-size: 0.68rem;
-      color: rgba(247,246,242,0.2);
+    .dot-red    { background: #E05555; }
+    .dot-orange { background: #E08A30; }
+    .dot-amber  { background: var(--amber); }
+    .dot-muted  { background: rgba(255,255,255,0.15); }
+    .report-bottom {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 10px;
+      color: rgba(255,255,255,0.18);
     }
-    .report-watermark {
-      color: rgba(245,196,0,0.25);
-      font-weight: 800;
-      letter-spacing: 2px;
+    .report-wm {
+      color: rgba(245,196,0,0.2);
+      font-weight: 900;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      font-size: 0.65rem;
     }
 
-    /* Form */
-    .audit-form-wrap {
-      max-width: 680px;
-    }
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    @media(max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .form-group.full { grid-column: 1 / -1; }
-    .form-group label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: rgba(247,246,242,0.55);
-      letter-spacing: 0.3px;
-      text-transform: uppercase;
-    }
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      background: rgba(247,246,242,0.04);
-      border: 1px solid rgba(247,246,242,0.1);
-      border-radius: 5px;
-      padding: 11px 14px;
-      color: var(--warm-white);
-      font-size: 0.88rem;
-      font-family: inherit;
-      transition: border-color 0.2s, background 0.2s;
-      outline: none;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .form-group input::placeholder,
-    .form-group textarea::placeholder { color: rgba(247,246,242,0.2); }
-    .form-group select { appearance: none; cursor: pointer; color: rgba(247,246,242,0.8); }
-    .form-group select option { background: #0D1F3C; color: var(--warm-white); }
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      border-color: rgba(245,196,0,0.4);
-      background: rgba(247,246,242,0.06);
-    }
-    .form-group textarea { resize: vertical; min-height: 90px; }
-    .form-submit {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 32px;
-      background: var(--amber);
-      color: var(--navy);
-      font-weight: 700;
-      font-size: 0.88rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: background 0.2s, transform 0.15s;
-    }
-    .form-submit:hover { background: var(--amber-dark); transform: translateY(-1px); }
-    .form-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .form-submit svg { width: 15px; height: 15px; stroke: var(--navy); fill: none; stroke-width: 2.5; }
-    .form-note {
-      font-size: 0.75rem;
-      color: rgba(247,246,242,0.3);
-      margin-top: 14px;
-      line-height: 1.5;
-    }
-    /* Toast notification */
+    /* Form success/error toast */
     .form-toast {
       display: none;
       align-items: center;
       gap: 10px;
       padding: 14px 18px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      font-size: 13.5px;
       font-weight: 600;
       margin-top: 16px;
-      max-width: 480px;
     }
     .form-toast.success {
       display: flex;
       background: rgba(34,197,94,0.1);
-      border: 1px solid rgba(34,197,94,0.25);
-      color: #6ee7a0;
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #5fcea0;
     }
     .form-toast.error {
       display: flex;
-      background: rgba(224,85,85,0.1);
-      border: 1px solid rgba(224,85,85,0.25);
-      color: #f0a0a0;
+      background: rgba(196,30,30,0.08);
+      border: 1px solid rgba(196,30,30,0.2);
+      color: #e07070;
     }
-    .form-toast svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+    .form-toast svg {
+      width: 16px; height: 16px;
+      stroke: currentColor; fill: none; stroke-width: 2.2;
+      flex-shrink: 0;
+    }
 
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .audit-hero-stats { gap: 24px; }
-      .audit-stat-num { font-size: 1.5rem; }
-      .sample-report { padding: 20px; }
-    }
+    /* Submit spinner */
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spin { animation: spin 0.9s linear infinite; }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation">
+  <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<div class="layout">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="logo-mark">V</div>
-      <div>
-        <div class="logo-name">VAGT</div>
-        <div class="logo-sub">Security Services</div>
-      </div>
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+      <p class="pronunciation">[ <em>vaht</em> ] — the <em>g</em> stands guard, silently.</p>
+    </div>
+    <div class="sidebar-portals">
+      <a href="employee-portal.html" class="portal-btn">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Employee
+      </a>
+      <a href="client-portal.html" class="portal-btn">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Client
+      </a>
     </div>
     <nav class="sidebar-nav">
       <a href="../index.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Home
       </a>
-
       <div class="nav-group-label">Services</div>
       <a href="security.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -416,7 +212,6 @@
         Intelligent Surveillance
         <span class="nav-badge">Soon</span>
       </a>
-
       <div class="nav-group-label">Company</div>
       <a href="about.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
@@ -424,226 +219,234 @@
       </a>
       <a href="contact.html" class="nav-link">
         <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Contact
+        Contact / Audit
       </a>
     </nav>
     <div class="sidebar-footer">
-      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br>
-      <a href="tel:+919008977711">+91 90089 77711</a>
+      <div class="sidebar-footer-label">Get in touch</div>
+      <p>
+        <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a><br>
+        <a href="tel:+919008977711">+91 90089 77711</a>
+      </p>
     </div>
   </aside>
 
-  <!-- Overlay for mobile -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <!-- ══ MAIN ══ -->
+  <main class="main">
 
-  <!-- Main content -->
-  <main class="main-content">
-    <header class="topbar">
-      <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
-      <div class="topbar-breadcrumb">Services → Security Audit</div>
-      <div class="portal-buttons">
-        <a href="admin-portal.html" class="portal-btn">Admin</a>
-        <a href="client-portal.html" class="portal-btn">Client Portal</a>
-        <a href="employee-portal.html" class="portal-btn">Employee Login</a>
-      </div>
-    </header>
+    <!-- ── PAGE HEADER ── -->
+    <div class="page-header">
+      <div class="section-label">Services</div>
+      <h1>Security &amp; Safety Audit</h1>
+      <p>Professional on-site assessments to identify security vulnerabilities before incidents occur. Every audit produces a scored, structured report with prioritised findings and remediation steps.</p>
+    </div>
 
-    <div class="page-content">
-
-      <!-- ── SECTION 1: HERO ── -->
-      <section class="audit-hero">
-        <div class="audit-hero-label">
-          <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          Premium Service · Now Available
-        </div>
-        <h1>Security &amp; <span>Safety Audit</span></h1>
-        <p>Professional facility security assessments to identify risks before incidents occur. Know your vulnerabilities. Fix them first.</p>
-        <div class="audit-hero-cta">
-          <a href="#audit-request-form" class="btn-primary">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Request an Audit
-          </a>
-          <a href="contact.html" class="btn-secondary">Contact Us</a>
-        </div>
-        <div class="audit-hero-stats">
-          <div class="audit-stat-item">
-            <div class="audit-stat-num">10</div>
-            <div class="audit-stat-label">Audit Domains</div>
-          </div>
-          <div class="audit-stat-item">
-            <div class="audit-stat-num">48h</div>
-            <div class="audit-stat-label">Report Turnaround</div>
-          </div>
-          <div class="audit-stat-item">
-            <div class="audit-stat-num">100%</div>
-            <div class="audit-stat-label">On-site Assessment</div>
-          </div>
-          <div class="audit-stat-item">
-            <div class="audit-stat-num">VAGT</div>
-            <div class="audit-stat-label">Certified Auditors</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ── SECTION 2: WHAT WE INSPECT ── -->
-      <section class="audit-section">
+    <!-- ── WHAT WE INSPECT ── -->
+    <section class="section">
+      <div class="section-head">
         <div class="section-label">What We Inspect</div>
-        <div class="section-title">10 Critical Security Domains</div>
-        <p class="section-sub">Every audit covers all major risk vectors — physical, operational, and environmental.</p>
-        <div class="inspect-grid">
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            </div>
-            <div class="inspect-card-name">Perimeter Security</div>
+        <h2 class="section-title">10 critical domains,<br>covered in every audit.</h2>
+        <p class="section-sub">No area is left unassessed. Physical, operational, and environmental risks are evaluated against industry standards and VAGT's internal benchmark.</p>
+      </div>
+
+      <div class="grid-4" style="gap: 18px;">
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            </div>
-            <div class="inspect-card-name">Access Control Systems</div>
+          <h3>Perimeter Security</h3>
+          <p>Boundary fencing, lighting, gate access, and unauthorised entry points assessed against standard protection levels.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </div>
-            <div class="inspect-card-name">CCTV Coverage</div>
+          <h3>Access Control Systems</h3>
+          <p>Physical and electronic access management — badge systems, biometrics, visitor logs, and key management practices.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            </div>
-            <div class="inspect-card-name">Security Guard Deployment</div>
+          <h3>CCTV Coverage</h3>
+          <p>Camera placement, blind spots, recording retention, and system condition reviewed for complete site visibility.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-            </div>
-            <div class="inspect-card-name">Fire Safety Compliance</div>
+          <h3>Guard Deployment</h3>
+          <p>Post coverage, shift handover, beat patrolling frequency, and guard conduct compliance on-site.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </div>
-            <div class="inspect-card-name">Electrical Safety</div>
+          <h3>Fire Safety Compliance</h3>
+          <p>Extinguisher placement, inspection dates, hydrant access, fire exits, and evacuation plan adequacy.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            </div>
-            <div class="inspect-card-name">Structural Safety</div>
+          <h3>Electrical Safety</h3>
+          <p>Panel access restrictions, earthing, exposed wiring, emergency isolation points, and compliance status.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4l-5 16-4-8-4 4-5-4"/></svg>
-            </div>
-            <div class="inspect-card-name">Industrial / Operational Safety</div>
+          <h3>Structural Safety</h3>
+          <p>Visible structural concerns, unsafe storage, overhead hazards, floor conditions, and signage gaps.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4l-5 16-4-8-4 4-5-4"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
-            </div>
-            <div class="inspect-card-name">Environmental Safety</div>
+          <h3>Industrial Safety</h3>
+          <p>PPE compliance, hazardous material storage, machinery guarding, and operational safety procedure adherence.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
           </div>
-          <div class="inspect-card">
-            <div class="inspect-icon">
-              <svg viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <h3>Environmental Safety</h3>
+          <p>Waste disposal, chemical storage, spill containment, and environmental exposure risk review.</p>
+        </div>
+
+        <div class="card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h3>Emergency Preparedness</h3>
+          <p>ERT team readiness, evacuation drills, BCP documentation, first aid availability, and incident command protocols.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── SAMPLE AUDIT OUTPUT ── -->
+    <section class="section section-dark">
+      <div class="grid-2-1" style="gap: 64px;">
+        <div>
+          <div class="section-label">Sample Output</div>
+          <h2 class="section-title">What your audit report looks like.</h2>
+          <p class="section-sub" style="margin-bottom: 32px;">Every report is scored, structured, and actionable. Findings are prioritised by risk level — critical, moderate, and advisory — with specific corrective actions for each.</p>
+
+          <div class="diff-item" style="border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 24px;">
+            <div class="diff-num">01</div>
+            <div>
+              <h4>Scored against 10 domains</h4>
+              <p>A composite safety score out of 100 with per-domain breakdowns, so you know exactly where you stand.</p>
             </div>
-            <div class="inspect-card-name">Emergency Preparedness</div>
+          </div>
+          <div class="diff-item" style="border-bottom: 1px solid rgba(255,255,255,0.07); padding: 24px 0;">
+            <div class="diff-num">02</div>
+            <div>
+              <h4>Prioritised findings</h4>
+              <p>Critical, moderate, and advisory findings listed clearly with on-site photographic evidence where relevant.</p>
+            </div>
+          </div>
+          <div class="diff-item" style="border-bottom: none; padding-top: 24px;">
+            <div class="diff-num">03</div>
+            <div>
+              <h4>Remediation roadmap</h4>
+              <p>Every finding comes with a specific corrective action, responsible party recommendation, and suggested timeline.</p>
+            </div>
           </div>
         </div>
-      </section>
 
-      <!-- ── SECTION 3: SAMPLE AUDIT OUTPUT ── -->
-      <section class="audit-section">
-        <div class="section-label">Sample Audit Output</div>
-        <div class="section-title">What Your Report Looks Like</div>
-        <p class="section-sub">Every audit produces a structured, scored report with prioritised findings and remediation guidance.</p>
+        <div>
+          <div class="audit-report-wrap">
+            <div class="audit-report">
+              <div class="report-top">
+                <div>
+                  <div class="report-id-line">Audit ID: <strong>VAGT/0326/Audit/Commercial/004</strong></div>
+                  <div class="report-date-line">Commercial Facility · Bangalore · 26 Mar 2026</div>
+                </div>
+                <div class="report-score">
+                  78
+                  <span>/ 100</span>
+                </div>
+              </div>
 
-        <div class="sample-report">
-          <div class="report-header">
-            <div>
-              <div class="report-id">Audit ID: <span>VAGT/0326/Audit/Commercial/004</span></div>
-              <div style="font-size:0.7rem; color:rgba(247,246,242,0.3); margin-top:4px;">Commercial Facility · Bangalore · 26 Mar 2026</div>
-            </div>
-            <div style="text-align:right;">
-              <div>
-                <span class="report-score-badge">78 / 100</span>
-                <span class="report-score-label">Safety Score</span>
+              <div class="report-section-head">Key Findings</div>
+              <div class="report-row">
+                <div class="report-dot dot-red"></div>
+                <span>CCTV blind spots in loading bay and service corridor</span>
+              </div>
+              <div class="report-row">
+                <div class="report-dot dot-orange"></div>
+                <span>Fire extinguisher inspection overdue — 3 units affected</span>
+              </div>
+              <div class="report-row">
+                <div class="report-dot dot-amber"></div>
+                <span>Perimeter lighting insufficient along northern boundary</span>
+              </div>
+
+              <div class="report-section-head">Corrective Actions</div>
+              <div class="report-row">
+                <div class="report-dot dot-muted"></div>
+                <span>Install 2x PTZ cameras to cover loading area</span>
+              </div>
+              <div class="report-row">
+                <div class="report-dot dot-muted"></div>
+                <span>Schedule fire equipment servicing within 14 days</span>
+              </div>
+              <div class="report-row">
+                <div class="report-dot dot-muted"></div>
+                <span>Install motion-activated floodlights — north perimeter</span>
+              </div>
+
+              <div class="report-bottom">
+                <span>Audited by VAGT Certified Inspector · Confidential</span>
+                <span class="report-wm">VAGT</span>
               </div>
             </div>
           </div>
-
-          <div class="report-section-title">Key Findings</div>
-          <div class="report-finding">
-            <div class="finding-dot red"></div>
-            <span>CCTV blind spots identified in loading bay and service corridor</span>
-          </div>
-          <div class="report-finding">
-            <div class="finding-dot orange"></div>
-            <span>Fire extinguisher inspection overdue by 4 months — 3 units affected</span>
-          </div>
-          <div class="report-finding">
-            <div class="finding-dot"></div>
-            <span>Perimeter lighting insufficient along northern boundary after 22:00</span>
-          </div>
-
-          <div class="report-section-title">Recommended Actions</div>
-          <div class="report-finding">
-            <div class="finding-dot" style="background:rgba(247,246,242,0.2)"></div>
-            <span>Install 2x PTZ cameras to cover loading area blind spots</span>
-          </div>
-          <div class="report-finding">
-            <div class="finding-dot" style="background:rgba(247,246,242,0.2)"></div>
-            <span>Schedule fire equipment servicing within 14 days</span>
-          </div>
-          <div class="report-finding">
-            <div class="finding-dot" style="background:rgba(247,246,242,0.2)"></div>
-            <span>Install motion-activated floodlights — northern perimeter</span>
-          </div>
-
-          <div class="report-footer">
-            <span>Audited by VAGT Certified Inspector · Confidential</span>
-            <span class="report-watermark">VAGT</span>
-          </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- ── SECTION 4: AUDIT REQUEST FORM ── -->
-      <section class="audit-section" id="audit-request-form">
-        <div class="section-label">Request an Audit</div>
-        <div class="section-title">Book Your Security Assessment</div>
-        <p class="section-sub">Our team will contact you within 24 hours to confirm the assessment date and scope.</p>
+    <!-- ── AUDIT REQUEST FORM ── -->
+    <section class="section section-dark" id="audit-request-form">
+      <div class="grid-2-1" style="gap: 64px;">
+        <div>
+          <div class="section-label">Book an Audit</div>
+          <h2 class="section-title">Request your security assessment.</h2>
+          <p class="section-sub" style="margin-bottom: 36px;">Our team will contact you within 24 hours to confirm the assessment date and scope. All information is strictly confidential.</p>
 
-        <div class="audit-form-wrap">
-          <form id="auditForm" novalidate>
-            <div class="form-grid">
-              <div class="form-group full">
+          <form class="contact-form" id="auditForm" novalidate>
+            <div class="form-row">
+              <div class="form-group">
                 <label for="facilityName">Company / Facility Name *</label>
                 <input type="text" id="facilityName" placeholder="e.g. Hats Off Aviation Pvt Ltd" required/>
               </div>
               <div class="form-group">
                 <label for="propertyType">Property Type *</label>
                 <select id="propertyType" required>
-                  <option value="" disabled selected>Select property type</option>
+                  <option value="" disabled selected>Select type</option>
                   <option value="Residential">Residential</option>
                   <option value="Commercial">Commercial</option>
                   <option value="Industrial">Industrial</option>
                   <option value="Institutional">Institutional</option>
                 </select>
               </div>
-              <div class="form-group">
-                <label for="facilitySize">Approximate Facility Size</label>
-                <input type="text" id="facilitySize" placeholder="e.g. 50,000 sq ft / 2 acres"/>
-              </div>
-              <div class="form-group full">
-                <label for="address">Location / Address *</label>
-                <input type="text" id="address" placeholder="Street, Area, City, PIN" required/>
-              </div>
+            </div>
+            <div class="form-group">
+              <label for="address">Location / Address *</label>
+              <input type="text" id="address" placeholder="Street, Area, City, PIN" required/>
+            </div>
+            <div class="form-row">
               <div class="form-group">
                 <label for="contactName">Contact Name *</label>
                 <input type="text" id="contactName" placeholder="Your full name" required/>
@@ -652,132 +455,197 @@
                 <label for="phone">Phone Number *</label>
                 <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX" required/>
               </div>
-              <div class="form-group full">
-                <label for="email">Email Address *</label>
-                <input type="email" id="email" placeholder="you@company.com" required/>
-              </div>
-              <div class="form-group full">
-                <label for="notes">Additional Notes</label>
-                <textarea id="notes" placeholder="Specific concerns, areas of focus, preferred timing..."></textarea>
-              </div>
             </div>
-            <button type="submit" class="form-submit" id="submitBtn">
-              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" placeholder="you@company.com" required/>
+            </div>
+            <div class="form-group">
+              <label for="facilitySize">Approximate Facility Size</label>
+              <input type="text" id="facilitySize" placeholder="e.g. 50,000 sq ft / 2 acres"/>
+            </div>
+            <div class="form-group">
+              <label for="notes">Additional Notes</label>
+              <textarea id="notes" placeholder="Specific concerns, areas of focus, preferred timing..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-amber" id="submitBtn" style="margin-top:6px; border: none;">
+              <svg viewBox="0 0 24 24" id="submitIcon"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
               Submit Audit Request
             </button>
-            <div class="form-note">* Required fields. Your information is kept strictly confidential and used only to arrange your facility assessment.</div>
+            <p style="font-size:11px; color:rgba(255,255,255,0.22); margin-top:10px; line-height:1.6;">* Required fields. Your information is kept strictly confidential and used only to arrange your facility assessment.</p>
           </form>
           <div class="form-toast" id="formToast">
             <svg viewBox="0 0 24 24" id="toastIcon"><polyline points="20 6 9 17 4 12"/></svg>
             <span id="toastMsg"></span>
           </div>
         </div>
-      </section>
 
-    </div><!-- /page-content -->
+        <div>
+          <div class="contact-block">
+            <h4>Phone</h4>
+            <p><a href="tel:+919008977711">+91 90089 77711</a></p>
+          </div>
+          <div class="contact-block">
+            <h4>Email</h4>
+            <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></p>
+          </div>
+          <div class="contact-block">
+            <h4>Location</h4>
+            <p>Bangalore, Karnataka, India<br>Serving Tier-1 &amp; Tier-2 cities</p>
+          </div>
+          <div class="contact-block">
+            <h4>Turnaround</h4>
+            <p>Report delivered within 48 hours of on-site assessment</p>
+          </div>
+          <div style="margin-top: 32px;">
+            <a href="https://wa.me/919008977711?text=Hi%2C%20I%27d%20like%20to%20request%20a%20Security%20Audit." class="btn btn-whatsapp" target="_blank" rel="noopener" style="width: 100%; justify-content: center;">
+              <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Request Audit on WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CTA STRIP ── -->
+    <div class="cta-strip">
+      <div>
+        <h2>Already know your gaps?<br>Let VAGT fix them.</h2>
+        <p>From guard deployment to CCTV installation — we cover the full remediation stack.</p>
+      </div>
+      <a href="security.html" class="btn btn-navy">
+        View Security Services
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <footer class="site-footer">
+      <div class="footer-copy">Est. 2017 · © 2026 VAGT Security Services Pvt Ltd. Bengaluru, India.</div>
+      <ul class="footer-nav">
+        <li><a href="security.html">Security</a></li>
+        <li><a href="facilities.html">Facilities</a></li>
+        <li><a href="security-audit.html">Audit</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </footer>
+
   </main>
+</div><!-- /layout -->
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { db } from '../assets/js/firebase-config.js';
-    import { collection, addDoc, serverTimestamp }
-      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+<!-- ── COOKIE BANNER ── -->
+<div id="cookie-banner">
+  <p>We use cookies to improve your experience on vagtservices.com. You can accept or decline non-essential cookies.</p>
+  <div class="cookie-actions">
+    <button class="cookie-btn cookie-btn-decline" id="cookie-decline">Decline</button>
+    <button class="cookie-btn cookie-btn-accept" id="cookie-accept">Accept</button>
+  </div>
+</div>
 
-    // ── Audit Request Form ──
-    const form       = document.getElementById('auditForm');
-    const submitBtn  = document.getElementById('submitBtn');
-    const toast      = document.getElementById('formToast');
-    const toastMsg   = document.getElementById('toastMsg');
-    const toastIcon  = document.getElementById('toastIcon');
+<!-- ── FLOATING WHATSAPP ── -->
+<a href="https://wa.me/919008977711?text=Hi%2C%20I%27d%20like%20to%20know%20more%20about%20VAGT%20Security%20Audit." class="whatsapp-float" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  <span class="whatsapp-float-label">Chat with us</span>
+</a>
 
-    function showToast(type, msg) {
-      toast.className = 'form-toast ' + type;
-      toastMsg.textContent = msg;
-      if (type === 'success') {
-        toastIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-      } else {
-        toastIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="20" x2="12.01" y2="20"/>';
-      }
-      toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+<!-- ── SCRIPTS ── -->
+<script>
+  // Mobile nav
+  const toggle  = document.getElementById('navToggle');
+  const sidebar = document.getElementById('sidebar');
+  const OPEN_ICON  = '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  const CLOSE_ICON = '<svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>';
+  function openNav()  { sidebar.classList.add('open');    toggle.classList.add('nav-open');    toggle.innerHTML = OPEN_ICON; }
+  function closeNav() { sidebar.classList.remove('open'); toggle.classList.remove('nav-open'); toggle.innerHTML = CLOSE_ICON; }
+  toggle.addEventListener('click', () => sidebar.classList.contains('open') ? closeNav() : openNav());
+  document.addEventListener('click', e => {
+    if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !toggle.contains(e.target)) closeNav();
+  });
 
-    form.addEventListener('submit', async (e) => {
+  // Cookie banner
+  const banner = document.getElementById('cookie-banner');
+  if (localStorage.getItem('cookie-consent')) banner.style.display = 'none';
+  document.getElementById('cookie-accept').addEventListener('click',  () => { localStorage.setItem('cookie-consent','accepted');  banner.style.display = 'none'; });
+  document.getElementById('cookie-decline').addEventListener('click', () => { localStorage.setItem('cookie-consent','declined'); banner.style.display = 'none'; });
+
+  // Smooth scroll for any in-page links
+  document.querySelectorAll('a[href="#audit-request-form"]').forEach(a => {
+    a.addEventListener('click', e => {
       e.preventDefault();
-
-      const facilityName = document.getElementById('facilityName').value.trim();
-      const propertyType = document.getElementById('propertyType').value;
-      const address      = document.getElementById('address').value.trim();
-      const contactName  = document.getElementById('contactName').value.trim();
-      const phone        = document.getElementById('phone').value.trim();
-      const email        = document.getElementById('email').value.trim();
-      const facilitySize = document.getElementById('facilitySize').value.trim();
-      const notes        = document.getElementById('notes').value.trim();
-
-      if (!facilityName || !propertyType || !address || !contactName || !phone || !email) {
-        showToast('error', 'Please fill in all required fields before submitting.');
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = `<svg viewBox="0 0 24 24" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" fill="none" stroke-width="2"/></svg> Submitting...`;
-
-      try {
-        await addDoc(collection(db, 'auditRequests'), {
-          facilityName,
-          propertyType,
-          address,
-          contactName,
-          phone,
-          email,
-          facilitySize,
-          notes,
-          status:    'new',
-          createdAt: serverTimestamp()
-        });
-
-        form.reset();
-        showToast('success', 'Request received! Our team will contact you within 24 hours to confirm your audit appointment.');
-        submitBtn.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Request Submitted`;
-
-      } catch (err) {
-        console.error('Firestore write error:', err);
-        showToast('error', 'Something went wrong. Please try again or call us on +91 90089 77711.');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = `<svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit Audit Request`;
-      }
+      document.getElementById('audit-request-form').scrollIntoView({ behavior: 'smooth' });
     });
+  });
+</script>
 
-    /* ── Smooth scroll for hero CTA ── */
-    document.querySelectorAll('a[href="#audit-request-form"]').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        document.getElementById('audit-request-form').scrollIntoView({ behavior: 'smooth' });
-      });
-    });
-  </script>
+<!-- Firebase form submission -->
+<script type="module">
+  import { db } from '../assets/js/firebase-config.js';
+  import { collection, addDoc, serverTimestamp }
+    from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-  <!-- Sidebar toggle (mobile) -->
-  <script>
-    const menuToggle = document.getElementById('menuToggle');
-    const overlay    = document.getElementById('sidebarOverlay');
-    const sidebar    = document.querySelector('.sidebar');
-    if (menuToggle) {
-      menuToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('open');
-        overlay.classList.toggle('active');
-      });
+  const form      = document.getElementById('auditForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitIcon= document.getElementById('submitIcon');
+  const toast     = document.getElementById('formToast');
+  const toastMsg  = document.getElementById('toastMsg');
+  const toastIcon = document.getElementById('toastIcon');
+
+  function showToast(type, msg) {
+    toast.className = 'form-toast ' + type;
+    toastMsg.textContent = msg;
+    toastIcon.innerHTML = type === 'success'
+      ? '<polyline points="20 6 9 17 4 12"/>'
+      : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="20" x2="12.01" y2="20"/>';
+    toast.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+
+    const facilityName = document.getElementById('facilityName').value.trim();
+    const propertyType = document.getElementById('propertyType').value;
+    const address      = document.getElementById('address').value.trim();
+    const contactName  = document.getElementById('contactName').value.trim();
+    const phone        = document.getElementById('phone').value.trim();
+    const email        = document.getElementById('email').value.trim();
+    const facilitySize = document.getElementById('facilitySize').value.trim();
+    const notes        = document.getElementById('notes').value.trim();
+
+    if (!facilityName || !propertyType || !address || !contactName || !phone || !email) {
+      showToast('error', 'Please fill in all required fields before submitting.');
+      return;
     }
-    if (overlay) {
-      overlay.addEventListener('click', () => {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
+
+    submitBtn.disabled = true;
+    submitIcon.classList.add('spin');
+    submitBtn.childNodes[submitBtn.childNodes.length - 1].textContent = ' Submitting…';
+
+    try {
+      await addDoc(collection(db, 'auditRequests'), {
+        facilityName, propertyType, address,
+        contactName, phone, email,
+        facilitySize, notes,
+        status: 'new',
+        createdAt: serverTimestamp()
       });
+
+      form.reset();
+      showToast('success', 'Request received! Our team will contact you within 24 hours to confirm your audit appointment.');
+      submitBtn.disabled = false;
+      submitIcon.classList.remove('spin');
+      submitIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+      submitBtn.childNodes[submitBtn.childNodes.length - 1].textContent = ' Request Submitted';
+
+    } catch (err) {
+      console.error('Firestore error:', err);
+      showToast('error', 'Something went wrong. Please try again or call +91 90089 77711.');
+      submitBtn.disabled = false;
+      submitIcon.classList.remove('spin');
+      submitIcon.innerHTML = '<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>';
+      submitBtn.childNodes[submitBtn.childNodes.length - 1].textContent = ' Submit Audit Request';
     }
-    /* Spinner keyframe */
-    const style = document.createElement('style');
-    style.textContent = '@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }';
-    document.head.appendChild(style);
-  </script>
+  });
+</script>
 
 </body>
 </html>
