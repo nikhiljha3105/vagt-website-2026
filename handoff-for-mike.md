@@ -26,7 +26,7 @@ Full-stack security services platform for **VAGT Security Services (Bengaluru)**
 
 ---
 
-## What Was Done Today (2026-03-09)
+## What Was Done Today (2026-03-09) — UPDATED end-of-session
 
 ### Backend — Cloud Functions (done via mobile session)
 Six security and performance fixes committed and pushed:
@@ -37,6 +37,16 @@ Six security and performance fixes committed and pushed:
 4. **Unbounded queries** — added `.limit(500)` to employees, clients, sites list endpoints.
 5. **Payroll crash for 500+ employees** — payroll now chunks into 499-write batches.
 6. **Ghost Auth accounts on rejection** — rejection now deletes the orphaned Firebase Auth account.
+
+### Code Documentation — Cloud Functions annotated (done via desktop session)
+All 5 Cloud Functions source files now have plain-English comments throughout.
+Commit `d54657e` — pushed to `claude/review-website-git-dPWyR`.
+Files annotated:
+- `firebase/functions/src/index.js` — request flow, CORS, rate limiter, auth middleware
+- `firebase/functions/src/routes/auth.js` — registration/OTP flows, MSG91 integration code
+- `firebase/functions/src/routes/admin.js` — approval flow, payroll placeholder warnings, keycode system
+- `firebase/functions/src/routes/employee.js` — attendance flow, leave flow, incident escalation, IST/UTC caveat
+- `firebase/functions/src/routes/client.js` — complaint flow, Indian FY logic, GST note, deployment summary
 
 ### Frontend — Security Audit page (done via desktop session)
 - `pages/security-audit.html` fully rebuilt — matches quality of facilities.html and security.html.
