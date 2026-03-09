@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VAGT · Hats Off Guard Onboarding Reference</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #0D1F3C; color: #F7F6F2; padding: 40px 32px; line-height: 1.5; }
+  h1 { font-size: 22px; font-weight: 900; color: #F5C400; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .subtitle { font-size: 12px; color: rgba(247,246,242,0.4); margin-bottom: 32px; letter-spacing: 0.3px; }
+  .legend { display: flex; gap: 20px; margin-bottom: 24px; font-size: 11px; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 10px; letter-spacing: 0.5px; }
+  .active   { background: rgba(34,197,94,0.15); color: #6ee7a0; border: 1px solid rgba(34,197,94,0.3); }
+  .inactive { background: rgba(247,246,242,0.06); color: rgba(247,246,242,0.3); border: 1px solid rgba(247,246,242,0.1); }
+
+  /* Steps */
+  .steps { display: flex; gap: 0; margin-bottom: 36px; border: 1px solid rgba(245,196,0,0.15); }
+  .step { flex: 1; padding: 14px 16px; border-right: 1px solid rgba(245,196,0,0.12); }
+  .step:last-child { border-right: none; }
+  .step-num { font-size: 9px; font-weight: 700; color: rgba(245,196,0,0.5); text-transform: uppercase; letter-spacing: 1.5px; }
+  .step-title { font-size: 12px; font-weight: 700; color: #F5C400; margin: 3px 0; }
+  .step-detail { font-size: 11px; color: rgba(247,246,242,0.45); line-height: 1.5; }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th { background: rgba(245,196,0,0.08); border: 1px solid rgba(245,196,0,0.15); padding: 10px 12px; text-align: left; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(245,196,0,0.7); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid rgba(247,246,242,0.05); }
+  tbody tr:hover { background: rgba(245,196,0,0.03); }
+  tbody tr.inactive-row { opacity: 0.45; }
+  td { padding: 10px 12px; border-left: 1px solid rgba(247,246,242,0.04); vertical-align: top; }
+  td:first-child { border-left: 1px solid rgba(245,196,0,0.15); }
+  td:last-child { border-right: 1px solid rgba(245,196,0,0.15); }
+  tbody tr:last-child td { border-bottom: 1px solid rgba(245,196,0,0.15); }
+
+  .vagt-id { font-family: 'SF Mono', Consolas, monospace; font-weight: 700; color: #F5C400; font-size: 11px; }
+  .clk     { font-family: 'SF Mono', Consolas, monospace; color: rgba(247,246,242,0.4); font-size: 11px; }
+  .name    { font-weight: 600; color: #F7F6F2; }
+  .desig   { font-size: 11px; color: rgba(247,246,242,0.6); }
+  .blank   { background: rgba(245,196,0,0.04); color: rgba(245,196,0,0.3); font-size: 10px; font-style: italic; border: 1px dashed rgba(245,196,0,0.15); padding: 3px 8px; }
+  .firebase-col { font-size: 10px; color: rgba(247,246,242,0.3); line-height: 1.6; }
+  .firebase-col code { font-family: 'SF Mono', Consolas, monospace; color: rgba(245,196,0,0.5); font-size: 10px; }
+
+  .section-divider { margin: 48px 0 24px; padding-bottom: 10px; border-bottom: 1px solid rgba(245,196,0,0.15); }
+  .section-divider h2 { font-size: 14px; font-weight: 800; color: #F5C400; }
+  .section-divider p  { font-size: 11px; color: rgba(247,246,242,0.35); margin-top: 4px; }
+
+  .rules-block { background: rgba(0,0,0,0.3); border: 1px solid rgba(245,196,0,0.15); padding: 24px; font-family: 'SF Mono', Consolas, monospace; font-size: 11.5px; line-height: 1.8; color: rgba(247,246,242,0.75); overflow-x: auto; white-space: pre; }
+  .rules-new  { background: rgba(34,197,94,0.08); color: #6ee7a0; }
+  .rules-comment { color: rgba(245,196,0,0.45); }
+
+  .note { background: rgba(245,196,0,0.06); border-left: 3px solid #F5C400; padding: 12px 16px; font-size: 12px; color: rgba(247,246,242,0.6); margin-top: 20px; line-height: 1.7; }
+  .note strong { color: #F5C400; }
+
+  @media print { body { background: white; color: #111; } }
+</style>
+</head>
+<body>
+
+<h1>VAGT · Hats Off Guard Onboarding Reference</h1>
+<p class="subtitle">Contract: VAGT-C-2023-001 · Sector: BIZ · Client Code: HTO · Generated: 08 Mar 2026 · 22 total guards · 10 currently active</p>
+
+<!-- ── STEP GUIDE ── -->
+<div class="steps">
+  <div class="step">
+    <div class="step-num">Step 1</div>
+    <div class="step-title">Firebase Auth</div>
+    <div class="step-detail">console.firebase.google.com → Authentication → Users → Add user<br>Email: <em>use guard's personal email</em><br>Password: <em>Vagt@2024! (temp)</em></div>
+  </div>
+  <div class="step">
+    <div class="step-num">Step 2</div>
+    <div class="step-title">Copy UID</div>
+    <div class="step-detail">After creating the Auth account, copy the UID shown in the users table — you'll need it for Step 3</div>
+  </div>
+  <div class="step">
+    <div class="step-num">Step 3</div>
+    <div class="step-title">Firestore Doc</div>
+    <div class="step-detail">Firestore → users → Add document<br>Document ID = UID from Step 2<br>Fill fields from table below</div>
+  </div>
+  <div class="step">
+    <div class="step-num">Step 4</div>
+    <div class="step-title">Employee Directory</div>
+    <div class="step-detail">Firestore → employee-directory → Add document<br>Document ID = VAGT ID (e.g. BIZ-HTO-427)<br>Fill public fields only</div>
+  </div>
+  <div class="step">
+    <div class="step-num">Step 5</div>
+    <div class="step-title">First Login</div>
+    <div class="step-detail">Guard logs in → system redirects to KYC wizard → they complete PAN / Aadhaar / address → profileComplete: true</div>
+  </div>
+</div>
+
+<!-- ── GUARD TABLE ── -->
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>VAGT ID</th>
+      <th>CLK No.</th>
+      <th>Full Name</th>
+      <th>Designation</th>
+      <th>Status</th>
+      <th>Firestore Fields to Set (users/{uid})</th>
+      <th>employee-directory fields</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- ACTIVE GUARDS -->
+    <tr>
+      <td>1</td>
+      <td class="vagt-id">BIZ-HTO-427</td>
+      <td class="clk">427</td>
+      <td class="name">Abhilash Br</td>
+      <td class="desig">Field Officer</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-427"</code><br>
+        <code>clkNo: "427"</code><br>
+        <code>designation: "Field Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-427"</code><br>
+        <code>name: "Abhilash Br"</code><br>
+        <code>designation: "Field Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>2</td>
+      <td class="vagt-id">BIZ-HTO-868</td>
+      <td class="clk">868</td>
+      <td class="name">Arnab Nandi</td>
+      <td class="desig">Field Officer</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-868"</code><br>
+        <code>clkNo: "868"</code><br>
+        <code>designation: "Field Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-868"</code><br>
+        <code>name: "Arnab Nandi"</code><br>
+        <code>designation: "Field Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>3</td>
+      <td class="vagt-id">BIZ-HTO-285</td>
+      <td class="clk">285</td>
+      <td class="name">Arumugam</td>
+      <td class="desig">Security Guard</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-285"</code><br>
+        <code>clkNo: "285"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-285"</code><br>
+        <code>name: "Arumugam"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>4</td>
+      <td class="vagt-id">BIZ-HTO-008</td>
+      <td class="clk">8</td>
+      <td class="name">Kempa Raju</td>
+      <td class="desig">Security Guard</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-008"</code><br>
+        <code>clkNo: "8"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-008"</code><br>
+        <code>name: "Kempa Raju"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>5</td>
+      <td class="vagt-id">BIZ-HTO-321</td>
+      <td class="clk">321</td>
+      <td class="name">Lal Singh K</td>
+      <td class="desig">Security Officer</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-321"</code><br>
+        <code>clkNo: "321"</code><br>
+        <code>designation: "Security Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-321"</code><br>
+        <code>name: "Lal Singh K"</code><br>
+        <code>designation: "Security Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>6</td>
+      <td class="vagt-id">BIZ-HTO-799</td>
+      <td class="clk">799</td>
+      <td class="name">Mohan Raj P</td>
+      <td class="desig">Security Guard</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-799"</code><br>
+        <code>clkNo: "799"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-799"</code><br>
+        <code>name: "Mohan Raj P"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>7</td>
+      <td class="vagt-id">BIZ-HTO-439</td>
+      <td class="clk">439</td>
+      <td class="name">Prashanta B</td>
+      <td class="desig">Security Guard</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-439"</code><br>
+        <code>clkNo: "439"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-439"</code><br>
+        <code>name: "Prashanta B"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>8</td>
+      <td class="vagt-id">BIZ-HTO-098</td>
+      <td class="clk">98</td>
+      <td class="name">Sambhu Manna</td>
+      <td class="desig">Security Guard</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-098"</code><br>
+        <code>clkNo: "98"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-098"</code><br>
+        <code>name: "Sambhu Manna"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>9</td>
+      <td class="vagt-id">BIZ-HTO-454</td>
+      <td class="clk">454</td>
+      <td class="name">Sandeep S</td>
+      <td class="desig">Field Officer</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-454"</code><br>
+        <code>clkNo: "454"</code><br>
+        <code>designation: "Field Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-454"</code><br>
+        <code>name: "Sandeep S"</code><br>
+        <code>designation: "Field Officer"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>10</td>
+      <td class="vagt-id">BIZ-HTO-009</td>
+      <td class="clk">9</td>
+      <td class="name">Vikram Bv</td>
+      <td class="desig">Security Guard</td>
+      <td><span class="pill active">Active</span></td>
+      <td class="firebase-col">
+        <code>role: "employee"</code><br>
+        <code>employeeCode: "BIZ-HTO-009"</code><br>
+        <code>clkNo: "9"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>active: true</code><br>
+        <code>profileComplete: false</code>
+      </td>
+      <td class="firebase-col">
+        <code>employeeCode: "BIZ-HTO-009"</code><br>
+        <code>name: "Vikram Bv"</code><br>
+        <code>designation: "Security Guard"</code><br>
+        <code>site: "Hats Off Aviation"</code><br>
+        <code>status: "active"</code>
+      </td>
+    </tr>
+
+    <!-- INACTIVE GUARDS (greyed out — for reference / future reactivation) -->
+    <tr class="inactive-row"><td>11</td><td class="vagt-id">BIZ-HTO-007</td><td class="clk">7</td><td class="name">Shree Kumar</td><td class="desig">Field Officer</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — create if needed</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>12</td><td class="vagt-id">BIZ-HTO-016</td><td class="clk">16</td><td class="name">Subesh Mandal</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code></td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>13</td><td class="vagt-id">BIZ-HTO-016B</td><td class="clk">16</td><td class="name">Hussain Saikh</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — CLK 16 reused</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>14</td><td class="vagt-id">BIZ-HTO-098B</td><td class="clk">?</td><td class="name">Joytirmoy</td><td class="desig">Field Officer</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — CLK missing</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>15</td><td class="vagt-id">BIZ-HTO-245</td><td class="clk">245</td><td class="name">Suresh</td><td class="desig">Field Officer</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code></td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>16</td><td class="vagt-id">BIZ-HTO-285B</td><td class="clk">285</td><td class="name">Ranjan Barik</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — CLK 285 reused</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>17</td><td class="vagt-id">BIZ-HTO-429</td><td class="clk">429</td><td class="name">Sanjiv Kumar</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code></td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>18</td><td class="vagt-id">BIZ-HTO-439B</td><td class="clk">439</td><td class="name">Prashanta Behra</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — CLK 439 reused</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>19</td><td class="vagt-id">BIZ-HTO-439C</td><td class="clk">439</td><td class="name">Goutam Mallick</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code></td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>20</td><td class="vagt-id">BIZ-HTO-813</td><td class="clk">813</td><td class="name">Kempa Raju (2)</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — different person, same name</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>21</td><td class="vagt-id">BIZ-HTO-009B</td><td class="clk">9</td><td class="name">Vikram (prev.)</td><td class="desig">Security Guard</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — earlier CLK 9 record</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+    <tr class="inactive-row"><td>22</td><td class="vagt-id">BIZ-HTO-868B</td><td class="clk">868</td><td class="name">Arnav Nandi (prev.)</td><td class="desig">Field Officer</td><td><span class="pill inactive">Inactive</span></td><td class="firebase-col"><code>active: false</code> — spelling variant of Arnab Nandi</td><td class="firebase-col"><code>status: "inactive"</code></td></tr>
+
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>VAGT ID Format:</strong> BIZ-HTO-[CLK zero-padded to 3 digits] · BIZ = Business sector · HTO = Hats Off · CLK = existing company clock number<br>
+  <strong>CLK collisions:</strong> CLK 9, 16, 285, 439, 813, 868 were reused for different guards across time — inactive duplicates are suffixed B/C for traceability. Only the <em>active</em> (Jan 2026) person gets the primary ID.<br>
+  <strong>Start with:</strong> Only create Firebase accounts for the 10 Active guards. Inactive records are here for historical traceability — create them only if a guard returns.
+</div>
+
+</body>
+</html>

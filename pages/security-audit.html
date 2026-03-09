@@ -13,24 +13,11 @@
   <meta property="og:site_name" content="VAGT Security Services"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    /* ── Audit-specific additions (all inherit the light theme) ── */
-
-    /* Domain cards — icon matches existing .service-icon pattern */
-    .audit-domain-name {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--navy);
-      line-height: 1.4;
-    }
-
-    /* Sample report block */
-    .audit-report-wrap {
-      max-width: 620px;
-    }
+    /* ── Audit report mockup block (dark section, right column) ── */
     .audit-report {
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(245,196,0,0.18);
-      padding: 28px 30px;
+      padding: 24px 26px;
       font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
       font-size: 12px;
     }
@@ -40,23 +27,13 @@
       justify-content: space-between;
       gap: 16px;
       flex-wrap: wrap;
-      padding-bottom: 16px;
+      padding-bottom: 14px;
       border-bottom: 1px solid rgba(255,255,255,0.08);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
-    .report-id-line {
-      font-size: 11px;
-      color: rgba(255,255,255,0.35);
-    }
-    .report-id-line strong {
-      color: var(--amber);
-      font-weight: 700;
-    }
-    .report-date-line {
-      font-size: 10px;
-      color: rgba(255,255,255,0.2);
-      margin-top: 3px;
-    }
+    .report-id-line { font-size: 11px; color: rgba(255,255,255,0.35); }
+    .report-id-line strong { color: var(--amber); font-weight: 700; }
+    .report-date-line { font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 3px; }
     .report-score {
       background: rgba(245,196,0,0.12);
       border: 1px solid rgba(245,196,0,0.3);
@@ -82,26 +59,21 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.2);
-      margin-bottom: 10px;
-      margin-top: 18px;
+      margin-bottom: 8px;
+      margin-top: 16px;
     }
     .report-row {
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      padding: 7px 0;
+      padding: 6px 0;
       border-bottom: 1px solid rgba(255,255,255,0.04);
       color: rgba(255,255,255,0.6);
-      font-size: 12px;
+      font-size: 11.5px;
       line-height: 1.5;
     }
     .report-row:last-child { border-bottom: none; }
-    .report-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      margin-top: 5px;
-      flex-shrink: 0;
-    }
+    .report-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
     .dot-red    { background: #E05555; }
     .dot-orange { background: #E08A30; }
     .dot-amber  { background: var(--amber); }
@@ -110,20 +82,38 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-top: 18px;
-      padding-top: 14px;
+      margin-top: 16px;
+      padding-top: 12px;
       border-top: 1px solid rgba(255,255,255,0.06);
       font-size: 10px;
       color: rgba(255,255,255,0.18);
     }
-    .report-wm {
-      color: rgba(245,196,0,0.2);
-      font-weight: 900;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
+    .report-wm { color: rgba(245,196,0,0.2); font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
 
-    /* Form success/error toast */
+    /* ── Why VAGT — light-section numbered cards ── */
+    .why-card {
+      padding: 32px 28px;
+      background: var(--warm-white);
+      border: 1px solid rgba(10,18,46,0.09);
+      border-top: 3px solid var(--amber);
+    }
+    .why-card-num {
+      font-size: 44px;
+      font-weight: 900;
+      color: var(--amber);
+      line-height: 1;
+      margin-bottom: 18px;
+      font-variant-numeric: tabular-nums;
+    }
+    .why-card h3 {
+      font-size: 16px;
+      color: var(--navy);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+    .why-card p { font-size: 13.5px; color: var(--muted); line-height: 1.75; }
+
+    /* ── Form toast ── */
     .form-toast {
       display: none;
       align-items: center;
@@ -133,25 +123,10 @@
       font-weight: 600;
       margin-top: 16px;
     }
-    .form-toast.success {
-      display: flex;
-      background: rgba(34,197,94,0.1);
-      border: 1px solid rgba(34,197,94,0.3);
-      color: #5fcea0;
-    }
-    .form-toast.error {
-      display: flex;
-      background: rgba(196,30,30,0.08);
-      border: 1px solid rgba(196,30,30,0.2);
-      color: #e07070;
-    }
-    .form-toast svg {
-      width: 16px; height: 16px;
-      stroke: currentColor; fill: none; stroke-width: 2.2;
-      flex-shrink: 0;
-    }
+    .form-toast.success { display: flex; background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #5fcea0; }
+    .form-toast.error   { display: flex; background: rgba(196,30,30,0.08); border: 1px solid rgba(196,30,30,0.2); color: #e07070; }
+    .form-toast svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
 
-    /* Submit spinner */
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .spin { animation: spin 0.9s linear infinite; }
   </style>
@@ -238,89 +213,87 @@
     <div class="page-header">
       <div class="section-label">Services</div>
       <h1>Security &amp; Safety Audit</h1>
-      <p>Professional on-site assessments to identify security vulnerabilities before incidents occur. Every audit produces a scored, structured report with prioritised findings and remediation steps.</p>
+      <p>Professional on-site assessments that identify security vulnerabilities before incidents occur. Every audit produces a scored, structured report with prioritised findings and a clear remediation roadmap.</p>
     </div>
 
-    <!-- ── WHAT WE INSPECT ── -->
+    <!-- ── WHAT WE AUDIT (light, grid-3 with svc-list) ── -->
     <section class="section">
       <div class="section-head">
-        <div class="section-label">What We Inspect</div>
-        <h2 class="section-title">10 critical domains,<br>covered in every audit.</h2>
-        <p class="section-sub">No area is left unassessed. Physical, operational, and environmental risks are evaluated against industry standards and VAGT's internal benchmark.</p>
+        <div class="section-label">What We Audit</div>
+        <h2 class="section-title">Six domains.<br>No gaps.</h2>
+        <p class="section-sub">Physical, operational, and safety risks are assessed systematically — not spot-checked. Every domain is reviewed against industry standards and VAGT's own internal benchmark, developed from 25 years of operational security experience.</p>
       </div>
 
-      <div class="grid-4" style="gap: 18px;">
+      <div class="grid-3">
 
         <div class="card">
           <div class="service-icon">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           </div>
-          <h3>Perimeter Security</h3>
-          <p>Boundary fencing, lighting, gate access, and unauthorised entry points assessed against standard protection levels.</p>
+          <h3>Physical Security &amp; Perimeter</h3>
+          <p>Boundary control, site entry points, and on-ground physical protection assessed against standard protection levels.</p>
+          <ul class="svc-list" style="margin-top: 12px;">
+            <li>Boundary fencing and gate condition</li>
+            <li>Perimeter lighting adequacy</li>
+            <li>Unauthorised entry point identification</li>
+            <li>Guard post placement and coverage</li>
+          </ul>
         </div>
 
         <div class="card">
           <div class="service-icon">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           </div>
-          <h3>Access Control Systems</h3>
-          <p>Physical and electronic access management — badge systems, biometrics, visitor logs, and key management practices.</p>
-        </div>
-
-        <div class="card">
-          <div class="service-icon">
-            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </div>
-          <h3>CCTV Coverage</h3>
-          <p>Camera placement, blind spots, recording retention, and system condition reviewed for complete site visibility.</p>
-        </div>
-
-        <div class="card">
-          <div class="service-icon">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-          </div>
-          <h3>Guard Deployment</h3>
-          <p>Post coverage, shift handover, beat patrolling frequency, and guard conduct compliance on-site.</p>
+          <h3>Access Control &amp; Identity</h3>
+          <p>Physical and electronic access management — from badge systems to visitor protocols — reviewed for gaps and misuse risk.</p>
+          <ul class="svc-list" style="margin-top: 12px;">
+            <li>Badge, biometric, and RFID systems</li>
+            <li>Visitor registration and logging</li>
+            <li>Key and master access management</li>
+            <li>Tailgating and piggyback risk</li>
+          </ul>
         </div>
 
         <div class="card">
           <div class="service-icon">
             <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
           </div>
-          <h3>Fire Safety Compliance</h3>
-          <p>Extinguisher placement, inspection dates, hydrant access, fire exits, and evacuation plan adequacy.</p>
+          <h3>Fire &amp; Safety Compliance</h3>
+          <p>Extinguisher placement, hydrant access, fire exit adequacy, and evacuation plan review against NBC and local fire department standards.</p>
+          <ul class="svc-list" style="margin-top: 12px;">
+            <li>Extinguisher placement and inspection dates</li>
+            <li>Hydrant access and flow adequacy</li>
+            <li>Fire exit routes and signage</li>
+            <li>Evacuation drill records and plan</li>
+          </ul>
         </div>
 
         <div class="card">
           <div class="service-icon">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </div>
-          <h3>Electrical Safety</h3>
-          <p>Panel access restrictions, earthing, exposed wiring, emergency isolation points, and compliance status.</p>
+          <h3>CCTV &amp; Electronic Systems</h3>
+          <p>Camera placement, blind spot identification, recording retention, and overall electronic surveillance system condition and coverage.</p>
+          <ul class="svc-list" style="margin-top: 12px;">
+            <li>Camera placement and blind spot map</li>
+            <li>Recording retention and quality check</li>
+            <li>Alarm systems and response protocols</li>
+            <li>System maintenance and hardware condition</li>
+          </ul>
         </div>
 
         <div class="card">
           <div class="service-icon">
-            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M8 2h8M4 4h16v2a16 16 0 01-8 13.93A16 16 0 014 6V4z"/></svg>
           </div>
-          <h3>Structural Safety</h3>
-          <p>Visible structural concerns, unsafe storage, overhead hazards, floor conditions, and signage gaps.</p>
-        </div>
-
-        <div class="card">
-          <div class="service-icon">
-            <svg viewBox="0 0 24 24"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4l-5 16-4-8-4 4-5-4"/></svg>
-          </div>
-          <h3>Industrial Safety</h3>
-          <p>PPE compliance, hazardous material storage, machinery guarding, and operational safety procedure adherence.</p>
-        </div>
-
-        <div class="card">
-          <div class="service-icon">
-            <svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0112 2a8 8 0 018 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="3"/></svg>
-          </div>
-          <h3>Environmental Safety</h3>
-          <p>Waste disposal, chemical storage, spill containment, and environmental exposure risk review.</p>
+          <h3>EHS &amp; Industrial Safety</h3>
+          <p>Environment, health, and safety review covering PPE compliance, chemical storage, electrical safety, and operational risk exposure.</p>
+          <ul class="svc-list" style="margin-top: 12px;">
+            <li>PPE availability and compliance</li>
+            <li>Hazardous material storage and labelling</li>
+            <li>Electrical safety and earthing checks</li>
+            <li>Waste disposal and spill containment</li>
+          </ul>
         </div>
 
         <div class="card">
@@ -328,98 +301,94 @@
             <svg viewBox="0 0 24 24"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
           </div>
           <h3>Emergency Preparedness</h3>
-          <p>ERT team readiness, evacuation drills, BCP documentation, first aid availability, and incident command protocols.</p>
+          <p>ERT team readiness, BCP documentation, first aid adequacy, and incident command protocols assessed for practical effectiveness.</p>
+          <ul class="svc-list" style="margin-top: 12px;">
+            <li>Emergency response team (ERT) structure</li>
+            <li>BCP documentation and currency</li>
+            <li>First aid kit availability and training</li>
+            <li>Incident reporting and command protocols</li>
+          </ul>
         </div>
 
       </div>
     </section>
 
-    <!-- ── SAMPLE AUDIT OUTPUT ── -->
+    <!-- ── AUDIT PROCESS (dark, numbered diff-items) ── -->
     <section class="section section-dark">
-      <div class="grid-2-1" style="gap: 64px;">
-        <div>
-          <div class="section-label">Sample Output</div>
-          <h2 class="section-title">What your audit report looks like.</h2>
-          <p class="section-sub" style="margin-bottom: 32px;">Every report is scored, structured, and actionable. Findings are prioritised by risk level — critical, moderate, and advisory — with specific corrective actions for each.</p>
+      <div class="section-head">
+        <div class="section-label">How We Work</div>
+        <h2 class="section-title">A four-step process<br>from brief to report.</h2>
+        <p class="section-sub">Every VAGT audit follows the same disciplined process — from scoping to delivery. You always know what to expect, and the report lands within 48 hours of the on-site visit.</p>
+      </div>
 
-          <div class="diff-item" style="border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 24px;">
-            <div class="diff-num">01</div>
-            <div>
-              <h4>Scored against 10 domains</h4>
-              <p>A composite safety score out of 100 with per-domain breakdowns, so you know exactly where you stand.</p>
-            </div>
-          </div>
-          <div class="diff-item" style="border-bottom: 1px solid rgba(255,255,255,0.07); padding: 24px 0;">
-            <div class="diff-num">02</div>
-            <div>
-              <h4>Prioritised findings</h4>
-              <p>Critical, moderate, and advisory findings listed clearly with on-site photographic evidence where relevant.</p>
-            </div>
-          </div>
-          <div class="diff-item" style="border-bottom: none; padding-top: 24px;">
-            <div class="diff-num">03</div>
-            <div>
-              <h4>Remediation roadmap</h4>
-              <p>Every finding comes with a specific corrective action, responsible party recommendation, and suggested timeline.</p>
-            </div>
-          </div>
+      <div class="diff-item">
+        <div class="diff-num">01</div>
+        <div>
+          <h4>Pre-assessment brief</h4>
+          <p>We begin with a structured conversation — understanding your facility layout, past incidents, current security arrangements, and the specific concerns driving the audit request. This scoping step ensures the assessment is targeted, not generic.</p>
         </div>
+      </div>
 
+      <div class="diff-item">
+        <div class="diff-num">02</div>
         <div>
-          <div class="audit-report-wrap">
-            <div class="audit-report">
-              <div class="report-top">
-                <div>
-                  <div class="report-id-line">Audit ID: <strong>VAGT/0326/Audit/Commercial/004</strong></div>
-                  <div class="report-date-line">Commercial Facility · Bangalore · 26 Mar 2026</div>
-                </div>
-                <div class="report-score">
-                  78
-                  <span>/ 100</span>
-                </div>
-              </div>
+          <h4>On-site physical inspection</h4>
+          <p>VAGT's certified inspector walks the entire facility systematically against a standardised 60-point checklist covering all six audit domains. Observations are recorded with photographic evidence where relevant. No area is skipped — including back-of-house, loading bays, and service corridors typically missed in informal reviews.</p>
+        </div>
+      </div>
 
-              <div class="report-section-head">Key Findings</div>
-              <div class="report-row">
-                <div class="report-dot dot-red"></div>
-                <span>CCTV blind spots in loading bay and service corridor</span>
-              </div>
-              <div class="report-row">
-                <div class="report-dot dot-orange"></div>
-                <span>Fire extinguisher inspection overdue — 3 units affected</span>
-              </div>
-              <div class="report-row">
-                <div class="report-dot dot-amber"></div>
-                <span>Perimeter lighting insufficient along northern boundary</span>
-              </div>
+      <div class="diff-item">
+        <div class="diff-num">03</div>
+        <div>
+          <h4>Report compilation and scoring</h4>
+          <p>Findings are categorised by severity — Critical, Moderate, and Advisory — and scored against a 100-point composite index with per-domain breakdowns. Each finding is supported by the inspection evidence and paired with a specific corrective action.</p>
+        </div>
+      </div>
 
-              <div class="report-section-head">Corrective Actions</div>
-              <div class="report-row">
-                <div class="report-dot dot-muted"></div>
-                <span>Install 2x PTZ cameras to cover loading area</span>
-              </div>
-              <div class="report-row">
-                <div class="report-dot dot-muted"></div>
-                <span>Schedule fire equipment servicing within 14 days</span>
-              </div>
-              <div class="report-row">
-                <div class="report-dot dot-muted"></div>
-                <span>Install motion-activated floodlights — north perimeter</span>
-              </div>
-
-              <div class="report-bottom">
-                <span>Audited by VAGT Certified Inspector · Confidential</span>
-                <span class="report-wm">VAGT</span>
-              </div>
-            </div>
-          </div>
+      <div class="diff-item">
+        <div class="diff-num">04</div>
+        <div>
+          <h4>Debrief and remediation roadmap</h4>
+          <p>The completed report is delivered within 48 hours of the on-site visit. Our inspector walks through the findings with your team, clarifies priorities, and hands over a remediation roadmap with suggested timelines and responsible party recommendations for each corrective action.</p>
         </div>
       </div>
     </section>
 
-    <!-- ── AUDIT REQUEST FORM ── -->
+    <!-- ── WHY VAGT (light, numbered amber-top cards) ── -->
+    <section class="section">
+      <div class="section-head">
+        <div class="section-label">Why Choose VAGT</div>
+        <h2 class="section-title">Expert audit,<br>not a tick-box inspection.</h2>
+        <p class="section-sub">Most audit reports are checklists completed by junior staff on a day rate. VAGT audits are grounded in 25 years of operational security experience — and the same rigour we apply to our own teams.</p>
+      </div>
+
+      <div class="grid-3">
+
+        <div class="why-card">
+          <div class="why-card-num">01</div>
+          <h3>Founded by security operations veterans</h3>
+          <p>Founding Director Ratan Lal Jha spent 25 years as Head of Facilities and Security at MNC companies before establishing VAGT. Our audit methodology draws directly from that institutional knowledge — the same standards applied by large corporates, now available to every property owner.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-card-num">02</div>
+          <h3>We audit our own operations too</h3>
+          <p>VAGT conducts internal audits of its deployed guard operations on a quarterly cycle. Our inspectors approach client audits with the same rigour they apply to their own teams — which means they understand the difference between a post order and actual practice, and they know exactly where corners get cut.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-card-num">03</div>
+          <h3>48-hour report — scored and actionable</h3>
+          <p>Your report is delivered within 48 hours of the on-site visit. Every finding is scored, categorised by severity, and paired with a specific corrective action and timeline — not vague recommendations. You leave the debrief with a clear picture of where you stand and exactly what to fix first.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── BOOK AN AUDIT (dark, form + sample report) ── -->
     <section class="section section-dark" id="audit-request-form">
       <div class="grid-2-1" style="gap: 64px;">
+
         <div>
           <div class="section-label">Book an Audit</div>
           <h2 class="section-title">Request your security assessment.</h2>
@@ -429,7 +398,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="facilityName">Company / Facility Name *</label>
-                <input type="text" id="facilityName" placeholder="e.g. Hats Off Aviation Pvt Ltd" required/>
+                <input type="text" id="facilityName" placeholder="e.g. Prestige Tech Park" required/>
               </div>
               <div class="form-group">
                 <label for="propertyType">Property Type *</label>
@@ -439,6 +408,7 @@
                   <option value="Commercial">Commercial</option>
                   <option value="Industrial">Industrial</option>
                   <option value="Institutional">Institutional</option>
+                  <option value="Aviation / Logistics">Aviation / Logistics</option>
                 </select>
               </div>
             </div>
@@ -481,29 +451,51 @@
         </div>
 
         <div>
-          <div class="contact-block">
-            <h4>Phone</h4>
-            <p><a href="tel:+919008977711">+91 90089 77711</a></p>
+          <div style="margin-bottom: 28px;">
+            <div class="contact-block">
+              <h4>Phone</h4>
+              <p><a href="tel:+919008977711">+91 90089 77711</a></p>
+            </div>
+            <div class="contact-block">
+              <h4>Email</h4>
+              <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></p>
+            </div>
+            <div class="contact-block">
+              <h4>Turnaround</h4>
+              <p>Report delivered within 48 hours of on-site assessment</p>
+            </div>
+            <div style="margin-bottom: 32px;">
+              <a href="https://wa.me/919008977711?text=Hi%2C%20I%27d%20like%20to%20request%20a%20Security%20Audit." class="btn btn-whatsapp" target="_blank" rel="noopener" style="width: 100%; justify-content: center;">
+                <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Request Audit on WhatsApp
+              </a>
+            </div>
           </div>
-          <div class="contact-block">
-            <h4>Email</h4>
-            <p><a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a></p>
-          </div>
-          <div class="contact-block">
-            <h4>Location</h4>
-            <p>Bangalore, Karnataka, India<br>Serving Tier-1 &amp; Tier-2 cities</p>
-          </div>
-          <div class="contact-block">
-            <h4>Turnaround</h4>
-            <p>Report delivered within 48 hours of on-site assessment</p>
-          </div>
-          <div style="margin-top: 32px;">
-            <a href="https://wa.me/919008977711?text=Hi%2C%20I%27d%20like%20to%20request%20a%20Security%20Audit." class="btn btn-whatsapp" target="_blank" rel="noopener" style="width: 100%; justify-content: center;">
-              <svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-              Request Audit on WhatsApp
-            </a>
+
+          <div style="font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.25); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;">Sample Report Preview</div>
+          <div class="audit-report">
+            <div class="report-top">
+              <div>
+                <div class="report-id-line">Audit ID: <strong>VAGT/0326/Audit/COM/004</strong></div>
+                <div class="report-date-line">Commercial Facility · Bangalore · 26 Mar 2026</div>
+              </div>
+              <div class="report-score">78<span>/ 100</span></div>
+            </div>
+            <div class="report-section-head">Critical &amp; Moderate Findings</div>
+            <div class="report-row"><div class="report-dot dot-red"></div><span>CCTV blind spots in loading bay and service corridor</span></div>
+            <div class="report-row"><div class="report-dot dot-orange"></div><span>Fire extinguisher inspection overdue — 3 units affected</span></div>
+            <div class="report-row"><div class="report-dot dot-amber"></div><span>Perimeter lighting insufficient along northern boundary</span></div>
+            <div class="report-section-head">Corrective Actions</div>
+            <div class="report-row"><div class="report-dot dot-muted"></div><span>Install 2× PTZ cameras to cover loading area</span></div>
+            <div class="report-row"><div class="report-dot dot-muted"></div><span>Schedule fire equipment servicing within 14 days</span></div>
+            <div class="report-row"><div class="report-dot dot-muted"></div><span>Install motion-activated floodlights — north perimeter</span></div>
+            <div class="report-bottom">
+              <span>Audited by VAGT Certified Inspector · Confidential</span>
+              <span class="report-wm">VAGT</span>
+            </div>
           </div>
         </div>
+
       </div>
     </section>
 
