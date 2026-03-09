@@ -4,6 +4,21 @@ Read this at the start of every session to get up to speed instantly.
 
 ---
 
+## ⚠️ FIRST ACTION — Every Session, No Exceptions
+
+Before reading any file or doing any work, run these two commands:
+
+```bash
+git fetch origin
+git checkout claude/review-website-git-dPWyR
+```
+
+All active development happens on this branch. `main` is behind. If you read files from `main` you will have stale context and waste Nikhil's time.
+
+After checking out, read `handoff-for-mike.md` in the project root — it contains the latest session notes.
+
+---
+
 ## What This Project Is
 
 A full-stack platform for VAGT Security Services (Bengaluru):
