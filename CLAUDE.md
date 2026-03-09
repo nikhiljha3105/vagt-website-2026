@@ -19,6 +19,7 @@ After checking out, read `handoff-for-mike.md` in the project root — it contai
 
 ---
 
+
 ## What This Project Is
 
 A full-stack platform for VAGT Security Services (Bengaluru):
