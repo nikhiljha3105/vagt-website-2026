@@ -64,7 +64,6 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       });
 
       // TODO: Send OTP via SMS / email (integrate Twilio / SendGrid here)
-      console.info(`[forgot-password] OTP for ${userRecord.uid}: ${otp} (token: ${resetToken})`);
 
       return res.json({ reset_token: resetToken, message: 'OTP sent to registered phone/email.' });
     } catch (err) {
@@ -125,7 +124,6 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
 
       // TODO: Resend OTP via SMS / email
-      console.info(`[resend-otp] New OTP for token ${reset_token}: ${newOtp}`);
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {
@@ -157,18 +155,19 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       const regToken = `reg_${Date.now()}_${Math.random().toString(36).slice(2)}`;
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
+      // Password is validated above but NOT stored — account is created with a
+      // random temp password in verify-otp; employee sets their real password
+      // via a reset link sent on admin approval.
       await db.collection('pending_registrations').doc(regToken).set({
         phone,
         email,
-        password_hash: password,   // TODO: hash before storing; for now stored temporarily
         otp,
         expires_at: expiresAt,
         verified: false,
         created_at: new Date(),
       });
 
-      // TODO: Send OTP to phone
-      console.info(`[employee/register] OTP for ${phone}: ${otp}`);
+      // TODO: Send OTP to phone via SMS (integrate Twilio / MSG91 here)
 
       return res.json({ registration_token: regToken });
     } catch (err) {
@@ -196,7 +195,22 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       }
       if (data.otp !== otp) return res.status(400).json({ message: 'Incorrect OTP.' });
 
-      await docRef.update({ verified: true, verified_at: new Date() });
+      // Create the Firebase Auth account now (disabled until admin approves).
+      // A random temp password is used; employee sets their real password via
+      // a reset link sent when the admin approves the registration.
+      const tempPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const userRecord = await auth.createUser({
+        email: data.email,
+        password: tempPassword,
+        displayName: data.name || data.phone,
+        disabled: true,
+      });
+
+      await docRef.update({
+        verified: true,
+        verified_at: new Date(),
+        firebase_uid: userRecord.uid,
+      });
 
       // Notify admin of new pending registration
       await db.collection('activity_log').add({
@@ -231,8 +245,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
 
-      // TODO: Resend OTP to phone
-      console.info(`[employee/resend-otp] New OTP for ${data.phone}: ${newOtp}`);
+      // TODO: Resend OTP to phone via SMS
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {

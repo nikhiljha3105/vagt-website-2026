@@ -136,21 +136,20 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
       const reg = regSnap.data();
       if (reg.approved) return res.status(409).json({ message: 'Already approved.' });
+      if (!reg.firebase_uid) return res.status(400).json({ message: 'Registration phone not yet verified.' });
 
-      // Create Firebase Auth account
-      const userRecord = await auth.createUser({
-        email: reg.email,
-        password: reg.password_hash,       // TODO: require password reset on first login
+      // Enable the Firebase Auth account created during phone verification
+      await auth.updateUser(reg.firebase_uid, {
+        disabled: false,
         displayName: reg.name || reg.phone,
-        phoneNumber: reg.phone,
       });
 
       // Set custom role claim
-      await auth.setCustomUserClaims(userRecord.uid, { role: 'employee' });
+      await auth.setCustomUserClaims(reg.firebase_uid, { role: 'employee' });
 
       // Create Firestore employee document
       const empId = await nextEmployeeId(db);
-      await db.collection('employees').doc(userRecord.uid).set({
+      await db.collection('employees').doc(reg.firebase_uid).set({
         name: reg.name || reg.phone,
         phone: reg.phone,
         email: reg.email,
@@ -161,14 +160,13 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         joined_at: new Date(),
       });
 
-      await regRef.update({ approved: true, approved_at: new Date(), uid: userRecord.uid });
-
+      await regRef.update({ approved: true, approved_at: new Date() });
       await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin');
 
-      // TODO: Send credentials via SMS
-      console.info(`[approve] Created employee ${empId}, uid: ${userRecord.uid}`);
+      // TODO: Send login reset link via SMS so employee can set their password
+      // const resetLink = await auth.generatePasswordResetLink(reg.email);
 
-      return res.json({ success: true });
+      return res.json({ success: true, employee_id: empId });
     } catch (err) {
       console.error('registrations/approve error:', err);
       return res.status(500).json({ message: 'Failed to approve registration.' });
@@ -184,8 +182,19 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       const snap   = await regRef.get();
       if (!snap.exists) return res.status(404).json({ message: 'Registration not found.' });
 
+      const reg = snap.data();
+
+      // Clean up the disabled Firebase Auth account created at verify-otp time
+      if (reg.firebase_uid) {
+        try {
+          await auth.deleteUser(reg.firebase_uid);
+        } catch (deleteErr) {
+          console.warn(`Could not delete Auth account ${reg.firebase_uid}:`, deleteErr.message);
+        }
+      }
+
       await regRef.update({ rejected: true, reject_reason: reason || null, rejected_at: new Date() });
-      await logActivity(db, 'registration', `Registration for ${snap.data().phone} rejected`, 'admin');
+      await logActivity(db, 'registration', `Registration for ${reg.phone} rejected`, 'admin');
 
       return res.json({ success: true });
     } catch (err) {
@@ -204,11 +213,15 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
       const LABELS = { casual: 'Casual Leave', sick: 'Sick Leave', earned: 'Earned Leave' };
 
-      // Enrich with employee names (batch)
-      const items = await Promise.all(snap.docs.map(async doc => {
+      // Batch-fetch all referenced employee docs in a single network round-trip
+      const empRefs = snap.docs.map(doc => db.collection('employees').doc(doc.data().employee_uid));
+      const empDocs = empRefs.length > 0 ? await db.getAll(...empRefs) : [];
+      const empMap = {};
+      empDocs.forEach(d => { if (d.exists) empMap[d.id] = d.data(); });
+
+      const items = snap.docs.map(doc => {
         const d = doc.data();
-        const empSnap = await db.collection('employees').doc(d.employee_uid).get();
-        const emp = empSnap.exists ? empSnap.data() : {};
+        const emp = empMap[d.employee_uid] || {};
         return {
           id: doc.id,
           employee_id: emp.employee_id || null,
@@ -220,7 +233,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
           reason: d.reason,
           applied_at: d.applied_at ? d.applied_at.toDate().toISOString() : null,
         };
-      }));
+      });
 
       return res.json(items);
     } catch (err) {
@@ -243,7 +256,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   router.get('/employees', ...guard, async (req, res) => {
     const { status } = req.query;
     try {
-      let query = db.collection('employees').orderBy('name');
+      let query = db.collection('employees').orderBy('name').limit(500);
       if (status) query = query.where('status', '==', status);
 
       const snap = await query.get();
@@ -407,7 +420,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   // ── GET /clients ─────────────────────────────────────────────────────────
   router.get('/clients', ...guard, async (req, res) => {
     try {
-      const snap = await db.collection('clients').orderBy('name').get();
+      const snap = await db.collection('clients').orderBy('name').limit(500).get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
@@ -471,7 +484,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   // ── GET /sites ────────────────────────────────────────────────────────────
   router.get('/sites', ...guard, async (req, res) => {
     try {
-      const snap = await db.collection('sites').orderBy('name').get();
+      const snap = await db.collection('sites').orderBy('name').limit(500).get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
@@ -587,32 +600,41 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
     try {
       const empSnap = await db.collection('employees').where('status', '==', 'active').get();
-      const batch = db.batch();
 
-      for (const empDoc of empSnap.docs) {
-        const emp = empDoc.data();
-        // Basic payslip computation — replace with real payroll logic
-        const grossPay  = emp.basic_salary || 15000;
-        const deductions = Math.round(grossPay * 0.02);   // Placeholder 2% deduction
-        const netPay    = grossPay - deductions;
-
-        const slipRef = db.collection('payslips').doc();
-        batch.set(slipRef, {
-          employee_uid: empDoc.id,
-          employee_id: emp.employee_id,
-          employee_name: emp.name,
-          period: month,
-          gross_pay: grossPay,
-          deductions,
-          net_pay: netPay,
-          basic: emp.basic_salary || 13000,
-          allowances: Math.round(grossPay * 0.13),
-          generated_at: new Date(),
-          pdf_url: null,          // PDF generation via Cloud Storage — TODO
-        });
+      // Firebase batch is capped at 499 writes — chunk to handle any employee count
+      const BATCH_SIZE = 499;
+      const chunks = [];
+      for (let i = 0; i < empSnap.docs.length; i += BATCH_SIZE) {
+        chunks.push(empSnap.docs.slice(i, i + BATCH_SIZE));
       }
 
-      await batch.commit();
+      for (const chunk of chunks) {
+        const batch = db.batch();
+        for (const empDoc of chunk) {
+          const emp = empDoc.data();
+          // Basic payslip computation — replace with real payroll logic
+          const grossPay   = emp.basic_salary || 15000;
+          const deductions = Math.round(grossPay * 0.02);   // Placeholder 2% deduction
+          const netPay     = grossPay - deductions;
+
+          const slipRef = db.collection('payslips').doc();
+          batch.set(slipRef, {
+            employee_uid: empDoc.id,
+            employee_id: emp.employee_id,
+            employee_name: emp.name,
+            period: month,
+            gross_pay: grossPay,
+            deductions,
+            net_pay: netPay,
+            basic: emp.basic_salary || 13000,
+            allowances: Math.round(grossPay * 0.13),
+            generated_at: new Date(),
+            pdf_url: null,          // PDF generation via Cloud Storage — TODO
+          });
+        }
+        await batch.commit();
+      }
+
       await logActivity(db, 'other', `Payroll run for ${month}: ${empSnap.size} slips generated`, 'admin');
 
       return res.json({ success: true, generated: empSnap.size });
