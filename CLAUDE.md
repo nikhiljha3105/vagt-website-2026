@@ -99,8 +99,7 @@ pending_registrations, guard_keycodes, sign_in_events, password_reset_tokens
 - `activity_log` collection unbounded — no TTL or archival
 - Denormalized employee/site names across collections — no cleanup on updates
 - Firestore composite indexes missing for several filtered queries
-- Firebase API key `REDACTED_OLD_KEY` exposed in git history
-  (commit dd5fd03) — needs history rewrite + key rotation before production
+- ~~Firebase API key exposed in git history~~ — **RESOLVED 2026-03-09**: key rotated + git history rewritten across all branches.
 
 ## Session Handoff Notes
 

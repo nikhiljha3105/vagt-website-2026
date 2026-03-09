@@ -71,10 +71,7 @@ When an admin rejected a registration, the disabled Firebase Auth account create
 
 ## Known Risk (Needs Attention Before Go-Live)
 
-A Firebase API key was accidentally committed to git history in an old commit (`dd5fd03`). The key is:
-`REDACTED_OLD_KEY`
-
-**Action needed:** Rotate this key in the Firebase console + rewrite git history to remove it before the project goes to production.
+~~Firebase API key exposed in git history~~ — **RESOLVED 2026-03-09**: key rotated in Firebase Console + git history rewritten and force-pushed across all branches.
 
 ---
 
