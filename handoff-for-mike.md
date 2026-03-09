@@ -62,8 +62,49 @@ Six security and performance fixes committed and pushed:
 
 ## Pending — Next Session Must Start With These
 
-### 1. The 10 Questions (UNKNOWN — HIGH PRIORITY)
-Nikhil has 10 questions from earlier mobile sessions that have **never been addressed**. He has mentioned them twice but not yet pasted them. **Ask Nikhil to paste these first thing.**
+### 1. The 10 Product Questions — LOGGED, NEED NIKHIL'S ANSWERS
+
+These questions were asked by mobile Claude. They are now logged here permanently. **Nikhil has not yet answered them.** Ask him to answer each one at the start of the next session — the answers will determine product priorities.
+
+**Q1. Who is the primary buyer — the person who signs the contract with VAGT?**
+Is it an HR manager, a Facilities head, a CXO? This determines what the client portal needs to show front-and-centre (operational data vs. billing vs. compliance reports).
+_Answer: [PENDING]_
+
+**Q2. How do guards currently check in?**
+Paper registers, WhatsApp, phone call to a supervisor? This tells us whether mobile-first (PWA) matters more than desktop, and whether GPS location verification needs to be part of check-in.
+_Answer: [PENDING]_
+
+**Q3. What is the one thing clients complain about most frequently today?**
+"I don't know if my guard showed up" is a very different product from "I can't get an invoice on time."
+_Answer: [PENDING — guest entry flagged as #1 complaint based on earlier context]_
+
+**Q4. How many guards do you have today, and what's the realistic number in 12 months?**
+Affects database design, payroll computation, and whether current Firestore approach holds.
+_Answer: [PENDING — currently 10 Hats Off guards onboarded]_
+
+**Q5. Do you handle payroll yourself or does an agency/accountant do it?**
+If outsourced → need CSV/Excel export. If in-house → build the computation engine.
+_Answer: [PENDING]_
+
+**Q6. What happens when a guard doesn't show up for a shift?**
+Is there a standby pool? Who gets notified — client, ops manager, both? Most critical operational edge case.
+_Answer: [PENDING]_
+
+**Q7. How do clients currently receive monthly reports and invoices?**
+Email PDFs, WhatsApp, or physical? Tells us whether the client portal replaces a workflow or adds to it, and whether PDF generation is urgent.
+_Answer: [PENDING]_
+
+**Q8. Any compliance or licensing requirements — PSARA Act, GST invoicing format, EPF/ESI deductions?**
+Non-negotiable in India. Will determine exact fields on payslips, invoices, and whether a CA-approved audit trail is needed.
+_Answer: [PENDING]_
+
+**Q9. Who will be the full-time admin of this platform on your side?**
+You, an operations manager, or a dedicated person? Determines how powerful vs. hand-held the admin portal should be.
+_Answer: [PENDING]_
+
+**Q10. What's the one thing this platform must do flawlessly on day one?**
+The thing that, if it breaks, you lose a client or an employee. Everything else can be imperfect in v1. That one thing cannot be.
+_Answer: [PENDING]_
 
 ### 2. Run `finalize_setup.py` (if not done yet)
 Nikhil may not have run this script yet. It creates the admin account and patches PVT employees. Script is in the project folder. Run on Mac (not VM — VM has no Google egress).

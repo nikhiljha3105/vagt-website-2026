@@ -1,14 +1,88 @@
 /**
- * Auth routes
+ * ─────────────────────────────────────────────────────────────────────────────
+ * VAGT Security Services — Authentication Routes
+ * File: firebase/functions/src/routes/auth.js
+ * ─────────────────────────────────────────────────────────────────────────────
  *
- * POST /api/auth/login
- * POST /api/auth/forgot-password
- * POST /api/auth/reset-password
- * POST /api/auth/resend-reset-otp
- * POST /api/auth/employee/register
- * POST /api/auth/employee/verify-otp
- * POST /api/auth/employee/resend-otp
- * POST /api/auth/guard/keycode-login
+ * ENDPOINTS:
+ *   POST /api/auth/login                   — stub (frontend uses Firebase SDK directly)
+ *   POST /api/auth/forgot-password         — send OTP to reset password
+ *   POST /api/auth/reset-password          — verify OTP + set new password
+ *   POST /api/auth/resend-reset-otp        — resend password reset OTP
+ *   POST /api/auth/employee/register       — new guard self-registration
+ *   POST /api/auth/employee/verify-otp     — verify phone OTP after registration
+ *   POST /api/auth/employee/resend-otp     — resend registration OTP
+ *   POST /api/auth/guard/keycode-login     — keycode-based login (no password)
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * REGISTRATION FLOW (new guard joining VAGT):
+ *
+ *   Step 1 — Guard opens register page, enters phone + email + password
+ *            → POST /api/auth/employee/register
+ *            → OTP generated (6 digits, 15 min TTL) stored in pending_registrations
+ *            → ⚠️  TODO: OTP sent via SMS (currently STUBBED — no SMS goes out)
+ *            → Returns: { registration_token: "reg_..." }
+ *
+ *   Step 2 — Guard enters OTP from SMS
+ *            → POST /api/auth/employee/verify-otp
+ *            → Firebase Auth account created (DISABLED — can't log in yet)
+ *            → pending_registrations doc marked verified
+ *            → Admin sees new pending registration in admin portal
+ *
+ *   Step 3 — Admin approves in admin portal
+ *            → POST /api/admin/registrations/:id/approve  (see admin.js)
+ *            → Firebase Auth account ENABLED
+ *            → Employee Firestore doc created with VAGT-XXXX ID
+ *            → ⚠️  TODO: Password reset link sent via SMS (currently commented out)
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * PASSWORD RESET FLOW:
+ *
+ *   Guard enters employee ID or email
+ *     → OTP generated, stored in password_reset_tokens
+ *     → ⚠️  TODO: OTP sent via SMS
+ *   Guard enters OTP + new password
+ *     → OTP verified, password updated in Firebase Auth
+ *     → Reset token marked used (can't reuse)
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * KEYCODE LOGIN FLOW (for guards without smartphones):
+ *
+ *   Guard types their physical keycode (format: XXXX-XXXX) on any shared device
+ *     → Keycode looked up in guard_keycodes collection
+ *     → If active: GPS + device info logged to sign_in_events
+ *     → Returns a Firebase Custom Token the frontend exchanges for a session
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * SMS INTEGRATION (the big TODO):
+ *
+ *   All four places that need SMS are marked: // TODO: Send OTP via SMS
+ *   When you're ready to wire MSG91:
+ *     1. Get your MSG91 API key and sender ID
+ *     2. Add them to Firebase environment config:
+ *        firebase functions:config:set msg91.key="YOUR_KEY" msg91.sender="VAGTSC"
+ *     3. Install the client: cd firebase/functions && npm install axios
+ *     4. Replace each TODO block with:
+ *
+ *        const axios = require('axios');
+ *        await axios.get('https://api.msg91.com/api/v5/otp', {
+ *          params: {
+ *            authkey: functions.config().msg91.key,
+ *            mobile:  '91' + phoneNumber,   // India prefix
+ *            message: `Your VAGT OTP is ${otp}. Valid for 15 minutes.`,
+ *            sender:  functions.config().msg91.sender,
+ *            otp:     otp,
+ *          }
+ *        });
+ *
+ * DEBUG TIPS:
+ *   - "Invalid registration token" → the reg_... token expired or was already used
+ *   - "Already verified" → guard tried to verify the same OTP twice (harmless)
+ *   - "An account with this email already exists" → guard already registered;
+ *     they should use forgot-password instead
+ *   - OTP always wrong → check that the OTP was stored correctly in Firestore
+ *     (Firestore Console → pending_registrations → find the doc → check 'otp' field)
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 'use strict';
@@ -18,53 +92,59 @@ const express = require('express');
 module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
   const router = express.Router();
 
-  // ── POST /api/auth/login ─────────────────────────────────────────────────
-  // Frontend uses Firebase client SDK directly for login; this endpoint is
-  // here for completeness and for future server-side session cookie support.
-  // The current client-side flow: firebase.auth().signInWithEmailAndPassword()
+  // ── POST /api/auth/login ──────────────────────────────────────────────────
+  // NOTE: Actual login is handled by the Firebase client SDK on the frontend
+  // (firebase.auth().signInWithEmailAndPassword). This backend endpoint exists
+  // only as a placeholder for future server-side session cookie support.
   router.post('/login', loginLimiter, async (req, res) => {
-    // Firebase client SDK handles auth directly.
-    // This endpoint can be used for admin SDK session-cookie minting.
     return res.status(501).json({ message: 'Use Firebase client SDK for authentication.' });
   });
 
-  // ── POST /api/auth/forgot-password ───────────────────────────────────────
+  // ── POST /api/auth/forgot-password ────────────────────────────────────────
+  // Guard enters their employee ID (e.g. VAGT-0001) or email to start reset.
+  // Returns a reset_token that is needed in the next step.
   router.post('/forgot-password', authLimiter, async (req, res) => {
     const { identifier } = req.body || {};
     if (!identifier) return res.status(400).json({ message: 'identifier is required.' });
 
     try {
-      // Look up employee by employee_id or email
+      // Try to find the user by email first, then fall back to employee_id
       let userRecord;
       try {
-        // Try as email first
         userRecord = await auth.getUserByEmail(identifier);
       } catch {
-        // Fall back to looking up by employee_id custom attribute via Firestore
+        // Not an email — try looking up by employee_id in Firestore
         const snap = await db.collection('employees')
           .where('employee_id', '==', identifier)
           .limit(1)
           .get();
         if (snap.empty) return res.status(404).json({ message: 'No account found for that identifier.' });
-        const uid = snap.docs[0].id;
-        userRecord = await auth.getUser(uid);
+        userRecord = await auth.getUser(snap.docs[0].id);
       }
 
-      // Generate and store a 6-digit OTP in Firestore (TTL: 15 min)
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      // Generate a 6-digit OTP and a unique token to tie the OTP to this reset attempt.
+      // The token (not the OTP) is what gets passed between steps — the OTP is the secret.
+      const otp        = Math.floor(100000 + Math.random() * 900000).toString();
       const resetToken = `rst_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+      const expiresAt  = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
       await db.collection('password_reset_tokens').doc(resetToken).set({
-        uid: userRecord.uid,
+        uid:        userRecord.uid,
         otp,
         expires_at: expiresAt,
-        used: false,
+        used:       false,
         created_at: new Date(),
       });
 
-      // TODO: Send OTP via SMS / email (integrate Twilio / SendGrid here)
+      // ── TODO: Send OTP via SMS ──────────────────────────────────────────
+      // Replace this comment with your MSG91/Twilio call.
+      // The phone number is in userRecord.phoneNumber (if set) or look it up
+      // from db.collection('employees').doc(userRecord.uid).get() → data().phone
+      // See SMS INTEGRATION section at the top of this file for exact code.
+      // ───────────────────────────────────────────────────────────────────
 
+      // We return the reset_token to the frontend so it can pass it to the next step.
+      // The OTP itself is NOT returned — it should only arrive via SMS.
       return res.json({ reset_token: resetToken, message: 'OTP sent to registered phone/email.' });
     } catch (err) {
       console.error('forgot-password error:', err);
@@ -72,7 +152,9 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
-  // ── POST /api/auth/reset-password ────────────────────────────────────────
+  // ── POST /api/auth/reset-password ─────────────────────────────────────────
+  // Guard submits: the reset_token from the previous step + the OTP they received
+  // via SMS + their new password.
   router.post('/reset-password', authLimiter, async (req, res) => {
     const { reset_token, otp, new_password } = req.body || {};
     if (!reset_token || !otp || !new_password) {
@@ -84,18 +166,19 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
 
     try {
       const docRef = db.collection('password_reset_tokens').doc(reset_token);
-      const snap = await docRef.get();
+      const snap   = await docRef.get();
 
-      if (!snap.exists) return res.status(400).json({ message: 'Invalid reset token.' });
-
-      const data = snap.data();
-      if (data.used) return res.status(400).json({ message: 'This reset link has already been used.' });
-      if (new Date() > data.expires_at.toDate()) {
+      if (!snap.exists)              return res.status(400).json({ message: 'Invalid reset token.' });
+      if (snap.data().used)          return res.status(400).json({ message: 'This reset link has already been used.' });
+      if (new Date() > snap.data().expires_at.toDate()) {
         return res.status(400).json({ message: 'Reset token has expired. Please request a new one.' });
       }
-      if (data.otp !== otp) return res.status(400).json({ message: 'Incorrect OTP.' });
+      if (snap.data().otp !== otp)   return res.status(400).json({ message: 'Incorrect OTP.' });
 
-      await auth.updateUser(data.uid, { password: new_password });
+      // All checks passed — update the password in Firebase Auth
+      await auth.updateUser(snap.data().uid, { password: new_password });
+
+      // Mark token as used so it can't be replayed
       await docRef.update({ used: true });
 
       return res.json({ success: true });
@@ -105,25 +188,27 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
-  // ── POST /api/auth/resend-reset-otp ──────────────────────────────────────
+  // ── POST /api/auth/resend-reset-otp ───────────────────────────────────────
+  // Guard didn't receive the SMS — generate a fresh OTP on the same reset_token.
+  // The old OTP is replaced; the token stays the same.
   router.post('/resend-reset-otp', authLimiter, async (req, res) => {
     const { reset_token } = req.body || {};
     if (!reset_token) return res.status(400).json({ message: 'reset_token is required.' });
 
     try {
       const docRef = db.collection('password_reset_tokens').doc(reset_token);
-      const snap = await docRef.get();
-      if (!snap.exists) return res.status(400).json({ message: 'Invalid reset token.' });
+      const snap   = await docRef.get();
+      if (!snap.exists)      return res.status(400).json({ message: 'Invalid reset token.' });
+      if (snap.data().used)  return res.status(400).json({ message: 'Token already used.' });
 
-      const data = snap.data();
-      if (data.used) return res.status(400).json({ message: 'Token already used.' });
-
-      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const newOtp    = Math.floor(100000 + Math.random() * 900000).toString();
       const newExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
 
-      // TODO: Resend OTP via SMS / email
+      // ── TODO: Resend OTP via SMS ────────────────────────────────────────
+      // Same as forgot-password above — send newOtp to the guard's phone.
+      // ───────────────────────────────────────────────────────────────────
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {
@@ -132,7 +217,11 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
-  // ── POST /api/auth/employee/register ─────────────────────────────────────
+  // ── POST /api/auth/employee/register ──────────────────────────────────────
+  // Step 1 of new guard registration.
+  // Stores the pending registration in Firestore and sends an OTP to phone.
+  // IMPORTANT: The password entered here is validated for length but NOT stored.
+  // The guard sets their real password later via a reset link sent on admin approval.
   router.post('/employee/register', authLimiter, async (req, res) => {
     const { phone, email, password } = req.body || {};
     if (!phone || !email || !password) {
@@ -143,32 +232,35 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
 
     try {
-      // Check if email already exists
+      // Reject if this email already has an account (active or pending)
       try {
         await auth.getUserByEmail(email);
         return res.status(409).json({ message: 'An account with this email already exists.' });
       } catch {
-        // Expected: user not found
+        // Expected: email not found → proceed
       }
 
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otp      = Math.floor(100000 + Math.random() * 900000).toString();
       const regToken = `reg_${Date.now()}_${Math.random().toString(36).slice(2)}`;
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-      // Password is validated above but NOT stored — account is created with a
-      // random temp password in verify-otp; employee sets their real password
-      // via a reset link sent on admin approval.
+      // Store registration intent — NOT the password
       await db.collection('pending_registrations').doc(regToken).set({
         phone,
         email,
         otp,
         expires_at: expiresAt,
-        verified: false,
+        verified:   false,
         created_at: new Date(),
       });
 
-      // TODO: Send OTP to phone via SMS (integrate Twilio / MSG91 here)
+      // ── TODO: Send OTP to phone via SMS ────────────────────────────────
+      // Send 'otp' to 'phone' via MSG91.
+      // See SMS INTEGRATION section at the top of this file for exact code.
+      // Until this is wired, the OTP is ONLY in Firestore — check there to test.
+      // ───────────────────────────────────────────────────────────────────
 
+      // Return the token (not the OTP) — frontend needs it for the verify step
       return res.json({ registration_token: regToken });
     } catch (err) {
       console.error('employee/register error:', err);
@@ -176,7 +268,10 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
-  // ── POST /api/auth/employee/verify-otp ───────────────────────────────────
+  // ── POST /api/auth/employee/verify-otp ────────────────────────────────────
+  // Step 2 of registration — guard enters the OTP from their SMS.
+  // If correct, a DISABLED Firebase Auth account is created.
+  // The account stays disabled until an admin approves it in the admin portal.
   router.post('/employee/verify-otp', authLimiter, async (req, res) => {
     const { registration_token, otp } = req.body || {};
     if (!registration_token || !otp) {
@@ -185,39 +280,39 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
 
     try {
       const docRef = db.collection('pending_registrations').doc(registration_token);
-      const snap = await docRef.get();
-      if (!snap.exists) return res.status(400).json({ message: 'Invalid registration token.' });
+      const snap   = await docRef.get();
+      if (!snap.exists)        return res.status(400).json({ message: 'Invalid registration token.' });
 
       const data = snap.data();
-      if (data.verified) return res.status(400).json({ message: 'Already verified.' });
+      if (data.verified)       return res.status(400).json({ message: 'Already verified.' });
       if (new Date() > data.expires_at.toDate()) {
         return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
       }
-      if (data.otp !== otp) return res.status(400).json({ message: 'Incorrect OTP.' });
+      if (data.otp !== otp)    return res.status(400).json({ message: 'Incorrect OTP.' });
 
-      // Create the Firebase Auth account now (disabled until admin approves).
-      // A random temp password is used; employee sets their real password via
-      // a reset link sent when the admin approves the registration.
+      // Create the Firebase Auth account in a DISABLED state.
+      // We use a random temp password — the real password is set later via reset link.
+      // IMPORTANT: do not log or store this tempPassword anywhere.
       const tempPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      const userRecord = await auth.createUser({
-        email: data.email,
-        password: tempPassword,
+      const userRecord   = await auth.createUser({
+        email:       data.email,
+        password:    tempPassword,
         displayName: data.name || data.phone,
-        disabled: true,
+        disabled:    true, // ← stays disabled until admin approves
       });
 
       await docRef.update({
-        verified: true,
-        verified_at: new Date(),
-        firebase_uid: userRecord.uid,
+        verified:     true,
+        verified_at:  new Date(),
+        firebase_uid: userRecord.uid, // needed by admin/approve endpoint
       });
 
-      // Notify admin of new pending registration
+      // Let the admin know there's a new registration waiting for review
       await db.collection('activity_log').add({
-        type: 'registration',
+        type:        'registration',
         description: `New employee registration request from ${data.phone}`,
-        time: new Date(),
-        actor: data.phone,
+        time:        new Date(),
+        actor:       data.phone,
       });
 
       return res.json({ success: true });
@@ -227,25 +322,26 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
-  // ── POST /api/auth/employee/resend-otp ───────────────────────────────────
+  // ── POST /api/auth/employee/resend-otp ────────────────────────────────────
+  // Guard didn't receive SMS during registration — regenerate and resend.
   router.post('/employee/resend-otp', authLimiter, async (req, res) => {
     const { registration_token } = req.body || {};
     if (!registration_token) return res.status(400).json({ message: 'registration_token is required.' });
 
     try {
       const docRef = db.collection('pending_registrations').doc(registration_token);
-      const snap = await docRef.get();
-      if (!snap.exists) return res.status(400).json({ message: 'Invalid registration token.' });
+      const snap   = await docRef.get();
+      if (!snap.exists)          return res.status(400).json({ message: 'Invalid registration token.' });
+      if (snap.data().verified)  return res.status(400).json({ message: 'Already verified.' });
 
-      const data = snap.data();
-      if (data.verified) return res.status(400).json({ message: 'Already verified.' });
-
-      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const newOtp    = Math.floor(100000 + Math.random() * 900000).toString();
       const newExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
 
-      // TODO: Resend OTP to phone via SMS
+      // ── TODO: Resend OTP to phone via SMS ──────────────────────────────
+      // Send newOtp to snap.data().phone via MSG91.
+      // ───────────────────────────────────────────────────────────────────
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {
@@ -254,16 +350,32 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
-  // ── POST /api/auth/guard/keycode-login ───────────────────────────────────
-  // Guard authenticates with a physical non-expiring keycode.
-  // Captures GPS + device info at sign-in. Returns a Firebase Custom Token.
+  // ── POST /api/auth/guard/keycode-login ────────────────────────────────────
+  // Alternative login for guards who use a physical keycode card instead of
+  // a username/password. The keycode is in format XXXX-XXXX (no ambiguous chars).
+  //
+  // WHY THIS EXISTS: Some guards don't have smartphones or struggle with passwords.
+  // The keycode is printed on a physical card. They type it on any shared tablet.
+  //
+  // WHAT HAPPENS:
+  //   1. Keycode looked up in guard_keycodes collection
+  //   2. GPS + device info logged to sign_in_events (audit trail)
+  //   3. A Firebase Custom Token is returned — frontend exchanges it for a session
+  //
+  // DEBUG TIP: If a guard says "keycode not working":
+  //   1. Check guard_keycodes in Firestore — is the keycode there with active: true?
+  //   2. Check sign_in_events — is the attempt being logged at all?
+  //   3. If not logged, the keycode format might be wrong (spaces, lowercase, etc.)
+  //      The code normalises to uppercase and strips non-alphanumeric, so XXXX-XXXX
+  //      and xxxx-xxxx should both work.
   router.post('/guard/keycode-login', loginLimiter, async (req, res) => {
     const { keycode, latitude, longitude, accuracy, device_info } = req.body || {};
     if (!keycode || typeof keycode !== 'string') {
       return res.status(400).json({ message: 'keycode is required.' });
     }
 
-    // Normalise: uppercase, strip non-alphanumeric except dash
+    // Normalise: uppercase, strip everything except A-Z, 0-9, and dash
+    // This makes the input forgiving — typos like spaces or lowercase are handled
     const normalised = keycode.toUpperCase().replace(/[^A-Z0-9-]/g, '');
 
     try {
@@ -276,12 +388,14 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       const codeData = codeSnap.data();
 
       if (!codeData.active) {
+        // Keycode was revoked — guard should contact their manager
         return res.status(403).json({ message: 'This keycode has been deactivated. Contact your manager.' });
       }
 
       const employeeUid = codeData.employee_uid;
 
-      // Log the sign-in event (GPS + device fingerprint)
+      // Log the sign-in event with all available location/device data
+      // This creates the audit trail for: who signed in, when, where, from what device
       const eventData = {
         employee_uid:  employeeUid,
         employee_id:   codeData.employee_id  || null,
@@ -289,17 +403,19 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         keycode:       normalised,
         latitude:      typeof latitude  === 'number' ? latitude  : null,
         longitude:     typeof longitude === 'number' ? longitude : null,
-        geo_accuracy:  typeof accuracy  === 'number' ? accuracy  : null,
-        device_info:   typeof device_info === 'string' ? device_info.slice(0, 512) : null,
+        geo_accuracy:  typeof accuracy  === 'number' ? accuracy  : null,  // metres
+        device_info:   typeof device_info === 'string' ? device_info.slice(0, 512) : null, // capped at 512 chars
         ip_address:    req.headers['x-forwarded-for'] || req.socket.remoteAddress || null,
         timestamp:     new Date(),
       };
       await db.collection('sign_in_events').add(eventData);
 
-      // Update last_seen on the keycode doc
+      // Update last_used_at so admins can see when each keycode was last active
       await codeSnap.ref.update({ last_used_at: new Date() });
 
-      // Mint a Firebase Custom Token for the employee
+      // Mint a short-lived Firebase Custom Token for this employee
+      // The frontend calls firebase.auth().signInWithCustomToken(customToken)
+      // to get a full session. Custom tokens expire after 1 hour.
       const customToken = await auth.createCustomToken(employeeUid, { role: 'employee' });
 
       return res.json({

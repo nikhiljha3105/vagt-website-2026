@@ -1,37 +1,81 @@
 /**
- * Admin portal routes
+ * ─────────────────────────────────────────────────────────────────────────────
+ * VAGT Security Services — Admin Portal Routes
+ * File: firebase/functions/src/routes/admin.js
+ * ─────────────────────────────────────────────────────────────────────────────
  *
- * All routes require a valid Firebase ID token with role === 'admin'.
+ * ALL ROUTES REQUIRE: Firebase ID token with role === 'admin'
+ * If you get 403 errors, the logged-in user doesn't have the admin role claim.
+ * Fix: admin.auth().setCustomUserClaims(uid, { role: 'admin' })
  *
- * GET  /api/admin/overview
- * GET  /api/admin/activity
- * GET  /api/admin/pending-registrations
- * POST /api/admin/registrations/:id/approve
- * POST /api/admin/registrations/:id/reject
- * GET  /api/admin/pending-leaves
- * POST /api/admin/leaves/:id/approve
- * POST /api/admin/leaves/:id/reject
- * GET  /api/admin/employees
- * GET  /api/admin/employees/:id
- * POST /api/admin/employees/:id/deactivate
- * POST /api/admin/employees/:id/reactivate
- * POST /api/admin/employees/:id/generate-keycode
- * POST /api/admin/employees/:id/revoke-keycode
- * GET  /api/admin/sign-in-events
- * GET  /api/admin/schedule
- * POST /api/admin/schedule
- * DELETE /api/admin/schedule/:id
- * GET  /api/admin/clients
- * GET  /api/admin/clients/:id
- * GET  /api/admin/sites
- * GET  /api/admin/sites/:id
- * GET  /api/admin/payroll
- * POST /api/admin/payroll/run
- * POST /api/admin/payroll/:employee_id/generate-slip
- * GET  /api/admin/complaints
- * GET  /api/admin/complaints/:id
- * POST /api/admin/complaints/:id/status
- * GET  /api/admin/reports
+ * ENDPOINTS:
+ *   GET  /api/admin/overview                              — dashboard numbers
+ *   GET  /api/admin/activity                              — recent activity log
+ *   GET  /api/admin/pending-registrations                 — guards awaiting approval
+ *   POST /api/admin/registrations/:id/approve             — approve a guard
+ *   POST /api/admin/registrations/:id/reject              — reject a guard
+ *   GET  /api/admin/pending-leaves                        — leaves waiting for decision
+ *   POST /api/admin/leaves/:id/approve                    — approve leave
+ *   POST /api/admin/leaves/:id/reject                     — reject leave
+ *   GET  /api/admin/employees                             — list all employees
+ *   GET  /api/admin/employees/:id                         — single employee detail
+ *   POST /api/admin/employees/:id/deactivate              — suspend employee
+ *   POST /api/admin/employees/:id/reactivate              — reinstate employee
+ *   POST /api/admin/employees/:id/generate-keycode        — issue physical keycode
+ *   POST /api/admin/employees/:id/revoke-keycode          — revoke keycode
+ *   GET  /api/admin/sign-in-events                        — keycode sign-in audit log
+ *   GET  /api/admin/schedule                              — view shift schedule
+ *   POST /api/admin/schedule                              — create a shift
+ *   DELETE /api/admin/schedule/:id                        — remove a shift
+ *   GET  /api/admin/clients                               — list all clients
+ *   GET  /api/admin/clients/:id                           — single client detail
+ *   GET  /api/admin/sites                                 — list all sites
+ *   GET  /api/admin/sites/:id                             — single site detail
+ *   GET  /api/admin/payroll                               — view payroll for a month
+ *   POST /api/admin/payroll/run                           — generate all payslips for a month
+ *   POST /api/admin/payroll/:employee_id/generate-slip    — regenerate one payslip
+ *   GET  /api/admin/complaints                            — list all complaints
+ *   GET  /api/admin/complaints/:id                        — single complaint detail
+ *   POST /api/admin/complaints/:id/status                 — update complaint status
+ *   GET  /api/admin/reports                               — analytics / reports
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * EMPLOYEE APPROVAL FLOW:
+ *   Guard registers on app → OTP verified → pending_registration created
+ *   Admin sees it in GET /pending-registrations
+ *   Admin clicks Approve → POST /registrations/:id/approve
+ *     → Firebase Auth account ENABLED
+ *     → employee doc created in Firestore with next VAGT-XXXX ID
+ *     → TODO: password reset link sent via SMS (currently commented out)
+ *   Admin clicks Reject → POST /registrations/:id/reject
+ *     → disabled Firebase Auth account deleted (cleanup)
+ *     → pending_registration marked rejected
+ *
+ * PAYROLL NOTES:
+ *   ⚠️  The payroll computation (gross pay, deductions, net pay) is currently
+ *   a PLACEHOLDER using basic_salary from the employee doc with a flat 2%
+ *   deduction. This is NOT production-ready.
+ *   BEFORE GO-LIVE: Replace the computation block in POST /payroll/run with:
+ *     - Real basic + HRA + allowances from the employee doc
+ *     - EPF (12% employee + 12% employer on basic, capped at ₹15,000 basic)
+ *     - ESI (0.75% employee + 3.25% employer on gross, if gross ≤ ₹21,000)
+ *     - TDS if applicable
+ *     - Days-present based proration from attendance_logs
+ *   The structure is already there — just replace the numbers.
+ *
+ * KEYCODE SYSTEM:
+ *   Keycodes are format XXXX-XXXX using only unambiguous characters
+ *   (no 0, O, I, 1 to avoid confusion on printed cards).
+ *   Each guard can have only one active keycode at a time.
+ *   Generating a new keycode auto-revokes the old one.
+ *
+ * DEBUG TIPS:
+ *   - "Registration not found" → the pending_registration ID is wrong or was deleted
+ *   - "Registration phone not yet verified" → guard never completed step 2 (OTP verify)
+ *   - "Employee already has a shift on this date" → check shifts collection in Firestore
+ *   - Payroll numbers are wrong → check basic_salary field on the employee doc
+ *   - Reports show 0% attendance → check attendance_logs has check_in field set
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
 'use strict';
@@ -40,9 +84,12 @@ const express = require('express');
 
 module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   const router = express.Router();
-  const guard  = [requireAuth, requireAdmin];
+  const guard  = [requireAuth, requireAdmin]; // shorthand — applied to every route below
 
-  // ── GET /overview ────────────────────────────────────────────────────────
+  // ── GET /overview ─────────────────────────────────────────────────────────
+  // Returns the 4 summary numbers shown on the admin dashboard:
+  // active employees, attendance today, open tickets, pending leaves.
+  // All 5 Firestore queries run in parallel (Promise.all) — single round trip.
   router.get('/overview', ...guard, async (req, res) => {
     try {
       const [empSnap, pendingRegSnap, openTicketsSnap, pendingLeavesSnap, attendanceSnap] = await Promise.all([
@@ -53,12 +100,11 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         db.collection('attendance_logs').where('date', '==', todayStr()).get(),
       ]);
 
-      const employees = empSnap.docs.map(d => d.data());
-      const active    = employees.filter(e => e.status === 'active').length;
-      const pending   = employees.filter(e => e.status === 'pending').length;
-      const checkedIn = attendanceSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
-      const onDuty    = attendanceSnap.size;
-
+      const employees      = empSnap.docs.map(d => d.data());
+      const active         = employees.filter(e => e.status === 'active').length;
+      const pending        = employees.filter(e => e.status === 'pending').length;
+      const checkedIn      = attendanceSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
+      const onDuty         = attendanceSnap.size;
       const openTickets    = openTicketsSnap.docs;
       const urgentTickets  = openTickets.filter(d => d.data().priority === 'urgent').length;
       const inProgressTickets = openTickets.filter(d => d.data().status === 'in_progress').length;
@@ -75,24 +121,23 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /activity ────────────────────────────────────────────────────────
+  // ── GET /activity ─────────────────────────────────────────────────────────
+  // Returns the 50 most recent entries from the activity_log collection.
+  // Everything significant (check-ins, leaves, approvals, incidents) is logged there.
+  // NOTE: activity_log has no TTL — it will grow forever. Add a cleanup strategy
+  // before going to production (Firebase Scheduled Functions can delete old entries).
   router.get('/activity', ...guard, async (req, res) => {
     try {
-      const snap = await db.collection('activity_log')
-        .orderBy('time', 'desc')
-        .limit(50)
-        .get();
-
+      const snap  = await db.collection('activity_log').orderBy('time', 'desc').limit(50).get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          type: d.type,
+          type:        d.type,
           description: d.description,
-          time: d.time ? d.time.toDate().toISOString() : null,
-          actor: d.actor,
+          time:        d.time ? d.time.toDate().toISOString() : null,
+          actor:       d.actor,
         };
       });
-
       return res.json(items);
     } catch (err) {
       console.error('admin/activity error:', err);
@@ -100,10 +145,12 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /pending-registrations ───────────────────────────────────────────
+  // ── GET /pending-registrations ────────────────────────────────────────────
+  // Returns guards who have verified their OTP but haven't been approved yet.
+  // These are the cards the admin sees in the "New Registrations" section.
   router.get('/pending-registrations', ...guard, async (req, res) => {
     try {
-      const snap = await db.collection('pending_registrations')
+      const snap  = await db.collection('pending_registrations')
         .where('verified', '==', true)
         .orderBy('verified_at', 'desc')
         .get();
@@ -111,11 +158,11 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id: doc.id,
-          name: d.name || null,
-          phone: d.phone,
+          id:            doc.id,
+          name:          d.name          || null,
+          phone:         d.phone,
           aadhaar_last4: d.aadhaar_last4 || null,
-          applied_at: d.created_at ? d.created_at.toDate().toISOString() : null,
+          applied_at:    d.created_at ? d.created_at.toDate().toISOString() : null,
         };
       });
 
@@ -126,45 +173,53 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /registrations/:id/approve ─────────────────────────────────────
+  // ── POST /registrations/:id/approve ──────────────────────────────────────
+  // Admin approves a guard registration. This does 3 things atomically:
+  //   1. Enables the disabled Firebase Auth account
+  //   2. Creates the employee Firestore document with auto-assigned VAGT-XXXX ID
+  //   3. Sets the 'employee' role claim on the Auth account
+  // After this, the guard can log in.
   router.post('/registrations/:id/approve', ...guard, async (req, res) => {
     const { id } = req.params;
     try {
       const regRef  = db.collection('pending_registrations').doc(id);
       const regSnap = await regRef.get();
-      if (!regSnap.exists) return res.status(404).json({ message: 'Registration not found.' });
+      if (!regSnap.exists)         return res.status(404).json({ message: 'Registration not found.' });
 
       const reg = regSnap.data();
-      if (reg.approved) return res.status(409).json({ message: 'Already approved.' });
-      if (!reg.firebase_uid) return res.status(400).json({ message: 'Registration phone not yet verified.' });
+      if (reg.approved)            return res.status(409).json({ message: 'Already approved.' });
+      if (!reg.firebase_uid)       return res.status(400).json({ message: 'Registration phone not yet verified.' });
 
-      // Enable the Firebase Auth account created during phone verification
+      // Enable the Firebase Auth account (was disabled at verify-otp time)
       await auth.updateUser(reg.firebase_uid, {
-        disabled: false,
+        disabled:    false,
         displayName: reg.name || reg.phone,
       });
 
-      // Set custom role claim
+      // Grant the employee role (used by backend middleware + Firestore rules)
       await auth.setCustomUserClaims(reg.firebase_uid, { role: 'employee' });
 
-      // Create Firestore employee document
+      // Create employee Firestore document with starting leave balance
       const empId = await nextEmployeeId(db);
       await db.collection('employees').doc(reg.firebase_uid).set({
-        name: reg.name || reg.phone,
-        phone: reg.phone,
-        email: reg.email,
-        employee_id: empId,
-        status: 'active',
-        leave_balance: { casual: 6, sick: 4, earned: 2 },
-        site_ids: [],
-        joined_at: new Date(),
+        name:          reg.name || reg.phone,
+        phone:         reg.phone,
+        email:         reg.email,
+        employee_id:   empId,
+        status:        'active',
+        leave_balance: { casual: 6, sick: 4, earned: 2 }, // Starting allocation — adjust as needed
+        site_ids:      [],   // No site assigned yet — admin assigns via the employees page
+        joined_at:     new Date(),
       });
 
       await regRef.update({ approved: true, approved_at: new Date() });
       await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin');
 
-      // TODO: Send login reset link via SMS so employee can set their password
+      // ── TODO: Send password reset link via SMS ─────────────────────────
+      // Uncomment this once SMS (MSG91) is integrated:
       // const resetLink = await auth.generatePasswordResetLink(reg.email);
+      // await sendSms(reg.phone, `Your VAGT account is approved. Set your password: ${resetLink}`);
+      // ──────────────────────────────────────────────────────────────────
 
       return res.json({ success: true, employee_id: empId });
     } catch (err) {
@@ -174,6 +229,8 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   });
 
   // ── POST /registrations/:id/reject ───────────────────────────────────────
+  // Admin rejects a guard. Deletes the disabled Firebase Auth account to keep
+  // Auth clean (otherwise ghost accounts accumulate indefinitely).
   router.post('/registrations/:id/reject', ...guard, async (req, res) => {
     const { id } = req.params;
     const { reason } = req.body || {};
@@ -184,11 +241,12 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
       const reg = snap.data();
 
-      // Clean up the disabled Firebase Auth account created at verify-otp time
+      // Clean up the disabled Auth account created at verify-otp time
       if (reg.firebase_uid) {
         try {
           await auth.deleteUser(reg.firebase_uid);
         } catch (deleteErr) {
+          // Log but don't fail — the account might already be gone
           console.warn(`Could not delete Auth account ${reg.firebase_uid}:`, deleteErr.message);
         }
       }
@@ -203,35 +261,39 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /pending-leaves ──────────────────────────────────────────────────
+  // ── GET /pending-leaves ───────────────────────────────────────────────────
+  // Returns all leave requests with status 'pending'.
+  // Uses db.getAll() to batch-fetch all related employee docs in ONE Firestore call
+  // instead of one call per leave (avoids N+1 query — critical at scale).
   router.get('/pending-leaves', ...guard, async (req, res) => {
     try {
       const snap = await db.collection('leave_requests')
         .where('status', '==', 'pending')
-        .orderBy('applied_at', 'asc')
+        .orderBy('applied_at', 'asc') // oldest first — FIFO processing
         .get();
 
       const LABELS = { casual: 'Casual Leave', sick: 'Sick Leave', earned: 'Earned Leave' };
 
-      // Batch-fetch all referenced employee docs in a single network round-trip
+      // Batch fetch: one network round trip for ALL employee docs at once
+      // This is important — without it, 50 pending leaves = 50 separate DB calls
       const empRefs = snap.docs.map(doc => db.collection('employees').doc(doc.data().employee_uid));
       const empDocs = empRefs.length > 0 ? await db.getAll(...empRefs) : [];
-      const empMap = {};
+      const empMap  = {};
       empDocs.forEach(d => { if (d.exists) empMap[d.id] = d.data(); });
 
       const items = snap.docs.map(doc => {
-        const d = doc.data();
+        const d   = doc.data();
         const emp = empMap[d.employee_uid] || {};
         return {
-          id: doc.id,
-          employee_id: emp.employee_id || null,
-          employee_name: emp.name || d.employee_uid,
-          leave_type: d.leave_type,
-          leave_type_label: LABELS[d.leave_type] || d.leave_type,
-          from_date: d.from_date,
-          to_date: d.to_date,
-          reason: d.reason,
-          applied_at: d.applied_at ? d.applied_at.toDate().toISOString() : null,
+          id:               doc.id,
+          employee_id:      emp.employee_id       || null,
+          employee_name:    emp.name              || d.employee_uid,
+          leave_type:       d.leave_type,
+          leave_type_label: LABELS[d.leave_type]  || d.leave_type,
+          from_date:        d.from_date,
+          to_date:          d.to_date,
+          reason:           d.reason,
+          applied_at:       d.applied_at ? d.applied_at.toDate().toISOString() : null,
         };
       });
 
@@ -242,35 +304,37 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /leaves/:id/approve ─────────────────────────────────────────────
+  // ── POST /leaves/:id/approve  &  POST /leaves/:id/reject ─────────────────
+  // Both routes delegate to setLeaveStatus() helper at the bottom of this file.
+  // TODO: When SMS is integrated, notify the employee here.
   router.post('/leaves/:id/approve', ...guard, async (req, res) => {
     await setLeaveStatus(db, req.params.id, 'approved', res);
   });
-
-  // ── POST /leaves/:id/reject ──────────────────────────────────────────────
   router.post('/leaves/:id/reject', ...guard, async (req, res) => {
     await setLeaveStatus(db, req.params.id, 'rejected', res);
   });
 
-  // ── GET /employees ───────────────────────────────────────────────────────
+  // ── GET /employees ────────────────────────────────────────────────────────
+  // List all employees. Optional ?status=active|inactive filter.
+  // Capped at 500 — if you have more, add pagination with startAfter().
   router.get('/employees', ...guard, async (req, res) => {
     const { status } = req.query;
     try {
       let query = db.collection('employees').orderBy('name').limit(500);
       if (status) query = query.where('status', '==', status);
 
-      const snap = await query.get();
+      const snap  = await query.get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id: doc.id,
+          id:          doc.id,
           employee_id: d.employee_id,
-          name: d.name,
-          phone: d.phone,
-          email: d.email || null,
-          site_name: d.site_name || null,
-          status: d.status,
-          joined_at: d.joined_at ? d.joined_at.toDate().toISOString() : null,
+          name:        d.name,
+          phone:       d.phone,
+          email:       d.email      || null,
+          site_name:   d.site_name  || null,
+          status:      d.status,
+          joined_at:   d.joined_at ? d.joined_at.toDate().toISOString() : null,
         };
       });
       return res.json(items);
@@ -280,26 +344,27 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /employees/:id ───────────────────────────────────────────────────
+  // ── GET /employees/:id ────────────────────────────────────────────────────
+  // Full employee detail — includes leave balance, emergency contact, Aadhaar last 4.
   router.get('/employees/:id', ...guard, async (req, res) => {
     try {
       const snap = await db.collection('employees').doc(req.params.id).get();
       if (!snap.exists) return res.status(404).json({ message: 'Employee not found.' });
       const d = snap.data();
       return res.json({
-        id: snap.id,
-        employee_id: d.employee_id,
-        name: d.name,
-        phone: d.phone,
-        email: d.email || null,
-        site_name: d.site_name || null,
-        status: d.status,
-        joined_at: d.joined_at ? d.joined_at.toDate().toISOString() : null,
-        aadhaar_last4: d.aadhaar_last4 || null,
-        address: d.address || null,
-        emergency_contact: d.emergency_contact || null,
-        leave_balance: d.leave_balance || {},
-        attendance_rate: d.attendance_rate || null,
+        id:                snap.id,
+        employee_id:       d.employee_id,
+        name:              d.name,
+        phone:             d.phone,
+        email:             d.email              || null,
+        site_name:         d.site_name          || null,
+        status:            d.status,
+        joined_at:         d.joined_at ? d.joined_at.toDate().toISOString() : null,
+        aadhaar_last4:     d.aadhaar_last4       || null,
+        address:           d.address             || null,
+        emergency_contact: d.emergency_contact   || null,
+        leave_balance:     d.leave_balance        || {},
+        attendance_rate:   d.attendance_rate      || null,
       });
     } catch (err) {
       console.error('admin/employees/:id error:', err);
@@ -307,43 +372,47 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /employees/:id/deactivate ───────────────────────────────────────
+  // ── POST /employees/:id/deactivate  &  POST /employees/:id/reactivate ────
+  // Deactivating an employee also disables their Firebase Auth account so they
+  // can't log in. Reactivating re-enables both Firestore status and Auth account.
   router.post('/employees/:id/deactivate', ...guard, async (req, res) => {
     await setEmployeeStatus(db, auth, req.params.id, 'inactive', res);
   });
-
-  // ── POST /employees/:id/reactivate ───────────────────────────────────────
   router.post('/employees/:id/reactivate', ...guard, async (req, res) => {
     await setEmployeeStatus(db, auth, req.params.id, 'active', res);
   });
 
-  // ── GET /schedule ────────────────────────────────────────────────────────
+  // ── GET /schedule  &  POST /schedule  &  DELETE /schedule/:id ────────────
+  // Schedule management — admins create/view/delete shifts.
+  // A shift is: one employee + one site + one date + shift type (morning/afternoon/night)
+  // Shift times are auto-set from the SHIFT_TIMES map — change times there if needed.
+
   router.get('/schedule', ...guard, async (req, res) => {
     const { week_start } = req.query;
     try {
       let query = db.collection('shifts').orderBy('date');
       if (week_start) {
+        // Return only the 7 days starting from week_start
         const end = new Date(week_start);
         end.setDate(end.getDate() + 7);
-        const endStr = end.toISOString().slice(0, 10);
-        query = query.where('date', '>=', week_start).where('date', '<', endStr);
+        query = query.where('date', '>=', week_start).where('date', '<', end.toISOString().slice(0, 10));
       } else {
-        query = query.where('date', '>=', todayStr()).limit(100);
+        query = query.where('date', '>=', todayStr()).limit(100); // Default: next 100 upcoming shifts
       }
 
-      const snap = await query.get();
+      const snap  = await query.get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id: doc.id,
-          employee_id: d.employee_id,
+          id:            doc.id,
+          employee_id:   d.employee_id,
           employee_name: d.employee_name,
-          site_id: d.site_id,
-          site_name: d.site_name,
-          date: d.date,
-          shift_type: d.shift_type,
-          start_time: d.start_time,
-          end_time: d.end_time,
+          site_id:       d.site_id,
+          site_name:     d.site_name,
+          date:          d.date,
+          shift_type:    d.shift_type,
+          start_time:    d.start_time,
+          end_time:      d.end_time,
         };
       });
       return res.json(items);
@@ -353,7 +422,6 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /schedule ───────────────────────────────────────────────────────
   router.post('/schedule', ...guard, async (req, res) => {
     const { employee_id, site_id, date, shift_type } = req.body || {};
     if (!employee_id || !site_id || !date || !shift_type) {
@@ -361,7 +429,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
 
     try {
-      // Check for existing shift on same day
+      // Prevent double-booking — one employee, one shift per day
       const existing = await db.collection('shifts')
         .where('employee_uid', '==', employee_id)
         .where('date', '==', date)
@@ -371,42 +439,42 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         return res.status(409).json({ message: 'Employee already has a shift on this date.' });
       }
 
-      // Fetch employee and site names
+      // Fetch names for denormalization — stored on the shift doc so the schedule
+      // page doesn't need extra lookups to display employee and site names
       const [empSnap, siteSnap] = await Promise.all([
         db.collection('employees').doc(employee_id).get(),
         db.collection('sites').doc(site_id).get(),
       ]);
 
+      // Default shift times — adjust these if VAGT uses different timings
       const SHIFT_TIMES = {
         morning:   { start: '06:00', end: '14:00' },
         afternoon: { start: '14:00', end: '22:00' },
-        night:     { start: '22:00', end: '06:00' },
+        night:     { start: '22:00', end: '06:00' }, // night shift crosses midnight
       };
       const times = SHIFT_TIMES[shift_type] || { start: '08:00', end: '16:00' };
 
       const ref = await db.collection('shifts').add({
-        employee_uid:   employee_id,
-        employee_id:    empSnap.exists ? empSnap.data().employee_id : null,
-        employee_name:  empSnap.exists ? empSnap.data().name : null,
+        employee_uid:  employee_id,
+        employee_id:   empSnap.exists ? empSnap.data().employee_id : null,
+        employee_name: empSnap.exists ? empSnap.data().name : null,
         site_id,
-        site_name:      siteSnap.exists ? siteSnap.data().name : null,
+        site_name:     siteSnap.exists ? siteSnap.data().name : null,
         date,
         shift_type,
-        start_time:     times.start,
-        end_time:       times.end,
-        created_at:     new Date(),
+        start_time:    times.start,
+        end_time:      times.end,
+        created_at:    new Date(),
       });
 
       const newDoc = await ref.get();
-      const d = newDoc.data();
-      return res.status(201).json({ id: ref.id, ...d });
+      return res.status(201).json({ id: ref.id, ...newDoc.data() });
     } catch (err) {
       console.error('admin/schedule POST error:', err);
       return res.status(500).json({ message: 'Failed to create shift.' });
     }
   });
 
-  // ── DELETE /schedule/:id ─────────────────────────────────────────────────
   router.delete('/schedule/:id', ...guard, async (req, res) => {
     try {
       await db.collection('shifts').doc(req.params.id).delete();
@@ -417,22 +485,24 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /clients ─────────────────────────────────────────────────────────
+  // ── GET /clients  &  GET /clients/:id ────────────────────────────────────
+  // Client management. capped at 500. Each client has a sites[] and open_tickets count.
+
   router.get('/clients', ...guard, async (req, res) => {
     try {
-      const snap = await db.collection('clients').orderBy('name').limit(500).get();
+      const snap  = await db.collection('clients').orderBy('name').limit(500).get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id: doc.id,
-          name: d.name,
-          contact_name: d.contact_name,
-          contact_email: d.contact_email,
-          contact_phone: d.contact_phone,
-          sites_count: d.sites_count || 0,
-          contract_start: d.contract_start,
-          sla_response_hours: d.sla_response_hours || 4,
-          status: d.status,
+          id:                   doc.id,
+          name:                 d.name,
+          contact_name:         d.contact_name,
+          contact_email:        d.contact_email,
+          contact_phone:        d.contact_phone,
+          sites_count:          d.sites_count          || 0,
+          contract_start:       d.contract_start,
+          sla_response_hours:   d.sla_response_hours   || 4, // default 4-hour SLA
+          status:               d.status,
         };
       });
       return res.json(items);
@@ -442,9 +512,9 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /clients/:id ─────────────────────────────────────────────────────
   router.get('/clients/:id', ...guard, async (req, res) => {
     try {
+      // 3 parallel reads: client doc + their sites + their open tickets
       const [clientSnap, sitesSnap, ticketsSnap] = await Promise.all([
         db.collection('clients').doc(req.params.id).get(),
         db.collection('sites').where('client_uid', '==', req.params.id).get(),
@@ -453,27 +523,27 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
       if (!clientSnap.exists) return res.status(404).json({ message: 'Client not found.' });
 
-      const d = clientSnap.data();
+      const d     = clientSnap.data();
       const sites = sitesSnap.docs.map(s => ({
-        id: s.id,
-        name: s.data().name,
-        address: s.data().address,
+        id:              s.id,
+        name:            s.data().name,
+        address:         s.data().address,
         guards_deployed: s.data().guards_deployed || 0,
       }));
 
       return res.json({
-        id: clientSnap.id,
-        name: d.name,
-        contact_name: d.contact_name,
-        contact_email: d.contact_email,
-        contact_phone: d.contact_phone,
-        sites_count: sites.length,
-        contract_start: d.contract_start,
-        sla_response_hours: d.sla_response_hours || 4,
-        status: d.status,
+        id:                   clientSnap.id,
+        name:                 d.name,
+        contact_name:         d.contact_name,
+        contact_email:        d.contact_email,
+        contact_phone:        d.contact_phone,
+        sites_count:          sites.length,
+        contract_start:       d.contract_start,
+        sla_response_hours:   d.sla_response_hours || 4,
+        status:               d.status,
         sites,
-        open_tickets: ticketsSnap.size,
-        notes: d.notes || null,
+        open_tickets:         ticketsSnap.size,
+        notes:                d.notes || null,
       });
     } catch (err) {
       console.error('admin/clients/:id error:', err);
@@ -481,21 +551,22 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /sites ────────────────────────────────────────────────────────────
+  // ── GET /sites  &  GET /sites/:id ─────────────────────────────────────────
+
   router.get('/sites', ...guard, async (req, res) => {
     try {
-      const snap = await db.collection('sites').orderBy('name').limit(500).get();
+      const snap  = await db.collection('sites').orderBy('name').limit(500).get();
       const items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id: doc.id,
-          name: d.name,
-          client_id: d.client_uid,
-          client_name: d.client_name,
-          address: d.address,
-          posts_required: d.posts_required || 0,
-          guards_deployed: d.guards_deployed || 0,
-          coverage_status: d.coverage_status || 'none',
+          id:               doc.id,
+          name:             d.name,
+          client_id:        d.client_uid,
+          client_name:      d.client_name,
+          address:          d.address,
+          posts_required:   d.posts_required   || 0,
+          guards_deployed:  d.guards_deployed  || 0,
+          coverage_status:  d.coverage_status  || 'none',
         };
       });
       return res.json(items);
@@ -505,7 +576,6 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /sites/:id ────────────────────────────────────────────────────────
   router.get('/sites/:id', ...guard, async (req, res) => {
     try {
       const [siteSnap, guardsSnap] = await Promise.all([
@@ -516,32 +586,32 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       if (!siteSnap.exists) return res.status(404).json({ message: 'Site not found.' });
 
       const d = siteSnap.data();
-      const today = todayStr();
-      // Find which guards are on today's shift at this site
+
+      // Find which guards are on shift at this site TODAY
       const todayShifts = await db.collection('shifts')
         .where('site_id', '==', req.params.id)
-        .where('date', '==', today)
+        .where('date', '==', todayStr())
         .get();
 
       const activeGuards = todayShifts.docs.map(s => ({
-        id: s.data().employee_uid,
-        name: s.data().employee_name,
+        id:         s.data().employee_uid,
+        name:       s.data().employee_name,
         shift_type: s.data().shift_type,
       }));
 
       return res.json({
-        id: siteSnap.id,
-        name: d.name,
-        client_id: d.client_uid,
-        client_name: d.client_name,
-        address: d.address,
-        posts_required: d.posts_required || 0,
-        guards_deployed: d.guards_deployed || 0,
-        coverage_status: d.coverage_status || 'none',
-        site_contact_name: d.site_contact_name || null,
+        id:                 siteSnap.id,
+        name:               d.name,
+        client_id:          d.client_uid,
+        client_name:        d.client_name,
+        address:            d.address,
+        posts_required:     d.posts_required    || 0,
+        guards_deployed:    d.guards_deployed   || 0,
+        coverage_status:    d.coverage_status   || 'none',
+        site_contact_name:  d.site_contact_name  || null,
         site_contact_phone: d.site_contact_phone || null,
-        notes: d.notes || null,
-        active_guards: activeGuards,
+        notes:              d.notes              || null,
+        active_guards:      activeGuards,
       });
     } catch (err) {
       console.error('admin/sites/:id error:', err);
@@ -549,13 +619,13 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /payroll ─────────────────────────────────────────────────────────
+  // ── GET /payroll ──────────────────────────────────────────────────────────
+  // Returns payslips already generated for a given month (default: current month).
+  // Use ?month=YYYY-MM to view a different month.
   router.get('/payroll', ...guard, async (req, res) => {
     const month = req.query.month || currentMonth();
     try {
-      const snap = await db.collection('payslips')
-        .where('period', '==', month)
-        .get();
+      const snap = await db.collection('payslips').where('period', '==', month).get();
 
       let totalPayable = 0, totalDeductions = 0;
 
@@ -564,25 +634,25 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         totalPayable    += d.net_pay    || 0;
         totalDeductions += d.deductions || 0;
         return {
-          id: doc.id,
-          employee_id: d.employee_id,
-          name: d.employee_name,
+          id:            doc.id,
+          employee_id:   d.employee_id,
+          name:          d.employee_name,
           days_in_month: d.days_in_month || null,
-          days_worked: d.days_worked || null,
-          leaves_taken: d.leaves_taken || null,
-          gross_pay: d.gross_pay || 0,
-          deductions: d.deductions || 0,
-          net_pay: d.net_pay || 0,
-          slip_status: 'generated',
-          slip_url: d.pdf_url || null,
+          days_worked:   d.days_worked   || null,
+          leaves_taken:  d.leaves_taken  || null,
+          gross_pay:     d.gross_pay     || 0,
+          deductions:    d.deductions    || 0,
+          net_pay:       d.net_pay       || 0,
+          slip_status:   'generated',
+          slip_url:      d.pdf_url       || null,
         };
       });
 
       return res.json({
         summary: {
-          total_payable: totalPayable,
-          slips_generated: snap.size,
-          pending: 0,           // TODO: compute from active employees without a slip this month
+          total_payable:    totalPayable,
+          slips_generated:  snap.size,
+          pending:          0, // TODO: compute = active employees count minus slips_generated
           total_deductions: totalDeductions,
         },
         employees,
@@ -593,7 +663,19 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /payroll/run ────────────────────────────────────────────────────
+  // ── POST /payroll/run ─────────────────────────────────────────────────────
+  // Generates payslips for ALL active employees for the given month.
+  // Body: { "month": "2026-03" }
+  //
+  // ⚠️  IMPORTANT: The computation below is a PLACEHOLDER.
+  // Before going live, replace the "basic payslip computation" block with real logic:
+  //   - Read employee basic_salary, hra, allowances from their Firestore doc
+  //   - Calculate EPF: 12% of basic (employee contribution), capped at ₹15,000 basic
+  //   - Calculate ESI: 0.75% of gross (if gross ≤ ₹21,000/month)
+  //   - Prorate for days worked using attendance_logs
+  //
+  // Firebase batch writes are capped at 499 per batch.
+  // This code chunks the employees into groups of 499 to handle any team size safely.
   router.post('/payroll/run', ...guard, async (req, res) => {
     const { month } = req.body || {};
     if (!month) return res.status(400).json({ message: 'month is required (YYYY-MM).' });
@@ -601,7 +683,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     try {
       const empSnap = await db.collection('employees').where('status', '==', 'active').get();
 
-      // Firebase batch is capped at 499 writes — chunk to handle any employee count
+      // ── Chunk into batches of 499 (Firebase hard limit is 500 writes per batch) ──
       const BATCH_SIZE = 499;
       const chunks = [];
       for (let i = 0; i < empSnap.docs.length; i += BATCH_SIZE) {
@@ -610,33 +692,38 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
       for (const chunk of chunks) {
         const batch = db.batch();
+
         for (const empDoc of chunk) {
           const emp = empDoc.data();
-          // Basic payslip computation — replace with real payroll logic
-          const grossPay   = emp.basic_salary || 15000;
-          const deductions = Math.round(grossPay * 0.02);   // Placeholder 2% deduction
+
+          // ── PLACEHOLDER COMPUTATION — replace before go-live ──────────
+          // This is intentionally simple so you can see the structure.
+          // Real payroll: replace grossPay, deductions, netPay with actual calculations.
+          const grossPay   = emp.basic_salary || 15000;          // fallback ₹15,000 if no salary set
+          const deductions = Math.round(grossPay * 0.02);        // 2% placeholder deduction
           const netPay     = grossPay - deductions;
+          // ─────────────────────────────────────────────────────────────
 
           const slipRef = db.collection('payslips').doc();
           batch.set(slipRef, {
-            employee_uid: empDoc.id,
-            employee_id: emp.employee_id,
+            employee_uid:  empDoc.id,
+            employee_id:   emp.employee_id,
             employee_name: emp.name,
-            period: month,
-            gross_pay: grossPay,
+            period:        month,
+            gross_pay:     grossPay,
             deductions,
-            net_pay: netPay,
-            basic: emp.basic_salary || 13000,
-            allowances: Math.round(grossPay * 0.13),
-            generated_at: new Date(),
-            pdf_url: null,          // PDF generation via Cloud Storage — TODO
+            net_pay:       netPay,
+            basic:         emp.basic_salary || 13000,
+            allowances:    Math.round(grossPay * 0.13),
+            generated_at:  new Date(),
+            pdf_url:       null, // TODO: generate PDF and store URL in Cloud Storage
           });
         }
+
         await batch.commit();
       }
 
       await logActivity(db, 'other', `Payroll run for ${month}: ${empSnap.size} slips generated`, 'admin');
-
       return res.json({ success: true, generated: empSnap.size });
     } catch (err) {
       console.error('payroll/run error:', err);
@@ -644,18 +731,20 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /payroll/:employee_id/generate-slip ─────────────────────────────
+  // ── POST /payroll/:employee_id/generate-slip ──────────────────────────────
+  // Regenerate a single employee's payslip PDF.
+  // TODO: Generate a real PDF using a library (e.g. pdfkit) and upload to Cloud Storage.
+  // The pdf_url on the payslip doc should then be updated to the Storage download URL.
   router.post('/payroll/:employee_id/generate-slip', ...guard, async (req, res) => {
     const { month } = req.body || {};
     if (!month) return res.status(400).json({ message: 'month is required.' });
 
     try {
-      // TODO: Generate PDF and upload to Cloud Storage
       const empSnap = await db.collection('employees').doc(req.params.employee_id).get();
       if (!empSnap.exists) return res.status(404).json({ message: 'Employee not found.' });
 
-      const emp = empSnap.data();
-      const slipUrl = null; // Set after PDF generation
+      // TODO: Generate PDF, upload to Cloud Storage, return download URL
+      const slipUrl = null; // Replace with actual URL after PDF generation
 
       return res.json({ slip_url: slipUrl });
     } catch (err) {
@@ -664,12 +753,14 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /complaints ───────────────────────────────────────────────────────
+  // ── GET /complaints  &  GET /complaints/:id  &  POST /complaints/:id/status ─
+  // Complaint management. Admin can filter by status/priority and update tickets.
+
   router.get('/complaints', ...guard, async (req, res) => {
     const { status, priority, site, search } = req.query;
     try {
       let query = db.collection('complaints').orderBy('created_at', 'desc');
-      if (status) query = query.where('status', '==', status);
+      if (status)   query = query.where('status', '==', status);
       if (priority) query = query.where('priority', '==', priority);
 
       const snap = await query.limit(100).get();
@@ -677,27 +768,27 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       let items = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id: doc.id,
-          ticket_id: d.ticket_id,
-          client_name: d.client_name,
-          site: d.site_name || null,
-          subject: d.subject,
-          priority: d.priority,
-          status: d.status,
+          id:           doc.id,
+          ticket_id:    d.ticket_id,
+          client_name:  d.client_name,
+          site:         d.site_name   || null,
+          subject:      d.subject,
+          priority:     d.priority,
+          status:       d.status,
           submitted_at: d.created_at ? d.created_at.toDate().toISOString() : null,
-          message: d.description,
-          admin_note: d.admin_note || null,
+          message:      d.description,
+          admin_note:   d.admin_note  || null,
         };
       });
 
-      // Apply site and search filters in memory (Firestore doesn't support multi-field LIKE)
-      if (site) items = items.filter(i => i.site === site);
+      // Firestore doesn't support full-text search — apply site/text filters in memory
+      if (site)   items = items.filter(i => i.site === site);
       if (search) {
         const s = search.toLowerCase();
         items = items.filter(i =>
           i.subject.toLowerCase().includes(s) ||
           (i.client_name || '').toLowerCase().includes(s) ||
-          (i.ticket_id || '').toLowerCase().includes(s)
+          (i.ticket_id   || '').toLowerCase().includes(s)
         );
       }
 
@@ -708,23 +799,22 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /complaints/:id ───────────────────────────────────────────────────
   router.get('/complaints/:id', ...guard, async (req, res) => {
     try {
       const snap = await db.collection('complaints').doc(req.params.id).get();
       if (!snap.exists) return res.status(404).json({ message: 'Complaint not found.' });
       const d = snap.data();
       return res.json({
-        id: snap.id,
-        ticket_id: d.ticket_id,
-        client_name: d.client_name,
-        site: d.site_name || null,
-        subject: d.subject,
-        priority: d.priority,
-        status: d.status,
+        id:           snap.id,
+        ticket_id:    d.ticket_id,
+        client_name:  d.client_name,
+        site:         d.site_name   || null,
+        subject:      d.subject,
+        priority:     d.priority,
+        status:       d.status,
         submitted_at: d.created_at ? d.created_at.toDate().toISOString() : null,
-        message: d.description,
-        admin_note: d.admin_note || null,
+        message:      d.description,
+        admin_note:   d.admin_note  || null,
       });
     } catch (err) {
       console.error('admin/complaints/:id error:', err);
@@ -732,7 +822,6 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /complaints/:id/status ───────────────────────────────────────────
   router.post('/complaints/:id/status', ...guard, async (req, res) => {
     const { status, note } = req.body || {};
     if (!status) return res.status(400).json({ message: 'status is required.' });
@@ -747,7 +836,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
 
       await ref.update({ status, admin_note: note || null, updated_at: new Date() });
 
-      // TODO: Notify client via push/email
+      // TODO: Notify client via SMS/email when their ticket status changes
       await logActivity(db, 'complaint', `Complaint ${snap.data().ticket_id} status → ${status}`, 'admin');
 
       return res.json({ success: true });
@@ -758,11 +847,15 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   });
 
   // ── GET /reports ──────────────────────────────────────────────────────────
+  // Analytics dashboard. Use ?period= with: this_month, last_month,
+  // last_3_months, last_6_months, this_year
+  // Returns: attendance rates, incident breakdown, SLA compliance, leave utilisation.
   router.get('/reports', ...guard, async (req, res) => {
     const { period = 'this_month' } = req.query;
     const { from, to } = periodToDateRange(period);
 
     try {
+      // 4 parallel reads across 4 collections — keep this pattern for speed
       const [attendanceSnap, incidentsSnap, complaintsSnap, empSnap] = await Promise.all([
         db.collection('attendance_logs').where('date', '>=', from).where('date', '<=', to).get(),
         db.collection('incidents').where('submitted_at', '>=', new Date(from)).where('submitted_at', '<=', new Date(to + 'T23:59:59')).get(),
@@ -773,7 +866,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       // Attendance rate per site
       const siteAttendance = {};
       attendanceSnap.docs.forEach(doc => {
-        const d = doc.data();
+        const d    = doc.data();
         const site = d.site_name || 'Unknown';
         if (!siteAttendance[site]) siteAttendance[site] = { total: 0, present: 0 };
         siteAttendance[site].total++;
@@ -789,27 +882,28 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         ? Math.round(attendanceBySite.reduce((a, b) => a + b.rate, 0) / attendanceBySite.length * 10) / 10
         : 0;
 
-      // Incidents by type
+      // Incidents broken down by type
+      const TYPE_LABELS = {
+        trespassing:         'Trespassing',
+        suspicious_activity: 'Suspicious Activity',
+        theft:               'Theft',
+        fire:                'Fire / Hazard',
+        equipment_failure:   'Equipment Failure',
+        medical:             'Medical Emergency',
+        other:               'Other',
+      };
       const incidentTypes = {};
       incidentsSnap.docs.forEach(doc => {
         const t = doc.data().type || 'other';
         incidentTypes[t] = (incidentTypes[t] || 0) + 1;
       });
-      const TYPE_LABELS = {
-        trespassing: 'Trespassing',
-        suspicious_activity: 'Suspicious Activity',
-        theft: 'Theft',
-        fire: 'Fire / Hazard',
-        equipment_failure: 'Equipment Failure',
-        medical: 'Medical Emergency',
-        other: 'Other',
-      };
       const incidentsByType = Object.entries(incidentTypes).map(([t, count]) => ({
         type_label: TYPE_LABELS[t] || t,
         count,
       }));
 
-      // SLA compliance (using 4-hour default SLA)
+      // SLA compliance — based on 4-hour default response time
+      // A ticket is "within SLA" if it was resolved within 4 hours of creation
       const slaHours = 4;
       let within = 0, breached = 0;
       complaintsSnap.docs.forEach(doc => {
@@ -819,34 +913,34 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
           if (hrs <= slaHours) within++; else breached++;
         }
       });
-      const total = within + breached;
 
-      // Leave utilisation
+      // Leave utilisation — how many days approved per type vs. total available
       const leaveSnap = await db.collection('leave_requests')
         .where('status', '==', 'approved')
         .where('applied_at', '>=', new Date(from))
         .get();
-      const leaveByType = { casual: 0, sick: 0, earned: 0 };
+      const leaveByType    = { casual: 0, sick: 0, earned: 0 };
       leaveSnap.docs.forEach(doc => {
         const t = doc.data().leave_type;
         if (leaveByType[t] != null) leaveByType[t]++;
       });
-      const empCount = empSnap.size;
-      const LEAVE_ALLOCS = { casual: 6, sick: 4, earned: 2 };
+      const empCount      = empSnap.size;
+      const LEAVE_ALLOCS  = { casual: 6, sick: 4, earned: 2 }; // must match approval defaults
       const leaveUtilisation = Object.entries(leaveByType).map(([type, days_taken]) => ({
         leave_type_label: { casual: 'Casual Leave', sick: 'Sick Leave', earned: 'Earned Leave' }[type],
         days_taken,
         days_available: (LEAVE_ALLOCS[type] || 0) * empCount,
       }));
 
+      const total = within + breached;
       return res.json({
         overview: {
           avg_attendance_rate: avgAttendance,
-          incidents_reported: incidentsSnap.size,
-          tickets_resolved: complaintsSnap.docs.filter(d => d.data().status === 'resolved').length,
-          avg_resolution_hours: total > 0 ? slaHours : null,  // simplified
+          incidents_reported:  incidentsSnap.size,
+          tickets_resolved:    complaintsSnap.docs.filter(d => d.data().status === 'resolved').length,
+          avg_resolution_hours: total > 0 ? slaHours : null,
         },
-        attendance_by_site: attendanceBySite,
+        attendance_by_site:  attendanceBySite,
         sla_compliance: {
           within_sla: within,
           breached,
@@ -854,7 +948,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         },
         incidents_by_type: incidentsByType,
         leave_utilisation: leaveUtilisation,
-        guard_performance: [],  // TODO: compute per-guard metrics
+        guard_performance: [], // TODO: per-guard attendance rate, incidents filed, leave taken
       });
     } catch (err) {
       console.error('admin/reports error:', err);
@@ -862,8 +956,11 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /api/admin/employees/:id/generate-keycode ───────────────────────
-  // Generate (or regenerate) a non-expiring physical keycode for a guard.
+  // ── POST /employees/:id/generate-keycode ──────────────────────────────────
+  // Issues a new physical keycode card for a guard.
+  // Any existing active keycode is automatically revoked first —
+  // a guard can only have ONE active keycode at a time.
+  // The keycode is printed on a card the guard keeps — it never expires unless revoked.
   router.post('/employees/:id/generate-keycode', ...guard, async (req, res) => {
     const uid = req.params.id;
     try {
@@ -871,7 +968,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       if (!empSnap.exists) return res.status(404).json({ message: 'Employee not found.' });
       const emp = empSnap.data();
 
-      // Deactivate any existing keycode for this employee
+      // Revoke any existing active keycode for this employee
       const existingSnap = await db.collection('guard_keycodes')
         .where('employee_uid', '==', uid)
         .where('active', '==', true)
@@ -879,7 +976,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       const batch = db.batch();
       existingSnap.docs.forEach(d => batch.update(d.ref, { active: false, revoked_at: new Date() }));
 
-      // Generate a unique keycode: XXXX-XXXX (no 0, O, I, 1 for legibility)
+      // Generate XXXX-XXXX keycode — excludes 0, O, I, 1 to avoid confusion on printed cards
       const CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
       let keycode;
       let attempts = 0;
@@ -887,12 +984,15 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         let raw = '';
         for (let i = 0; i < 8; i++) raw += CHARS[Math.floor(Math.random() * CHARS.length)];
         keycode = raw.slice(0, 4) + '-' + raw.slice(4);
+        // Check uniqueness — collision is extremely unlikely but we check anyway
         const existing = await db.collection('guard_keycodes').doc(keycode).get();
         if (!existing.exists) break;
         attempts++;
       } while (attempts < 10);
 
-      if (attempts >= 10) return res.status(500).json({ message: 'Could not generate unique keycode. Try again.' });
+      if (attempts >= 10) {
+        return res.status(500).json({ message: 'Could not generate unique keycode. Try again.' });
+      }
 
       batch.set(db.collection('guard_keycodes').doc(keycode), {
         employee_uid: uid,
@@ -900,7 +1000,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         name:         emp.name        || null,
         active:       true,
         created_at:   new Date(),
-        created_by:   req.user.uid,
+        created_by:   req.user.uid,   // which admin generated it
         last_used_at: null,
       });
 
@@ -909,6 +1009,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         `Keycode generated for ${emp.name || uid} (${emp.employee_id || uid})`,
         req.user.uid);
 
+      // Return the keycode — admin prints/shares it with the guard
       return res.json({ keycode, employee_id: emp.employee_id, name: emp.name });
     } catch (err) {
       console.error('generate-keycode error:', err);
@@ -916,7 +1017,9 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── POST /api/admin/employees/:id/revoke-keycode ──────────────────────────
+  // ── POST /employees/:id/revoke-keycode ────────────────────────────────────
+  // Deactivates the guard's keycode — they can no longer sign in with it.
+  // Use this when a guard loses their card or leaves the company.
   router.post('/employees/:id/revoke-keycode', ...guard, async (req, res) => {
     const uid = req.params.id;
     try {
@@ -925,6 +1028,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         .where('active', '==', true)
         .get();
       if (snap.empty) return res.status(404).json({ message: 'No active keycode found for this employee.' });
+
       const batch = db.batch();
       snap.docs.forEach(d => batch.update(d.ref, { active: false, revoked_at: new Date() }));
       await batch.commit();
@@ -935,16 +1039,20 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
-  // ── GET /api/admin/sign-in-events ─────────────────────────────────────────
+  // ── GET /sign-in-events ───────────────────────────────────────────────────
+  // Audit log of all keycode sign-ins — who, when, where (GPS), from what device.
+  // Optional: ?employee_uid=xxx to filter to one guard. ?limit=N (max 200).
   router.get('/sign-in-events', ...guard, async (req, res) => {
-    const limit  = Math.min(parseInt(req.query.limit  || '50', 10), 200);
+    const limit  = Math.min(parseInt(req.query.limit || '50', 10), 200);
     const empUid = req.query.employee_uid || null;
     try {
       let q = db.collection('sign_in_events').orderBy('timestamp', 'desc');
       if (empUid) q = q.where('employee_uid', '==', empUid);
       q = q.limit(limit);
-      const snap = await q.get();
-      const events = snap.docs.map(d => ({ id: d.id, ...d.data(),
+      const snap   = await q.get();
+      const events = snap.docs.map(d => ({
+        id:        d.id,
+        ...d.data(),
         timestamp: d.data().timestamp ? d.data().timestamp.toDate().toISOString() : null,
       }));
       return res.json({ events });
@@ -957,28 +1065,37 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   return { router };
 };
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// These are shared utilities used by the route handlers above.
+// They live at the bottom of the file to keep the routes readable.
+// ─────────────────────────────────────────────────────────────────────────────
 
+/** Returns today's date as "YYYY-MM-DD" in server timezone (UTC on Cloud Functions) */
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Returns current month as "YYYY-MM" */
 function currentMonth() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+/**
+ * Converts a period string to a { from, to } date range.
+ * Used by GET /reports to support multiple time window options.
+ * Add more cases here as needed (e.g. 'last_year', 'last_quarter').
+ */
 function periodToDateRange(period) {
   const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
+  const y   = now.getFullYear();
+  const m   = now.getMonth();
 
   switch (period) {
-    case 'last_month': {
-      const d = new Date(y, m - 1, 1);
-      return { from: fmtDate(d), to: fmtDate(new Date(y, m, 0)) };
-    }
+    case 'last_month':
+      return { from: fmtDate(new Date(y, m - 1, 1)), to: fmtDate(new Date(y, m, 0)) };
     case 'last_3_months':
       return { from: fmtDate(new Date(y, m - 2, 1)), to: fmtDate(now) };
     case 'last_6_months':
@@ -991,18 +1108,19 @@ function periodToDateRange(period) {
   }
 }
 
+/** Formats a Date as "YYYY-MM-DD" */
 function fmtDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Approve or reject a leave request. Shared between two routes. */
 async function setLeaveStatus(db, id, status, res) {
   try {
     const ref  = db.collection('leave_requests').doc(id);
     const snap = await ref.get();
     if (!snap.exists) return res.status(404).json({ message: 'Leave request not found.' });
-
     await ref.update({ status, reviewed_at: new Date() });
-    // TODO: Notify employee via push/SMS
+    // TODO: Notify employee via SMS when their leave is approved or rejected
     return res.json({ success: true });
   } catch (err) {
     console.error(`leave ${status} error:`, err);
@@ -1010,11 +1128,15 @@ async function setLeaveStatus(db, id, status, res) {
   }
 }
 
+/**
+ * Deactivate or reactivate an employee.
+ * Disabling in Firestore AND in Firebase Auth keeps both systems in sync.
+ * If you only disable in one place, the employee could still access the other.
+ */
 async function setEmployeeStatus(db, auth, id, status, res) {
   try {
     await db.collection('employees').doc(id).update({ status, updated_at: new Date() });
-    // Disable/enable Firebase Auth account to match
-    await auth.updateUser(id, { disabled: status === 'inactive' });
+    await auth.updateUser(id, { disabled: status === 'inactive' }); // mirrors Firestore status
     await logActivity(db, 'other', `Employee ${id} ${status === 'inactive' ? 'deactivated' : 'reactivated'}`, 'admin');
     return res.json({ success: true });
   } catch (err) {
@@ -1023,6 +1145,12 @@ async function setEmployeeStatus(db, auth, id, status, res) {
   }
 }
 
+/**
+ * Auto-increments employee IDs: VAGT-0001, VAGT-0002, ...
+ * Reads the highest existing ID and adds 1.
+ * NOTE: This has a race condition if two employees are approved at exactly the same time.
+ * At small scale this is fine. At large scale, use a Firestore counter or UUID instead.
+ */
 async function nextEmployeeId(db) {
   const snap = await db.collection('employees').orderBy('employee_id', 'desc').limit(1).get();
   if (snap.empty) return 'VAGT-0001';
@@ -1031,6 +1159,13 @@ async function nextEmployeeId(db) {
   return `VAGT-${String(num).padStart(4, '0')}`;
 }
 
+/**
+ * Write a line to the activity_log collection.
+ * type: 'registration' | 'check_in' | 'check_out' | 'leave_request' | 'complaint' |
+ *       'keycode_generated' | 'other'
+ * Errors are caught and logged but don't fail the parent request —
+ * activity logging is best-effort.
+ */
 async function logActivity(db, type, description, actor) {
   try {
     await db.collection('activity_log').add({ type, description, actor, time: new Date() });
