@@ -15,6 +15,9 @@
  * GET  /api/admin/employees/:id
  * POST /api/admin/employees/:id/deactivate
  * POST /api/admin/employees/:id/reactivate
+ * POST /api/admin/employees/:id/generate-keycode
+ * POST /api/admin/employees/:id/revoke-keycode
+ * GET  /api/admin/sign-in-events
  * GET  /api/admin/schedule
  * POST /api/admin/schedule
  * DELETE /api/admin/schedule/:id
@@ -834,6 +837,98 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     } catch (err) {
       console.error('admin/reports error:', err);
       return res.status(500).json({ message: 'Failed to fetch reports.' });
+    }
+  });
+
+  // ── POST /api/admin/employees/:id/generate-keycode ───────────────────────
+  // Generate (or regenerate) a non-expiring physical keycode for a guard.
+  router.post('/employees/:id/generate-keycode', ...guard, async (req, res) => {
+    const uid = req.params.id;
+    try {
+      const empSnap = await db.collection('employees').doc(uid).get();
+      if (!empSnap.exists) return res.status(404).json({ message: 'Employee not found.' });
+      const emp = empSnap.data();
+
+      // Deactivate any existing keycode for this employee
+      const existingSnap = await db.collection('guard_keycodes')
+        .where('employee_uid', '==', uid)
+        .where('active', '==', true)
+        .get();
+      const batch = db.batch();
+      existingSnap.docs.forEach(d => batch.update(d.ref, { active: false, revoked_at: new Date() }));
+
+      // Generate a unique keycode: XXXX-XXXX (no 0, O, I, 1 for legibility)
+      const CHARS = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+      let keycode;
+      let attempts = 0;
+      do {
+        let raw = '';
+        for (let i = 0; i < 8; i++) raw += CHARS[Math.floor(Math.random() * CHARS.length)];
+        keycode = raw.slice(0, 4) + '-' + raw.slice(4);
+        const existing = await db.collection('guard_keycodes').doc(keycode).get();
+        if (!existing.exists) break;
+        attempts++;
+      } while (attempts < 10);
+
+      if (attempts >= 10) return res.status(500).json({ message: 'Could not generate unique keycode. Try again.' });
+
+      batch.set(db.collection('guard_keycodes').doc(keycode), {
+        employee_uid: uid,
+        employee_id:  emp.employee_id || null,
+        name:         emp.name        || null,
+        active:       true,
+        created_at:   new Date(),
+        created_by:   req.user.uid,
+        last_used_at: null,
+      });
+
+      await batch.commit();
+      await logActivity(db, 'keycode_generated',
+        `Keycode generated for ${emp.name || uid} (${emp.employee_id || uid})`,
+        req.user.uid);
+
+      return res.json({ keycode, employee_id: emp.employee_id, name: emp.name });
+    } catch (err) {
+      console.error('generate-keycode error:', err);
+      return res.status(500).json({ message: 'Failed to generate keycode.' });
+    }
+  });
+
+  // ── POST /api/admin/employees/:id/revoke-keycode ──────────────────────────
+  router.post('/employees/:id/revoke-keycode', ...guard, async (req, res) => {
+    const uid = req.params.id;
+    try {
+      const snap = await db.collection('guard_keycodes')
+        .where('employee_uid', '==', uid)
+        .where('active', '==', true)
+        .get();
+      if (snap.empty) return res.status(404).json({ message: 'No active keycode found for this employee.' });
+      const batch = db.batch();
+      snap.docs.forEach(d => batch.update(d.ref, { active: false, revoked_at: new Date() }));
+      await batch.commit();
+      return res.json({ success: true });
+    } catch (err) {
+      console.error('revoke-keycode error:', err);
+      return res.status(500).json({ message: 'Failed to revoke keycode.' });
+    }
+  });
+
+  // ── GET /api/admin/sign-in-events ─────────────────────────────────────────
+  router.get('/sign-in-events', ...guard, async (req, res) => {
+    const limit  = Math.min(parseInt(req.query.limit  || '50', 10), 200);
+    const empUid = req.query.employee_uid || null;
+    try {
+      let q = db.collection('sign_in_events').orderBy('timestamp', 'desc');
+      if (empUid) q = q.where('employee_uid', '==', empUid);
+      q = q.limit(limit);
+      const snap = await q.get();
+      const events = snap.docs.map(d => ({ id: d.id, ...d.data(),
+        timestamp: d.data().timestamp ? d.data().timestamp.toDate().toISOString() : null,
+      }));
+      return res.json({ events });
+    } catch (err) {
+      console.error('sign-in-events error:', err);
+      return res.status(500).json({ message: 'Failed to fetch sign-in events.' });
     }
   });
 

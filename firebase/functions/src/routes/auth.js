@@ -8,6 +8,7 @@
  * POST /api/auth/employee/register
  * POST /api/auth/employee/verify-otp
  * POST /api/auth/employee/resend-otp
+ * POST /api/auth/guard/keycode-login
  */
 
 'use strict';
@@ -237,6 +238,65 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     } catch (err) {
       console.error('employee/resend-otp error:', err);
       return res.status(500).json({ message: 'Failed to resend OTP.' });
+    }
+  });
+
+  // ── POST /api/auth/guard/keycode-login ───────────────────────────────────
+  // Guard authenticates with a physical non-expiring keycode.
+  // Captures GPS + device info at sign-in. Returns a Firebase Custom Token.
+  router.post('/guard/keycode-login', loginLimiter, async (req, res) => {
+    const { keycode, latitude, longitude, accuracy, device_info } = req.body || {};
+    if (!keycode || typeof keycode !== 'string') {
+      return res.status(400).json({ message: 'keycode is required.' });
+    }
+
+    // Normalise: uppercase, strip non-alphanumeric except dash
+    const normalised = keycode.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+
+    try {
+      const codeSnap = await db.collection('guard_keycodes').doc(normalised).get();
+
+      if (!codeSnap.exists) {
+        return res.status(401).json({ message: 'Invalid keycode.' });
+      }
+
+      const codeData = codeSnap.data();
+
+      if (!codeData.active) {
+        return res.status(403).json({ message: 'This keycode has been deactivated. Contact your manager.' });
+      }
+
+      const employeeUid = codeData.employee_uid;
+
+      // Log the sign-in event (GPS + device fingerprint)
+      const eventData = {
+        employee_uid:  employeeUid,
+        employee_id:   codeData.employee_id  || null,
+        name:          codeData.name         || null,
+        keycode:       normalised,
+        latitude:      typeof latitude  === 'number' ? latitude  : null,
+        longitude:     typeof longitude === 'number' ? longitude : null,
+        geo_accuracy:  typeof accuracy  === 'number' ? accuracy  : null,
+        device_info:   typeof device_info === 'string' ? device_info.slice(0, 512) : null,
+        ip_address:    req.headers['x-forwarded-for'] || req.socket.remoteAddress || null,
+        timestamp:     new Date(),
+      };
+      await db.collection('sign_in_events').add(eventData);
+
+      // Update last_seen on the keycode doc
+      await codeSnap.ref.update({ last_used_at: new Date() });
+
+      // Mint a Firebase Custom Token for the employee
+      const customToken = await auth.createCustomToken(employeeUid, { role: 'employee' });
+
+      return res.json({
+        custom_token: customToken,
+        employee_id:  codeData.employee_id || null,
+        name:         codeData.name        || null,
+      });
+    } catch (err) {
+      console.error('guard/keycode-login error:', err);
+      return res.status(500).json({ message: 'Sign-in failed. Please try again.' });
     }
   });
 

@@ -72,25 +72,55 @@
 
       <!-- ── Step 2: Login form ── -->
       <div id="stepLogin" style="display:none;">
-        <div id="loginError" class="portal-error" style="display:none;" role="alert"></div>
-        <form id="loginForm" novalidate>
-          <div class="form-group" style="margin-bottom:16px;">
-            <label for="loginEmail">Work email</label>
-            <input type="email" id="loginEmail" autocomplete="email" required
-                   placeholder="name@vagtsecurityservices.com"/>
-          </div>
-          <div class="form-group" style="margin-bottom:24px;">
-            <label for="loginPass">Password</label>
-            <input type="password" id="loginPass" autocomplete="current-password" required
-                   placeholder="••••••••"/>
-          </div>
-          <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
-                  id="signInBtn">Sign In</button>
-        </form>
-        <div style="text-align:center; margin-top:14px;">
-          <button class="portal-forgot-link" onclick="goToForgot()">Forgot password?</button>
+
+        <!-- Tab switcher -->
+        <div id="loginTabs" style="display:flex; margin-bottom:20px; border-bottom:2px solid var(--border);">
+          <button id="tabEmail"   class="login-tab login-tab-active" onclick="switchTab('email')">Email / Password</button>
+          <button id="tabKeycode" class="login-tab"                  onclick="switchTab('keycode')">Guard Keycode</button>
         </div>
-        <div style="text-align:center; margin-top:10px;">
+
+        <div id="loginError" class="portal-error" style="display:none;" role="alert"></div>
+
+        <!-- Email / Password panel -->
+        <div id="panelEmail">
+          <form id="loginForm" novalidate>
+            <div class="form-group" style="margin-bottom:16px;">
+              <label for="loginEmail">Work email</label>
+              <input type="email" id="loginEmail" autocomplete="email" required
+                     placeholder="name@vagtsecurityservices.com"/>
+            </div>
+            <div class="form-group" style="margin-bottom:24px;">
+              <label for="loginPass">Password</label>
+              <input type="password" id="loginPass" autocomplete="current-password" required
+                     placeholder="••••••••"/>
+            </div>
+            <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
+                    id="signInBtn">Sign In</button>
+          </form>
+          <div style="text-align:center; margin-top:14px;">
+            <button class="portal-forgot-link" onclick="goToForgot()">Forgot password?</button>
+          </div>
+        </div>
+
+        <!-- Guard Keycode panel -->
+        <div id="panelKeycode" style="display:none;">
+          <p style="font-size:12px; color:var(--text-muted); margin:0 0 16px;">
+            Enter the keycode printed on your VAGT access card.
+          </p>
+          <form id="keycodeForm" novalidate>
+            <div class="form-group" style="margin-bottom:24px;">
+              <label for="keycodeInput">Access Keycode</label>
+              <input type="text" id="keycodeInput" autocomplete="off" required
+                     placeholder="XXXX-XXXX" maxlength="9"
+                     style="text-transform:uppercase; letter-spacing:3px; font-size:20px; font-weight:700; text-align:center;"/>
+            </div>
+            <div id="geoStatus" style="font-size:11px; color:var(--text-muted); margin-bottom:12px; display:none;"></div>
+            <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
+                    id="keycodeBtn">Sign In with Keycode</button>
+          </form>
+        </div>
+
+        <div style="text-align:center; margin-top:14px;">
           <button class="portal-forgot-link" onclick="goBack()">← Back to role selection</button>
         </div>
       </div>
@@ -123,6 +153,14 @@
     font-size: 12px; color: var(--text-muted); text-decoration: underline;
   }
   .portal-forgot-link:hover { color: var(--navy); }
+
+  .login-tab {
+    background: none; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 600; color: var(--text-muted);
+    padding: 8px 14px 10px; border-bottom: 2px solid transparent; margin-bottom: -2px;
+  }
+  .login-tab-active { color: var(--navy); border-bottom-color: var(--navy); }
+  .login-tab:hover:not(.login-tab-active) { color: var(--text); }
 </style>
 
 <!-- Firebase v10 compat SDK -->
@@ -157,6 +195,90 @@
     setText('formTitle', title);
     setText('formSub',   sub);
   }
+
+  // ── Tab switcher ──────────────────────────────────────────────────────────
+  window.switchTab = function (tab) {
+    hide('loginError');
+    if (tab === 'keycode') {
+      hide('panelEmail'); show('panelKeycode');
+      document.getElementById('tabEmail').classList.remove('login-tab-active');
+      document.getElementById('tabKeycode').classList.add('login-tab-active');
+    } else {
+      show('panelEmail'); hide('panelKeycode');
+      document.getElementById('tabKeycode').classList.remove('login-tab-active');
+      document.getElementById('tabEmail').classList.add('login-tab-active');
+    }
+  };
+
+  // ── Keycode input: auto-insert dash after 4 chars ─────────────────────────
+  document.getElementById('keycodeInput').addEventListener('input', function (e) {
+    let v = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (v.length > 4) v = v.slice(0, 4) + '-' + v.slice(4, 8);
+    e.target.value = v;
+  });
+
+  // ── Keycode sign-in ───────────────────────────────────────────────────────
+  document.getElementById('keycodeForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('keycodeBtn');
+    const geoStatus = document.getElementById('geoStatus');
+    hide('loginError');
+    btn.disabled = true;
+    btn.textContent = 'Locating…';
+    show('geoStatus');
+    geoStatus.textContent = 'Capturing your location…';
+
+    const keycode = document.getElementById('keycodeInput').value.trim().toUpperCase();
+    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(keycode)) {
+      showEl('loginError', 'Please enter a valid keycode in the format XXXX-XXXX.');
+      btn.disabled = false; btn.textContent = 'Sign In with Keycode';
+      hide('geoStatus');
+      return;
+    }
+
+    // Request GPS — non-blocking: if denied we still submit without coords
+    let latitude = null, longitude = null, accuracy = null;
+    try {
+      const pos = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 8000, maximumAge: 0 });
+      });
+      latitude  = pos.coords.latitude;
+      longitude = pos.coords.longitude;
+      accuracy  = pos.coords.accuracy;
+      geoStatus.textContent = 'Location captured.';
+    } catch {
+      geoStatus.textContent = 'Location unavailable — proceeding without GPS.';
+    }
+
+    btn.textContent = 'Signing in…';
+
+    try {
+      const resp = await fetch('/api/auth/guard/keycode-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keycode,
+          latitude,
+          longitude,
+          accuracy,
+          device_info: navigator.userAgent,
+        }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        showEl('loginError', data.message || 'Sign-in failed. Please try again.');
+        btn.disabled = false; btn.textContent = 'Sign In with Keycode';
+        hide('geoStatus');
+        return;
+      }
+      await auth.signInWithCustomToken(data.custom_token);
+      // onAuthStateChanged will handle the redirect
+    } catch (err) {
+      showEl('loginError', 'Network error. Check your connection and try again.');
+      btn.disabled = false; btn.textContent = 'Sign In with Keycode';
+      hide('geoStatus');
+    }
+  });
 
   // ── Navigation ────────────────────────────────────────────────────────────
   window.goToLogin = function () {

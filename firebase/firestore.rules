@@ -166,5 +166,20 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ─── guard_keycodes/{keycode} ─────────────────────────────────────────────
+    // Keycodes are validated server-side only (Cloud Functions with admin SDK
+    // bypass rules). Client SDK never reads or writes these directly.
+    match /guard_keycodes/{keycode} {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── sign_in_events/{eventId} ────────────────────────────────────────────
+    // Written only by Cloud Functions (admin SDK bypasses rules).
+    // Admins can read for monitoring.
+    match /sign_in_events/{eventId} {
+      allow read: if isAdmin();
+      allow write: if false; // Server-side only
+    }
+
   }
 }
