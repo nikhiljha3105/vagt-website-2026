@@ -3,143 +3,398 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard | VAGT Security Services</title>
+  <title>Admin Portal | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <meta name="description" content="This section of the VAGT portal is temporarily unavailable while security configuration is completed. Please contact info@vagtsecurityservices.com for assistance."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    .maintenance-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg, #f5f5f5);
-      padding: 40px 20px;
+    .admin-sidebar-profile { padding:14px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .admin-sidebar-name { font-size:13px; font-weight:700; color:var(--white); line-height:1.3; margin-bottom:2px; }
+    .admin-sidebar-badge { display:inline-block; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:2px 8px; background:var(--amber); color:var(--navy); }
+    #authOverlay {
+      position:fixed; inset:0; background:var(--white);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999; font-size:13px; color:var(--text-muted);
     }
-    .maintenance-card {
-      background: #fff;
-      border: 1px solid var(--border, #e0e0e0);
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      padding: 48px 40px 40px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    .dash-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 24px; } }
+    .dash-section-title { font-size:9px; font-weight:700; color:var(--text-faint); text-transform:uppercase; letter-spacing:2px; margin-bottom:16px; }
+    .dash-row { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:40px; }
+    @media (max-width: 860px) { .dash-row { grid-template-columns:1fr; } }
+
+    /* ── Overview stat strip ── */
+    .stat-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid var(--border); margin-bottom:40px; }
+    @media (max-width:700px) { .stat-strip { grid-template-columns:1fr 1fr; } }
+    .stat-cell { padding:22px 20px; border-right:1px solid var(--border); }
+    .stat-cell:last-child { border-right:none; }
+    .stat-value { font-size:30px; font-weight:900; color:var(--navy); letter-spacing:-1px; line-height:1; margin-bottom:6px; }
+    .stat-sub   { font-size:10px; color:var(--text-faint); font-weight:500; margin-top:2px; }
+    .stat-label { font-size:11px; color:var(--text-muted); font-weight:500; }
+
+    /* ── Activity feed ── */
+    .activity-item { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .activity-item:last-child { border-bottom:none; }
+    .activity-dot { width:8px; height:8px; border-radius:50%; background:var(--amber); flex-shrink:0; margin-top:5px; }
+    .activity-desc { font-size:12.5px; color:var(--text); line-height:1.5; }
+    .activity-time { font-size:11px; color:var(--text-faint); margin-top:2px; }
+
+    /* ── Pending items list ── */
+    .pending-item { display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .pending-item:last-child { border-bottom:none; }
+    .pending-avatar {
+      width:34px; height:34px; border-radius:50%; background:rgba(13,31,60,0.08);
+      display:flex; align-items:center; justify-content:center; flex-shrink:0;
+      font-size:12px; font-weight:800; color:var(--navy); text-transform:uppercase;
     }
-    .maintenance-icon {
-      width: 64px;
-      height: 64px;
-      background: rgba(0,40,100,0.07);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-    }
-    .maintenance-icon svg {
-      width: 28px;
-      height: 28px;
-      stroke: var(--navy, #002864);
-      fill: none;
-      stroke-width: 1.8;
-    }
-    .maintenance-badge {
-      display: inline-block;
-      background: rgba(245,196,0,0.15);
-      color: #7a5c00;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(245,196,0,0.35);
-      margin-bottom: 18px;
-    }
-    .maintenance-card h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--navy, #002864);
-      margin: 0 0 14px;
-      line-height: 1.3;
-    }
-    .maintenance-card p {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.75;
-      margin: 0 0 28px;
-    }
-    .maintenance-divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 0 0 24px;
-    }
-    .maintenance-contact {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.65;
-    }
-    .maintenance-contact a {
-      color: var(--navy, #002864);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .maintenance-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--navy, #002864);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      letter-spacing: 0.02em;
-      margin-bottom: 28px;
-    }
-    .maintenance-home-btn svg {
-      width: 14px; height: 14px;
-      stroke: currentColor; fill: none; stroke-width: 2.2;
-    }
+    .pending-name  { font-size:13px; font-weight:600; color:var(--navy); margin-bottom:2px; }
+    .pending-meta  { font-size:11px; color:var(--text-muted); }
+    .pending-actions { margin-left:auto; display:flex; gap:6px; flex-shrink:0; }
+    .btn-approve { font-size:11px; font-weight:700; padding:5px 12px; background:var(--navy); color:var(--white); border:none; cursor:pointer; }
+    .btn-approve:hover { background:var(--navy-400); }
+    .btn-reject  { font-size:11px; font-weight:700; padding:5px 12px; background:none; color:var(--red); border:1px solid var(--red); cursor:pointer; }
   </style>
 </head>
 <body>
-<div class="maintenance-wrap">
-  <div class="maintenance-card">
 
-    <div class="maintenance-icon">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+<div id="authOverlay">Checking access…</div>
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
+    </div>
+    <div class="admin-sidebar-profile">
+      <div class="admin-sidebar-name" id="sidebarName">—</div>
+      <span class="admin-sidebar-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav" aria-label="Admin portal">
+      <div class="nav-group-label">Operations</div>
+      <a href="admin-portal.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="admin-employees.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Employees
+      </a>
+      <a href="admin-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </a>
+      <div class="nav-group-label">Clients</div>
+      <a href="admin-clients.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Clients &amp; Sites
+      </a>
+      <a href="admin-complaints.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Complaints
+      </a>
+      <div class="nav-group-label">Finance &amp; Reports</div>
+      <a href="admin-payroll.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Payroll
+      </a>
+      <a href="admin-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Admin Portal</div>
+      <h1 id="pageGreeting">Overview</h1>
+      <p id="pageSubtitle">Operations dashboard</p>
     </div>
 
-    <div class="maintenance-badge">Portal Temporarily Disabled</div>
+    <div class="dash-content">
 
-    <h2>Portal Access Unavailable</h2>
+      <!-- Stat strip -->
+      <div class="stat-strip">
+        <div class="stat-cell">
+          <div class="stat-value" id="statEmployees">—</div>
+          <div class="stat-label">Active employees</div>
+          <div class="stat-sub" id="statPending"></div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value" id="statCheckedIn">—</div>
+          <div class="stat-label">Checked in today</div>
+          <div class="stat-sub" id="statOnDuty"></div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value" id="statTickets">—</div>
+          <div class="stat-label">Open tickets</div>
+          <div class="stat-sub" id="statUrgent"></div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-value" id="statLeaves">—</div>
+          <div class="stat-label">Pending leaves</div>
+        </div>
+      </div>
 
-    <p>
-      Our client, employee, and admin portals are currently offline
-      while we complete security configuration.
-      We will restore access as soon as the infrastructure is ready.
-    </p>
+      <div class="dash-row">
 
-    <a href="../index.html" class="maintenance-home-btn">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Back to VAGT Home
-    </a>
+        <!-- Activity feed -->
+        <div>
+          <div class="dash-section-title">Recent Activity</div>
+          <div id="activityBlock">
+            <div style="font-size:13px;color:var(--text-muted);">Loading…</div>
+          </div>
+        </div>
 
-    <hr class="maintenance-divider"/>
+        <!-- Pending registrations -->
+        <div>
+          <div class="dash-section-title">Pending Registrations</div>
+          <div id="registrationsBlock">
+            <div style="font-size:13px;color:var(--text-muted);">Loading…</div>
+          </div>
+        </div>
 
-    <div class="maintenance-contact">
-      Need immediate assistance?<br>
-      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
-      &nbsp;&middot;&nbsp;
-      <a href="tel:+919008977711">+91 90089 77711</a>
+      </div><!-- /dash-row -->
+
+      <!-- Pending leave requests -->
+      <div>
+        <div class="dash-section-title">Pending Leave Requests</div>
+        <div id="leavesBlock">
+          <div style="font-size:13px;color:var(--text-muted);">Loading…</div>
+        </div>
+        <div style="margin-top:14px;">
+          <a href="admin-employees.html" style="font-size:12px; color:var(--navy); font-weight:600; text-decoration:none;">
+            View all employees →
+          </a>
+        </div>
+      </div>
+
     </div>
-
-  </div>
+  </main>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h;   }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function greeting() {
+    const h = new Date().getHours();
+    return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  }
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function relTime(date) {
+    if (!date) return '';
+    const diff = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (diff < 60)     return 'just now';
+    if (diff < 3600)   return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400)  return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+  }
+
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role !== 'admin') { window.location.href = 'portal.html'; return; }
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display = '';
+    setText('sidebarName', user.displayName || user.email || 'Admin');
+    setText('pageGreeting', greeting());
+    loadAll();
+  });
+
+  function loadAll() {
+    Promise.allSettled([loadOverview(), loadActivity(), loadRegistrations(), loadLeaves()]);
+  }
+
+  async function loadOverview() {
+    try {
+      const [empSnap, attendSnap, ticketsSnap, leavesSnap] = await Promise.all([
+        db.collection('employees').get(),
+        db.collection('attendance_logs').where('date', '==', todayStr()).get(),
+        db.collection('complaints').where('status', 'in', ['open', 'in_progress']).get(),
+        db.collection('leave_requests').where('status', '==', 'pending').get(),
+      ]);
+      const emps    = empSnap.docs.map(d => d.data());
+      const active  = emps.filter(e => e.status === 'active').length;
+      const pending = emps.filter(e => e.status === 'pending').length;
+      const checkedIn = attendSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
+      const onDuty  = attendSnap.size;
+      const urgent  = ticketsSnap.docs.filter(d => d.data().priority === 'urgent').length;
+
+      setText('statEmployees', active);
+      setText('statPending', pending > 0 ? pending + ' pending approval' : '');
+      setText('statCheckedIn', checkedIn);
+      setText('statOnDuty', onDuty > 0 ? 'of ' + onDuty + ' on duty' : '');
+      setText('statTickets', ticketsSnap.size);
+      setText('statUrgent', urgent > 0 ? urgent + ' urgent' : '');
+      setText('statLeaves', leavesSnap.size);
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadActivity() {
+    try {
+      const snap = await db.collection('activity_log').orderBy('time', 'desc').limit(12).get();
+      if (snap.empty) {
+        setHTML('activityBlock', '<div class="portal-empty-state" style="padding:20px 0;"><svg viewBox="0 0 24 24" width="28" height="28"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>No activity yet.</div>');
+        return;
+      }
+      const html = snap.docs.map(doc => {
+        const d = doc.data();
+        const t = d.time ? d.time.toDate() : null;
+        return `<div class="activity-item">
+          <div class="activity-dot"></div>
+          <div>
+            <div class="activity-desc">${esc(d.description || '')}</div>
+            <div class="activity-time">${relTime(t)}</div>
+          </div>
+        </div>`;
+      }).join('');
+      setHTML('activityBlock', html);
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadRegistrations() {
+    try {
+      const snap = await db.collection('pending_registrations')
+        .where('verified', '==', true)
+        .orderBy('verified_at', 'desc')
+        .limit(5)
+        .get();
+
+      if (snap.empty) {
+        setHTML('registrationsBlock', '<div style="font-size:13px;color:var(--text-muted);">No pending registrations.</div>');
+        return;
+      }
+
+      const html = snap.docs.map(doc => {
+        const d = doc.data();
+        const initials = (d.phone || '?').slice(-2);
+        return `<div class="pending-item" id="reg-${doc.id}">
+          <div class="pending-avatar">${esc(initials)}</div>
+          <div>
+            <div class="pending-name">${esc(d.name || d.phone)}</div>
+            <div class="pending-meta">${esc(d.phone)} · Applied ${d.created_at ? d.created_at.toDate().toLocaleDateString('en-IN') : '—'}</div>
+          </div>
+          <div class="pending-actions">
+            <button class="btn-approve" onclick="approveReg('${doc.id}')">Approve</button>
+            <button class="btn-reject"  onclick="rejectReg('${doc.id}')">Reject</button>
+          </div>
+        </div>`;
+      }).join('');
+      setHTML('registrationsBlock', html);
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadLeaves() {
+    try {
+      const snap = await db.collection('leave_requests')
+        .where('status', '==', 'pending')
+        .orderBy('applied_at', 'asc')
+        .limit(8)
+        .get();
+
+      if (snap.empty) {
+        setHTML('leavesBlock', '<div style="font-size:13px;color:var(--text-muted);">No pending leave requests.</div>');
+        return;
+      }
+
+      // Load employee names in parallel
+      const items = await Promise.all(snap.docs.map(async doc => {
+        const d = doc.data();
+        let empName = d.employee_uid;
+        try {
+          const empSnap = await db.collection('employees').doc(d.employee_uid).get();
+          if (empSnap.exists) empName = empSnap.data().name || empName;
+        } catch (_) {}
+        const LABELS = { casual: 'Casual', sick: 'Sick', earned: 'Earned' };
+        const initials = (empName || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        return `<div class="pending-item" id="lv-${doc.id}">
+          <div class="pending-avatar">${esc(initials)}</div>
+          <div>
+            <div class="pending-name">${esc(empName)}</div>
+            <div class="pending-meta">${LABELS[d.leave_type] || d.leave_type} · ${esc(d.from_date)} – ${esc(d.to_date)} · ${esc(d.reason || '')}</div>
+          </div>
+          <div class="pending-actions">
+            <button class="btn-approve" onclick="approveLeave('${doc.id}')">Approve</button>
+            <button class="btn-reject"  onclick="rejectLeave('${doc.id}')">Reject</button>
+          </div>
+        </div>`;
+      }));
+      setHTML('leavesBlock', items.join(''));
+    } catch (e) { console.error(e); }
+  }
+
+  window.approveReg = async function (id) {
+    if (!confirm('Approve this registration?')) return;
+    try {
+      await db.collection('pending_registrations').doc(id).update({ approved: true, approved_at: new Date() });
+      document.getElementById('reg-' + id)?.remove();
+      // Note: full account creation requires Cloud Functions (admin SDK). This marks it for processing.
+    } catch (e) { alert('Failed: ' + e.message); }
+  };
+  window.rejectReg = async function (id) {
+    const reason = prompt('Reason for rejection (optional):');
+    if (reason === null) return;
+    try {
+      await db.collection('pending_registrations').doc(id).update({ rejected: true, reject_reason: reason, rejected_at: new Date() });
+      document.getElementById('reg-' + id)?.remove();
+    } catch (e) { alert('Failed: ' + e.message); }
+  };
+  window.approveLeave = async function (id) {
+    if (!confirm('Approve this leave request?')) return;
+    try {
+      await db.collection('leave_requests').doc(id).update({ status: 'approved', reviewed_at: new Date() });
+      document.getElementById('lv-' + id)?.remove();
+      setText('statLeaves', Math.max(0, parseInt(document.getElementById('statLeaves').textContent || '0', 10) - 1));
+    } catch (e) { alert('Failed: ' + e.message); }
+  };
+  window.rejectLeave = async function (id) {
+    if (!confirm('Reject this leave request?')) return;
+    try {
+      await db.collection('leave_requests').doc(id).update({ status: 'rejected', reviewed_at: new Date() });
+      document.getElementById('lv-' + id)?.remove();
+      setText('statLeaves', Math.max(0, parseInt(document.getElementById('statLeaves').textContent || '0', 10) - 1));
+    } catch (e) { alert('Failed: ' + e.message); }
+  };
+
+})();
+</script>
 </body>
 </html>

@@ -3,143 +3,234 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Client — Invoices | VAGT Security Services</title>
+  <title>Invoices | VAGT Client Portal</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <meta name="description" content="This section of the VAGT portal is temporarily unavailable while security configuration is completed. Please contact info@vagtsecurityservices.com for assistance."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    .maintenance-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg, #f5f5f5);
-      padding: 40px 20px;
+    .client-sidebar-profile { padding:14px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .client-sidebar-name    { font-size:13px; font-weight:700; color:var(--white); line-height:1.3; margin-bottom:2px; }
+    .client-sidebar-company { font-size:11px; color:var(--amber); font-weight:700; letter-spacing:0.5px; margin-bottom:4px; }
+    .client-sidebar-role    { font-size:10.5px; color:rgba(255,255,255,0.38); }
+    #authOverlay {
+      position:fixed; inset:0; background:var(--white);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999; font-size:13px; color:var(--text-muted);
     }
-    .maintenance-card {
-      background: #fff;
-      border: 1px solid var(--border, #e0e0e0);
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      padding: 48px 40px 40px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    .page-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .page-content { padding: 28px 24px; } }
+    .inv-summary {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+      border: 1px solid var(--border); margin-bottom: 32px;
     }
-    .maintenance-icon {
-      width: 64px;
-      height: 64px;
-      background: rgba(0,40,100,0.07);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
+    @media (max-width: 600px) { .inv-summary { grid-template-columns: 1fr 1fr; } }
+    .inv-summary-cell { padding: 20px 18px; border-right: 1px solid var(--border); }
+    .inv-summary-cell:last-child { border-right: none; }
+    .inv-summary-value { font-size: 22px; font-weight: 900; color: var(--navy); letter-spacing: -0.5px; margin-bottom: 4px; }
+    .inv-summary-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+    .inv-table { width: 100%; border-collapse: collapse; }
+    .inv-table th {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-faint); text-align: left; padding: 0 12px 10px 0;
+      border-bottom: 1px solid var(--border);
     }
-    .maintenance-icon svg {
-      width: 28px;
-      height: 28px;
-      stroke: var(--navy, #002864);
-      fill: none;
-      stroke-width: 1.8;
+    .inv-table td {
+      padding: 14px 12px 14px 0; border-bottom: 1px solid var(--border);
+      font-size: 13px; color: var(--text); vertical-align: middle;
     }
-    .maintenance-badge {
-      display: inline-block;
-      background: rgba(245,196,0,0.15);
-      color: #7a5c00;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(245,196,0,0.35);
-      margin-bottom: 18px;
+    .inv-table tr:last-child td { border-bottom: none; }
+    .inv-num { font-weight: 700; color: var(--navy); }
+    .inv-amount-cell { font-weight: 800; color: var(--navy); text-align: right; padding-right: 0; }
+    .inv-badge {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
+      padding: 3px 10px; border-radius: 20px; white-space: nowrap;
     }
-    .maintenance-card h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--navy, #002864);
-      margin: 0 0 14px;
-      line-height: 1.3;
+    .badge-paid    { background: rgba(0,150,80,0.12); color: #005c30; }
+    .badge-unpaid  { background: rgba(245,196,0,0.20); color: #5a4200; }
+    .badge-overdue { background: rgba(196,30,30,0.10); color: #7a0000; }
+    .badge-partial { background: rgba(0,80,200,0.10); color: #003080; }
+    .download-link {
+      font-size: 11px; color: var(--navy); font-weight: 600;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px; border: 1px solid var(--border);
     }
-    .maintenance-card p {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.75;
-      margin: 0 0 28px;
-    }
-    .maintenance-divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 0 0 24px;
-    }
-    .maintenance-contact {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.65;
-    }
-    .maintenance-contact a {
-      color: var(--navy, #002864);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .maintenance-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--navy, #002864);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      letter-spacing: 0.02em;
-      margin-bottom: 28px;
-    }
-    .maintenance-home-btn svg {
-      width: 14px; height: 14px;
-      stroke: currentColor; fill: none; stroke-width: 2.2;
-    }
+    .download-link:hover { background: var(--amber-soft); }
+    .download-link svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
   </style>
 </head>
 <body>
-<div class="maintenance-wrap">
-  <div class="maintenance-card">
 
-    <div class="maintenance-icon">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+<div id="authOverlay">Checking access…</div>
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
     </div>
-
-    <div class="maintenance-badge">Portal Temporarily Disabled</div>
-
-    <h2>Portal Access Unavailable</h2>
-
-    <p>
-      Our client, employee, and admin portals are currently offline
-      while we complete security configuration.
-      We will restore access as soon as the infrastructure is ready.
-    </p>
-
-    <a href="../index.html" class="maintenance-home-btn">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Back to VAGT Home
-    </a>
-
-    <hr class="maintenance-divider"/>
-
-    <div class="maintenance-contact">
-      Need immediate assistance?<br>
-      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
-      &nbsp;&middot;&nbsp;
-      <a href="tel:+919008977711">+91 90089 77711</a>
+    <div class="client-sidebar-profile">
+      <div class="client-sidebar-name" id="sidebarName">—</div>
+      <div class="client-sidebar-company" id="sidebarCompany">—</div>
+      <div class="client-sidebar-role">Client</div>
     </div>
+    <nav class="sidebar-nav" aria-label="Client portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="client-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="client-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Daily Reports
+      </a>
+      <a href="client-invoices.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Invoices
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
 
-  </div>
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Client Portal</div>
+      <h1>Invoices</h1>
+      <p id="pageSubtitle">Billing history for your account.</p>
+    </div>
+    <div class="page-content">
+      <div class="inv-summary">
+        <div class="inv-summary-cell"><div class="inv-summary-value" id="sumOutstanding">—</div><div class="inv-summary-label">Outstanding</div></div>
+        <div class="inv-summary-cell"><div class="inv-summary-value" id="sumOverdue">—</div><div class="inv-summary-label">Overdue</div></div>
+        <div class="inv-summary-cell"><div class="inv-summary-value" id="sumPaidYtd">—</div><div class="inv-summary-label">Paid this FY</div></div>
+      </div>
+      <div id="invoiceListWrap">
+        <div style="font-size:13px; color:var(--text-muted);">Loading invoices…</div>
+      </div>
+    </div>
+  </main>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h;   }
+  function fmt(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role !== 'client') { window.location.href = 'portal.html'; return; }
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display = '';
+    loadProfile(user.uid);
+    loadSummary(user.uid);
+    loadInvoices(user.uid);
+  });
+
+  async function loadProfile(uid) {
+    try {
+      const snap = await db.collection('clients').doc(uid).get();
+      if (!snap.exists) return;
+      const d = snap.data();
+      setText('sidebarName', d.name || '—');
+      setText('sidebarCompany', d.company_name || '—');
+      setText('pageSubtitle', 'Billing history for ' + (d.company_name || 'your account') + '.');
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadSummary(uid) {
+    try {
+      const snap = await db.collection('invoices').where('client_uid', '==', uid).get();
+      let outstanding = 0, overdue = 0, paidYtd = 0;
+      const fyStart = (new Date().getFullYear() - 1) + '-04-01';
+      snap.docs.forEach(doc => {
+        const d = doc.data();
+        if (d.status === 'unpaid') outstanding += d.amount || 0;
+        if (d.status === 'overdue') { outstanding += d.amount || 0; overdue += d.amount || 0; }
+        if (d.status === 'paid' && d.issued_date >= fyStart) paidYtd += d.amount || 0;
+      });
+      setText('sumOutstanding', fmt(outstanding));
+      setText('sumOverdue', fmt(overdue));
+      setText('sumPaidYtd', fmt(paidYtd));
+    } catch (e) { console.error(e); }
+  }
+
+  async function loadInvoices(uid) {
+    try {
+      const snap = await db.collection('invoices')
+        .where('client_uid', '==', uid)
+        .orderBy('issued_date', 'desc')
+        .limit(50)
+        .get();
+
+      if (snap.empty) {
+        setHTML('invoiceListWrap', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>No invoices on record.</div>');
+        return;
+      }
+
+      const rows = snap.docs.map(doc => {
+        const d = doc.data();
+        const pdf = d.pdf_url
+          ? `<a href="${esc(d.pdf_url)}" target="_blank" rel="noopener noreferrer" class="download-link"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>PDF</a>`
+          : '<span style="font-size:11px;color:var(--text-faint);">—</span>';
+        return `<tr>
+          <td class="inv-num">${esc(d.invoice_number || doc.id)}</td>
+          <td>${esc(d.period_label || '—')}</td>
+          <td>${esc(d.issued_date || '—')}</td>
+          <td>${esc(d.due_date || '—')}</td>
+          <td><span class="inv-badge badge-${esc(d.status)}">${esc(d.status)}</span></td>
+          <td class="inv-amount-cell">${fmt(d.amount)}</td>
+          <td>${pdf}</td>
+        </tr>`;
+      }).join('');
+
+      setHTML('invoiceListWrap', `<table class="inv-table">
+        <thead><tr>
+          <th>Invoice #</th><th>Period</th><th>Issued</th><th>Due</th>
+          <th>Status</th><th style="text-align:right;">Amount</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`);
+    } catch (e) {
+      console.error(e);
+      setHTML('invoiceListWrap', '<div style="font-size:13px;color:var(--text-muted);">Could not load invoices.</div>');
+    }
+  }
+})();
+</script>
 </body>
 </html>
