@@ -117,6 +117,29 @@ incidents, complaints, daily_reports, invoices, sites, companies, activity_log,
 pending_registrations, guard_keycodes, sign_in_events, password_reset_tokens,
 **guest_logs**, **patrol_checkpoints**, **patrol_logs**
 
+## User Profile — Critical Context for All UI Decisions
+
+**Guards (employees):** Many are not educated in English. Hindi, Kannada, Tamil, Odia are their primary languages.
+Implications for every screen you build or edit:
+- Labels must be short and literal — no jargon, no abbreviations
+- Buttons must say exactly what they do ("Mark Exit" not "Process")
+- Error messages must be plain — "Wrong password. Try again." not "Authentication failed (401)"
+- Icons must always have text labels — never icon-only
+- Multilingual support is a **planned future feature**, not optional forever — design with it in mind
+
+**Clients:** May be 60+ years old, head-strong, not tech-savvy. They judge the product in the first 30 seconds.
+Implications:
+- Dashboard must answer "Is my guard there right now?" without any clicks
+- Avoid empty states — if there's no data, explain why in plain English
+- Complaint flow must feel dignified, not like a support ticket system
+
+**Multilingual roadmap (back-burner, do when rate limit allows):**
+1. Extract all UI text strings to `assets/js/i18n.js` (one object per language)
+2. Add a language selector to the nav bar (EN / हिं / ಕನ್ನ / தமி / ଓଡ଼ )
+3. Load correct language on page render
+4. Languages needed: English, Hindi, Kannada, Tamil, Odia
+5. User manuals already done in EN + HI — see `docs/`
+
 ## Known Issues / Technical Debt
 
 - No input validation library (joi/zod) — manual checks only
@@ -124,6 +147,7 @@ pending_registrations, guard_keycodes, sign_in_events, password_reset_tokens,
 - Denormalized employee/site names across collections — no cleanup on updates
 - Firestore composite indexes missing for several filtered queries
 - ~~Firebase API key exposed in git history~~ — **RESOLVED 2026-03-09**: key rotated + git history rewritten across all branches.
+- UI is English-only — multilingual support needed (guards and clients are not English-primary)
 
 ## Session Handoff Notes
 
