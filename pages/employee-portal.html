@@ -408,6 +408,36 @@
     }
   }
 
+  // ── Payslip PDF download ──────────────────────────────────────────────────
+  window.downloadPayslip = async function (slipId) {
+    const btn = event.target;
+    btn.textContent = 'Downloading…';
+    btn.disabled = true;
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('Not signed in');
+      const token = await user.getIdToken();
+      const res = await fetch('/api/payslips/' + slipId + '/download', {
+        headers: { Authorization: 'Bearer ' + token },
+      });
+      if (!res.ok) throw new Error('Download failed (' + res.status + ')');
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = 'VAGT-Payslip.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Could not download payslip. Please try again.\n' + e.message);
+    } finally {
+      btn.textContent = '⬇ Download PDF';
+      btn.disabled = false;
+    }
+  };
+
   window.checkIn = async function (uid) {
     const btn = document.querySelector('#attendanceActions button');
     if (btn) { btn.textContent = 'Checking in…'; btn.disabled = true; }
@@ -496,6 +526,7 @@
         return;
       }
 
+      const slipId = snap.docs[0].id;
       const s = snap.docs[0].data();
       const fmt = function (n) {
         return '₹' + Number(n || 0).toLocaleString('en-IN');
@@ -507,7 +538,11 @@
         <div class="payslip-preview-row"><span class="k">Basic</span><span class="v">${fmt(s.basic)}</span></div>
         <div class="payslip-preview-row"><span class="k">Allowances</span><span class="v">${fmt(s.allowances)}</span></div>
         <div class="payslip-preview-row"><span class="k">Deductions</span><span class="v">${fmt(s.deductions)}</span></div>
-        ${s.pdf_url ? `<div style="margin-top:14px;"><a href="${s.pdf_url}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-navy" style="font-size:11px; padding:8px 16px;">Download PDF</a></div>` : ''}
+        <div style="margin-top:14px;">
+          <button onclick="downloadPayslip('${slipId}')" class="btn btn-outline-navy" style="font-size:11px; padding:8px 16px;">
+            ⬇ Download PDF
+          </button>
+        </div>
       `);
     } catch (e) {
       console.error('Payslip load failed:', e);

@@ -23,6 +23,7 @@
 'use strict';
 
 const express = require('express');
+const QRCode  = require('qrcode');
 
 module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
   const router      = express.Router();
@@ -55,6 +56,10 @@ module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
       const cp  = cpSnap.docs[0].data();
       const cpId = cpSnap.docs[0].id;
 
+      const VALID_METHODS = ['nfc', 'qr', 'manual'];
+      const scanMethod = req.body.scan_method && VALID_METHODS.includes(req.body.scan_method)
+        ? req.body.scan_method : 'nfc';
+
       // Get guard details for denormalisation
       const empSnap = await db.collection('employees').doc(uid).get();
       const guardName = empSnap.exists ? (empSnap.data().name || uid) : uid;
@@ -68,6 +73,7 @@ module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
         site_id:            cp.site_id || null,
         site_name:          cp.site_name || null,
         nfc_tag_id:         nfc_tag_id.trim(),
+        scan_method:        scanMethod,   // 'nfc' | 'qr' | 'manual'
         scanned_at:         now,
       });
 
@@ -129,6 +135,7 @@ module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
           id:               doc.id,
           checkpoint_label: d.checkpoint_label,
           site_name:        d.site_name || null,
+          scan_method:      d.scan_method || 'nfc',
           scanned_at:       d.scanned_at ? d.scanned_at.toDate().toISOString() : null,
         };
       });
@@ -147,10 +154,27 @@ module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
       let query = db.collection('patrol_checkpoints');
       if (site_id) query = query.where('site_id', '==', site_id);
       const snap  = await query.orderBy('label').limit(500).get();
-      const items = snap.docs.map(doc => {
+
+      // Generate QR data URLs for all checkpoints (for print labels)
+      const items = await Promise.all(snap.docs.map(async doc => {
         const d = doc.data();
-        return { id: doc.id, label: d.label, site_id: d.site_id, site_name: d.site_name || null, nfc_tag_id: d.nfc_tag_id, active: d.active };
-      });
+        let qr_data_url = null;
+        try {
+          qr_data_url = await QRCode.toDataURL(d.nfc_tag_id, {
+            width: 220, margin: 2, color: { dark: '#0a1628', light: '#ffffff' },
+          });
+        } catch (e) { /* QR generation failure is non-fatal */ }
+        return {
+          id:          doc.id,
+          label:       d.label,
+          site_id:     d.site_id || null,
+          site_name:   d.site_name || null,
+          nfc_tag_id:  d.nfc_tag_id,
+          active:      d.active,
+          qr_data_url,
+        };
+      }));
+
       return res.json(items);
     } catch (err) {
       console.error('patrol/admin/checkpoints GET error:', err);
@@ -232,6 +256,7 @@ module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
           guard_name:       d.guard_name,
           checkpoint_label: d.checkpoint_label,
           site_name:        d.site_name || null,
+          scan_method:      d.scan_method || 'nfc',
           scanned_at:       d.scanned_at ? d.scanned_at.toDate().toISOString() : null,
         };
       });

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patrol | VAGT Admin Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="description" content="VAGT Security Services — secure admin portal. Restricted access."/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .admin-sidebar-profile { padding:14px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .admin-sidebar-name  { font-size:13px; font-weight:700; color:var(--white); line-height:1.3; margin-bottom:2px; }
+    .admin-sidebar-badge { display:inline-block; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:2px 8px; background:var(--amber); color:var(--navy); }
+    #authOverlay { position:fixed; inset:0; background:var(--white); display:flex; align-items:center; justify-content:center; z-index:9999; font-size:13px; color:var(--text-muted); }
+    .page-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .page-content { padding: 28px 24px; } }
+    .section-gap { margin-bottom: 56px; }
+    .section-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-faint); margin-bottom: 16px; }
+
+    /* Filter bar */
+    .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; align-items:flex-end; }
+    .filter-bar label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); display:block; margin-bottom:5px; }
+    .filter-bar select, .filter-bar input[type="date"], .filter-bar input[type="text"] {
+      font-size:12px; padding:8px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); outline:none;
+    }
+
+    /* Log table */
+    .log-table { width:100%; border-collapse:collapse; max-width:900px; }
+    .log-table th { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); text-align:left; padding:0 12px 10px 0; border-bottom:1px solid var(--border); }
+    .log-table td { padding:11px 12px 11px 0; border-bottom:1px solid var(--border); font-size:12.5px; color:var(--text); vertical-align:middle; }
+    .log-table tr:last-child td { border-bottom:none; }
+    .method-tag {
+      font-size:9px; font-weight:700; padding:2px 6px; text-transform:uppercase; letter-spacing:0.8px;
+    }
+    .method-tag.nfc    { background:#e6f4ea; color:#1a7f3c; }
+    .method-tag.qr     { background:#e8f4fd; color:#1565c0; }
+    .method-tag.manual { background:#fff3e0; color:#b45309; }
+
+    /* Checkpoint management */
+    .cp-add-form {
+      background:var(--white); border:1px solid var(--border); padding:24px 24px 28px;
+      max-width:600px; margin-bottom:32px;
+    }
+    .cp-add-form h3 { font-size:14px; font-weight:800; color:var(--navy); margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+    .cp-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; }
+    @media (max-width:600px) { .cp-form-grid { grid-template-columns:1fr; } }
+    .cp-form-full { grid-column:1/-1; }
+
+    .cp-table { width:100%; border-collapse:collapse; max-width:800px; }
+    .cp-table th { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); text-align:left; padding:0 12px 10px 0; border-bottom:1px solid var(--border); }
+    .cp-table td { padding:11px 12px 11px 0; border-bottom:1px solid var(--border); font-size:12.5px; vertical-align:middle; }
+    .cp-table tr:last-child td { border-bottom:none; }
+    .cp-tag-id { font-family:monospace; font-size:11.5px; color:var(--text-muted); }
+    .cp-status-active   { font-size:10px; font-weight:700; background:#e6f4ea; color:#1a7f3c; padding:2px 8px; }
+    .cp-status-inactive { font-size:10px; font-weight:700; background:#f0f0f0; color:#666; padding:2px 8px; }
+    .action-btn { font-size:11px; font-weight:600; padding:4px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); cursor:pointer; }
+    .action-btn:hover   { background:var(--warm-grey); }
+    .action-btn.danger  { color:var(--red); border-color:var(--red); }
+    .action-btn.primary { background:var(--navy); color:var(--white); border-color:var(--navy); }
+    .action-btn.primary:hover { background:var(--amber); border-color:var(--amber); color:var(--navy); }
+
+    /* QR label print modal */
+    .qr-modal-overlay {
+      position:fixed; inset:0; background:rgba(10,22,40,0.68);
+      display:none; align-items:center; justify-content:center; z-index:8000; padding:20px;
+    }
+    .qr-modal-overlay.open { display:flex; }
+    .qr-modal { background:var(--white); max-width:340px; width:100%; position:relative; box-shadow:0 24px 64px rgba(0,0,0,0.3); }
+    .qr-modal-close { position:absolute; top:10px; right:14px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted); }
+
+    /* Printable QR label */
+    .qr-label {
+      padding:24px 24px 20px; text-align:center;
+    }
+    .qr-label-header {
+      font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:2px;
+      color:var(--navy); margin-bottom:4px;
+    }
+    .qr-label-org { font-size:9px; color:var(--text-muted); margin-bottom:16px; }
+    .qr-label img { width:180px; height:180px; display:block; margin:0 auto 10px; }
+    .qr-label-cp  { font-size:15px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+    .qr-label-site { font-size:11px; color:var(--text-muted); margin-bottom:6px; }
+    .qr-label-tag { font-family:monospace; font-size:11px; color:var(--text-faint); letter-spacing:2px; }
+    .qr-label-note {
+      font-size:9px; color:var(--text-faint); margin-top:12px; border-top:1px solid var(--border);
+      padding-top:8px; line-height:1.5;
+    }
+    .qr-modal-actions { padding:0 24px 20px; display:flex; gap:10px; }
+    .qr-modal-actions .btn { flex:1; text-align:center; }
+
+    @media print {
+      body > *:not(.qr-modal-overlay) { display:none !important; }
+      .qr-modal-overlay { position:static; background:none; display:block !important; }
+      .qr-modal { box-shadow:none; max-width:100%; }
+      .qr-modal-close, .qr-modal-actions { display:none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
+    </div>
+    <div class="admin-sidebar-profile">
+      <div class="admin-sidebar-name" id="sidebarName">—</div>
+      <span class="admin-sidebar-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav" aria-label="Admin portal">
+      <div class="nav-group-label">Operations</div>
+      <a href="admin-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="admin-employees.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Employees
+      </a>
+      <a href="admin-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </a>
+      <a href="admin-patrol.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <div class="nav-group-label">Clients</div>
+      <a href="admin-clients.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Clients &amp; Sites
+      </a>
+      <a href="admin-complaints.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Complaints
+      </a>
+      <div class="nav-group-label">Finance &amp; Reports</div>
+      <a href="admin-payroll.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Payroll
+      </a>
+      <a href="admin-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Admin Portal</div>
+      <h1>Beat Patrol</h1>
+      <p>View patrol logs and manage checkpoint stickers.</p>
+    </div>
+
+    <div class="page-content">
+
+      <!-- ── Patrol log viewer ── -->
+      <div class="section-gap">
+        <div class="section-title">Patrol Logs</div>
+
+        <div class="filter-bar">
+          <div>
+            <label>Date</label>
+            <input type="date" id="filterDate"/>
+          </div>
+          <div>
+            <label>Guard name (optional)</label>
+            <input type="text" id="filterGuard" placeholder="e.g. Rajan Kumar" style="min-width:180px;"/>
+          </div>
+          <button id="loadLogsBtn" class="btn btn-amber" style="font-size:12px; padding:9px 18px; align-self:flex-end;">Load Logs</button>
+        </div>
+
+        <div id="patrolError"   class="portal-error"       style="display:none; max-width:700px; margin-bottom:12px;" role="alert"></div>
+        <div id="patrolLogWrap">
+          <div style="font-size:13px; color:var(--text-muted);">Select a date and press Load Logs.</div>
+        </div>
+      </div>
+
+      <!-- ── Checkpoint management ── -->
+      <div class="section-gap">
+        <div class="section-title">Checkpoint Stickers</div>
+
+        <div class="cp-add-form">
+          <h3>Add New Checkpoint</h3>
+          <div id="cpError"   class="portal-error"       style="display:none; margin-bottom:12px;" role="alert"></div>
+          <div id="cpSuccess" class="portal-success-msg" style="display:none; margin-bottom:12px;" role="status"></div>
+          <div class="cp-form-grid">
+            <div class="form-group">
+              <label for="cpLabel">Checkpoint name <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="cpLabel" placeholder="e.g. Main Gate, Stairwell B" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label for="cpTagId">NFC/QR Tag ID <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="cpTagId" placeholder="e.g. CP-GATE-01" autocomplete="off"
+                style="font-family:monospace;"/>
+            </div>
+            <div class="form-group">
+              <label for="cpSiteName">Site name</label>
+              <input type="text" id="cpSiteName" placeholder="e.g. HatsOff HQ" autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label for="cpSiteId">Site ID (optional)</label>
+              <input type="text" id="cpSiteId" placeholder="Firestore site doc ID" autocomplete="off"/>
+            </div>
+          </div>
+          <p style="font-size:11px; color:var(--text-faint); margin-bottom:14px;">
+            The Tag ID is the unique identifier written on each NFC sticker (printed on packaging), or a short code you define for QR-only sites. Once created, print the QR label and stick it at the checkpoint.
+          </p>
+          <button class="btn btn-navy" id="addCpBtn">Add &amp; Generate QR</button>
+        </div>
+
+        <div id="cpTableWrap">
+          <div style="font-size:13px; color:var(--text-muted);">Loading checkpoints…</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- QR Label Print Modal -->
+<div class="qr-modal-overlay" id="qrOverlay">
+  <div class="qr-modal">
+    <button class="qr-modal-close" id="qrClose">&times;</button>
+
+    <div class="qr-label" id="qrLabelPrint">
+      <div class="qr-label-header">VAGT Security Services</div>
+      <div class="qr-label-org">Beat Patrol — Checkpoint</div>
+      <img id="qrLabelImg" src="" alt="Checkpoint QR code"/>
+      <div class="qr-label-cp"   id="qrLabelCp">—</div>
+      <div class="qr-label-site" id="qrLabelSite"></div>
+      <div class="qr-label-tag"  id="qrLabelTag">—</div>
+      <div class="qr-label-note">
+        Scan this QR code or tap NFC tag at this checkpoint.<br/>
+        Do not remove or deface this label.
+      </div>
+    </div>
+
+    <div class="qr-modal-actions">
+      <button class="btn btn-navy" onclick="window.print()">Print Label</button>
+      <button class="btn btn-ghost" id="qrCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+
+  const API = '/api/admin';
+  let idToken = null;
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+  function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
+  function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+  function showErr(id, m)  { const el = document.getElementById(id); el.textContent = m; el.style.display = ''; }
+  function showSucc(id, m) { const el = document.getElementById(id); el.textContent = m; el.style.display = ''; setTimeout(() => el.style.display='none', 4000); }
+
+  async function apiFetch(path, opts) {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { 'Authorization': 'Bearer ' + idToken, 'Content-Type': 'application/json', ...(opts && opts.headers) },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  }
+
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  // ── Patrol logs ────────────────────────────────────────────────────────────
+  document.getElementById('loadLogsBtn').addEventListener('click', loadLogs);
+
+  async function loadLogs() {
+    hide('patrolError');
+    const date  = document.getElementById('filterDate').value;
+    const guard = document.getElementById('filterGuard').value.trim();
+
+    if (!date) { showErr('patrolError', 'Please select a date.'); return; }
+
+    setHTML('patrolLogWrap', '<div style="font-size:13px; color:var(--text-muted);">Loading…</div>');
+
+    try {
+      let path = '/patrol/logs?date=' + encodeURIComponent(date);
+      // Guard filter is by name (client-side filter after fetch)
+      const items = await apiFetch(path);
+
+      const filtered = guard
+        ? items.filter(i => (i.guard_name || '').toLowerCase().includes(guard.toLowerCase()))
+        : items;
+
+      if (!filtered.length) {
+        setHTML('patrolLogWrap', '<div style="font-size:13px; color:var(--text-muted);">No patrol logs found for this date.</div>');
+        return;
+      }
+
+      const ICONS = { nfc: '📶', qr: '📷', manual: '👆' };
+
+      const rows = filtered.map(function (log) {
+        const method = log.scan_method || 'nfc';
+        return `<tr>
+          <td>${fmtDateTime(log.scanned_at)}</td>
+          <td style="font-weight:600; color:var(--navy);">${log.checkpoint_label || '—'}</td>
+          <td>${log.guard_name || '—'}</td>
+          <td>${log.site_name || '—'}</td>
+          <td><span class="method-tag ${method}">${ICONS[method] || ''} ${method}</span></td>
+        </tr>`;
+      }).join('');
+
+      setHTML('patrolLogWrap', `
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">${filtered.length} scan${filtered.length !== 1 ? 's' : ''} on ${date}</p>
+        <table class="log-table">
+          <thead><tr>
+            <th>Time</th><th>Checkpoint</th><th>Guard</th><th>Site</th><th>Method</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`);
+    } catch (err) {
+      showErr('patrolError', err.message || 'Failed to load patrol logs.');
+      setHTML('patrolLogWrap', '');
+    }
+  }
+
+  // ── Add checkpoint ─────────────────────────────────────────────────────────
+  document.getElementById('addCpBtn').addEventListener('click', async function () {
+    hide('cpError'); hide('cpSuccess');
+    const label    = document.getElementById('cpLabel').value.trim();
+    const tagId    = document.getElementById('cpTagId').value.trim();
+    const siteName = document.getElementById('cpSiteName').value.trim();
+    const siteId   = document.getElementById('cpSiteId').value.trim();
+
+    if (!label || !tagId) { showErr('cpError', 'Checkpoint name and Tag ID are required.'); return; }
+
+    const btn = this;
+    btn.textContent = 'Adding…'; btn.disabled = true;
+
+    try {
+      const data = await apiFetch('/patrol/checkpoints', {
+        method: 'POST',
+        body: JSON.stringify({ label, nfc_tag_id: tagId, site_name: siteName || null, site_id: siteId || null }),
+      });
+      showSucc('cpSuccess', 'Checkpoint added. QR label ready to print.');
+      document.getElementById('cpLabel').value  = '';
+      document.getElementById('cpTagId').value  = '';
+      document.getElementById('cpSiteName').value = '';
+      document.getElementById('cpSiteId').value = '';
+      loadCheckpoints();
+      // Open the QR modal after a short delay (checkpoint list will reload with QR)
+    } catch (err) {
+      showErr('cpError', err.message || 'Failed to add checkpoint.');
+    }
+    btn.textContent = 'Add & Generate QR'; btn.disabled = false;
+  });
+
+  // ── Load checkpoints ───────────────────────────────────────────────────────
+  async function loadCheckpoints() {
+    try {
+      const items = await apiFetch('/patrol/checkpoints');
+
+      if (!items.length) {
+        setHTML('cpTableWrap', '<div style="font-size:13px; color:var(--text-muted);">No checkpoints yet. Add your first one above.</div>');
+        return;
+      }
+
+      // Store for QR modal access
+      window._cpData = {};
+      items.forEach(function (cp) { window._cpData[cp.id] = cp; });
+
+      const rows = items.map(function (cp) {
+        const statusCls = cp.active ? 'cp-status-active' : 'cp-status-inactive';
+        const statusTxt = cp.active ? 'Active' : 'Inactive';
+        return `<tr>
+          <td style="font-weight:600; color:var(--navy);">${cp.label}</td>
+          <td class="cp-tag-id">${cp.nfc_tag_id}</td>
+          <td>${cp.site_name || '—'}</td>
+          <td><span class="${statusCls}">${statusTxt}</span></td>
+          <td style="white-space:nowrap;">
+            <button class="action-btn primary" data-cp-id="${cp.id}" data-action="qr" style="margin-right:6px;">Print QR</button>
+            ${cp.active
+              ? `<button class="action-btn danger" data-cp-id="${cp.id}" data-action="deactivate">Deactivate</button>`
+              : '<span style="font-size:11px; color:var(--text-faint);">Deactivated</span>'}
+          </td>
+        </tr>`;
+      }).join('');
+
+      setHTML('cpTableWrap', `
+        <table class="cp-table">
+          <thead><tr>
+            <th>Checkpoint</th><th>Tag ID</th><th>Site</th><th>Status</th><th>Actions</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`);
+    } catch (e) {
+      setHTML('cpTableWrap', '<div style="font-size:13px; color:var(--text-muted);">Could not load checkpoints.</div>');
+    }
+  }
+
+  // ── Checkpoint table button handler ───────────────────────────────────────
+  document.getElementById('cpTableWrap').addEventListener('click', async function (e) {
+    const btn    = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const cpId   = btn.dataset.cpId;
+    const cp     = window._cpData && window._cpData[cpId];
+
+    if (action === 'qr') {
+      if (!cp) return;
+      openQR(cp);
+    }
+
+    if (action === 'deactivate') {
+      if (!cp || !confirm('Deactivate "' + (cp ? cp.label : cpId) + '"? Guards will no longer be able to scan it.')) return;
+      btn.disabled = true; btn.textContent = '…';
+      try {
+        await apiFetch('/patrol/checkpoints/' + encodeURIComponent(cpId), { method: 'DELETE' });
+        loadCheckpoints();
+      } catch (err) {
+        alert('Failed: ' + err.message);
+        btn.disabled = false; btn.textContent = 'Deactivate';
+      }
+    }
+  });
+
+  // ── QR Modal ──────────────────────────────────────────────────────────────
+  function openQR(cp) {
+    setText('qrLabelCp',   cp.label);
+    setText('qrLabelSite', cp.site_name || '');
+    setText('qrLabelTag',  cp.nfc_tag_id);
+    const img = document.getElementById('qrLabelImg');
+    img.src = cp.qr_data_url || '';
+    img.alt = 'QR for ' + cp.label;
+    document.getElementById('qrOverlay').classList.add('open');
+  }
+
+  function closeQR() { document.getElementById('qrOverlay').classList.remove('open'); }
+  document.getElementById('qrClose').addEventListener('click', closeQR);
+  document.getElementById('qrCloseBtn').addEventListener('click', closeQR);
+  document.getElementById('qrOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeQR();
+  });
+
+  // ── Nav & auth ─────────────────────────────────────────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+
+    const tokenResult = await user.getIdTokenResult();
+    if (!tokenResult.claims.role || tokenResult.claims.role !== 'admin') {
+      window.location.href = 'portal.html'; return;
+    }
+
+    idToken = await user.getIdToken();
+
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    if (window.innerWidth < 900) document.getElementById('navToggle').style.display = '';
+
+    // Set today as default date
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-'
+      + String(today.getMonth() + 1).padStart(2, '0') + '-'
+      + String(today.getDate()).padStart(2, '0');
+    document.getElementById('filterDate').value = todayStr;
+
+    try {
+      const db = firebase.firestore ? firebase.firestore() : null;
+      if (db) {
+        const snap = await db.collection('admins').doc(user.uid).get();
+        if (snap.exists) setText('sidebarName', snap.data().name || 'Admin');
+      }
+    } catch (e) { /* non-critical */ }
+
+    loadCheckpoints();
+    loadLogs(); // load today's logs immediately
+  });
+
+})();
+</script>
+</body>
+</html>

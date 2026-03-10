@@ -181,5 +181,43 @@ service cloud.firestore {
       allow write: if false; // Server-side only
     }
 
+    // ─── password_reset_tokens/{tokenId} ─────────────────────────────────────
+    // Created and consumed server-side only (admin SDK bypasses rules).
+    match /password_reset_tokens/{tokenId} {
+      allow read, write: if false; // Server-side only
+    }
+
+    // ─── guest_logs/{logId} ──────────────────────────────────────────────────
+    // Guards create entries for their own site; guards can read their own.
+    // Admin can read/write all.
+    match /guest_logs/{logId} {
+      allow create: if isAnyEmployee()
+        && request.resource.data.guard_uid == request.auth.uid;
+      allow read: if isAnyEmployee()
+        && resource.data.guard_uid == request.auth.uid;
+      allow update: if isAnyEmployee()
+        && resource.data.guard_uid == request.auth.uid;
+      allow read, write: if isAdmin();
+    }
+
+    // ─── patrol_checkpoints/{cpId} ───────────────────────────────────────────
+    // Guards can read active checkpoints for their site (filtered server-side).
+    // Only admins can create/update/delete.
+    match /patrol_checkpoints/{cpId} {
+      allow read: if isAnyEmployee() || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ─── patrol_logs/{logId} ─────────────────────────────────────────────────
+    // Guards can create and read their own scan logs.
+    // Admin can read/write all.
+    match /patrol_logs/{logId} {
+      allow create: if isAnyEmployee()
+        && request.resource.data.guard_uid == request.auth.uid;
+      allow read: if isAnyEmployee()
+        && resource.data.guard_uid == request.auth.uid;
+      allow read, write: if isAdmin();
+    }
+
   }
 }
