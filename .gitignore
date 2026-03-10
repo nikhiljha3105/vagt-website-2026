@@ -1,9 +1,11 @@
 # ── Credentials & Secrets ────────────────────────────────────────────────────
+# NOTE: firebase-config.js is intentionally NOT ignored.
+# Firebase client-side config (apiKey, authDomain, etc.) is safe to commit —
+# it is not a secret. Security is enforced by Firestore Rules + Firebase Auth.
+# The thing that must NEVER be committed is service account JSON (server-side).
 .env
 .env.*
 *.env
-firebase-config.js
-firebase-config.*.js
 service-account*.json
 *-service-account.json
 google-credentials*.json
