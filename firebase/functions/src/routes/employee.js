@@ -63,7 +63,7 @@
 const express = require('express');
 const PDFDocument = require('pdfkit');
 
-module.exports = function ({ db, requireAuth, requireEmployee }) {
+module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) {
   const router = express.Router();
 
   // Shorthand: every route needs both auth + employee-role check
@@ -108,7 +108,7 @@ module.exports = function ({ db, requireAuth, requireEmployee }) {
   // Fails with 409 Conflict if the guard already checked in today — this
   // prevents accidental duplicate check-ins if the button is tapped twice.
   // Site name is pulled automatically from the employee's profile.
-  router.post('/attendance/checkin', ...guard, async (req, res) => {
+  router.post('/attendance/checkin', ...guard, actionLimiter, async (req, res) => {
     const uid = req.user.uid;
     const today = todayStr();
     try {
@@ -150,7 +150,7 @@ module.exports = function ({ db, requireAuth, requireEmployee }) {
   // Updates today's attendance log with the check-out time.
   // Fails with 400 if there's no check-in for today (guard never checked in).
   // Fails with 409 if already checked out (prevents double checkout).
-  router.post('/attendance/checkout', ...guard, async (req, res) => {
+  router.post('/attendance/checkout', ...guard, actionLimiter, async (req, res) => {
     const uid = req.user.uid;
     const today = todayStr();
     try {

@@ -93,7 +93,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   router.get('/overview', ...guard, async (req, res) => {
     try {
       const [empSnap, pendingRegSnap, openTicketsSnap, pendingLeavesSnap, attendanceSnap] = await Promise.all([
-        db.collection('employees').get(),
+        db.collection('employees').limit(500).get(),
         db.collection('pending_registrations').where('verified', '==', true).get(),
         db.collection('complaints').where('status', 'in', ['open', 'in_progress']).get(),
         db.collection('leave_requests').where('status', '==', 'pending').get(),
@@ -213,7 +213,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       });
 
       await regRef.update({ approved: true, approved_at: new Date() });
-      await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin');
+      await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin', req.user.uid);
 
       // ── TODO: Send password reset link via SMS ─────────────────────────
       // Uncomment this once SMS (MSG91) is integrated:
@@ -252,7 +252,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       }
 
       await regRef.update({ rejected: true, reject_reason: reason || null, rejected_at: new Date() });
-      await logActivity(db, 'registration', `Registration for ${reg.phone} rejected`, 'admin');
+      await logActivity(db, 'registration', `Registration for ${reg.phone} rejected`, 'admin', req.user.uid);
 
       return res.json({ success: true });
     } catch (err) {
@@ -376,10 +376,10 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   // Deactivating an employee also disables their Firebase Auth account so they
   // can't log in. Reactivating re-enables both Firestore status and Auth account.
   router.post('/employees/:id/deactivate', ...guard, async (req, res) => {
-    await setEmployeeStatus(db, auth, req.params.id, 'inactive', res);
+    await setEmployeeStatus(db, auth, req.params.id, 'inactive', res, req.user.uid);
   });
   router.post('/employees/:id/reactivate', ...guard, async (req, res) => {
-    await setEmployeeStatus(db, auth, req.params.id, 'active', res);
+    await setEmployeeStatus(db, auth, req.params.id, 'active', res, req.user.uid);
   });
 
   // ── GET /schedule  &  POST /schedule  &  DELETE /schedule/:id ────────────
@@ -723,7 +723,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         await batch.commit();
       }
 
-      await logActivity(db, 'other', `Payroll run for ${month}: ${empSnap.size} slips generated`, 'admin');
+      await logActivity(db, 'other', `Payroll run for ${month}: ${empSnap.size} slips generated`, 'admin', req.user.uid);
       return res.json({ success: true, generated: empSnap.size });
     } catch (err) {
       console.error('payroll/run error:', err);
@@ -837,7 +837,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       await ref.update({ status, admin_note: note || null, updated_at: new Date() });
 
       // TODO: Notify client via SMS/email when their ticket status changes
-      await logActivity(db, 'complaint', `Complaint ${snap.data().ticket_id} status → ${status}`, 'admin');
+      await logActivity(db, 'complaint', `Complaint ${snap.data().ticket_id} status → ${status}`, 'admin', req.user.uid);
 
       return res.json({ success: true });
     } catch (err) {
@@ -1007,7 +1007,7 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       await batch.commit();
       await logActivity(db, 'keycode_generated',
         `Keycode generated for ${emp.name || uid} (${emp.employee_id || uid})`,
-        req.user.uid);
+        'admin', req.user.uid);
 
       // Return the keycode — admin prints/shares it with the guard
       return res.json({ keycode, employee_id: emp.employee_id, name: emp.name });
@@ -1133,11 +1133,11 @@ async function setLeaveStatus(db, id, status, res) {
  * Disabling in Firestore AND in Firebase Auth keeps both systems in sync.
  * If you only disable in one place, the employee could still access the other.
  */
-async function setEmployeeStatus(db, auth, id, status, res) {
+async function setEmployeeStatus(db, auth, id, status, res, adminUid = null) {
   try {
     await db.collection('employees').doc(id).update({ status, updated_at: new Date() });
     await auth.updateUser(id, { disabled: status === 'inactive' }); // mirrors Firestore status
-    await logActivity(db, 'other', `Employee ${id} ${status === 'inactive' ? 'deactivated' : 'reactivated'}`, 'admin');
+    await logActivity(db, 'other', `Employee ${id} ${status === 'inactive' ? 'deactivated' : 'reactivated'}`, 'admin', adminUid);
     return res.json({ success: true });
   } catch (err) {
     console.error(`employee ${status} error:`, err);
@@ -1146,29 +1146,51 @@ async function setEmployeeStatus(db, auth, id, status, res) {
 }
 
 /**
- * Auto-increments employee IDs: VAGT-0001, VAGT-0002, ...
- * Reads the highest existing ID and adds 1.
- * NOTE: This has a race condition if two employees are approved at exactly the same time.
- * At small scale this is fine. At large scale, use a Firestore counter or UUID instead.
+ * Returns the next employee ID (e.g. VAGT-0042) using an atomic Firestore transaction.
+ *
+ * Stores the counter in _meta/employee_counter.value so two simultaneous approvals
+ * never produce the same ID. On first ever call, seeds from the highest existing
+ * employee_id so existing records are never disturbed.
  */
 async function nextEmployeeId(db) {
-  const snap = await db.collection('employees').orderBy('employee_id', 'desc').limit(1).get();
-  if (snap.empty) return 'VAGT-0001';
-  const last = snap.docs[0].data().employee_id || 'VAGT-0000';
-  const num  = parseInt(last.replace('VAGT-', ''), 10) + 1;
-  return `VAGT-${String(num).padStart(4, '0')}`;
+  const counterRef = db.collection('_meta').doc('employee_counter');
+
+  // Seed the counter on first use (runs once in the lifetime of the project).
+  const counterSnap = await counterRef.get();
+  if (!counterSnap.exists) {
+    const empSnap = await db.collection('employees')
+      .orderBy('employee_id', 'desc').limit(1).get();
+    const lastNum = empSnap.empty
+      ? 0
+      : parseInt((empSnap.docs[0].data().employee_id || 'VAGT-0000').replace('VAGT-', ''), 10);
+    // merge: true so a simultaneous first call doesn't overwrite a concurrent write
+    await counterRef.set({ value: lastNum }, { merge: true });
+  }
+
+  // Atomically increment — safe under concurrent approvals
+  return db.runTransaction(async (txn) => {
+    const snap = await txn.get(counterRef);
+    const next = (snap.data().value || 0) + 1;
+    txn.set(counterRef, { value: next });
+    return `VAGT-${String(next).padStart(4, '0')}`;
+  });
 }
 
 /**
  * Write a line to the activity_log collection.
- * type: 'registration' | 'check_in' | 'check_out' | 'leave_request' | 'complaint' |
- *       'keycode_generated' | 'other'
+ * type:     'registration' | 'check_in' | 'check_out' | 'leave_request' | 'complaint' |
+ *           'keycode_generated' | 'other'
+ * actor:    human-readable label ('admin', a phone number, etc.)
+ * actor_uid: Firebase UID of the user performing the action — required for audit.
+ *            Pass req.user.uid when available. Defaults to null.
  * Errors are caught and logged but don't fail the parent request —
  * activity logging is best-effort.
  */
-async function logActivity(db, type, description, actor) {
+async function logActivity(db, type, description, actor, actor_uid = null) {
   try {
-    await db.collection('activity_log').add({ type, description, actor, time: new Date() });
+    await db.collection('activity_log').add({
+      type, description, actor, actor_uid, time: new Date(),
+    });
   } catch (e) {
     console.warn('logActivity failed:', e.message);
   }

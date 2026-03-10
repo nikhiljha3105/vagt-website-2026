@@ -75,23 +75,32 @@ if (process.env.NODE_ENV !== 'production') {
   allowedOrigins.push('http://localhost:5000', 'http://127.0.0.1:5000');
 }
 app.use(cors({ origin: allowedOrigins, credentials: true }));
-app.use(express.json()); // Parse JSON request bodies
+// Cap request body at 1 MB — prevents memory exhaustion from oversized payloads.
+// No legitimate request in this app sends more than a few KB.
+app.use(express.json({ limit: '1mb' }));
 
 // ── Rate limiters ─────────────────────────────────────────────────────────────
-// These prevent brute-force attacks on login and OTP endpoints.
-// authLimiter: 10 requests per 15 minutes (for OTP / forgot-password)
-// loginLimiter: 5 requests per 15 minutes (for login / keycode)
-// If a legitimate user hits the limit, they'll see a "try again" message.
-// INCREASE these numbers if real guards are getting blocked legitimately.
+// These prevent brute-force and spam attacks.
+// authLimiter:    10 requests per 15 minutes (OTP / forgot-password)
+// loginLimiter:    5 requests per 15 minutes (login / keycode)
+// actionLimiter:  60 requests per minute (check-in, guest entry, patrol scan)
+//   — allows a guard to clock in once, log a few visitors, and scan patrol tags
+//     without hitting the limit under normal use.
+// INCREASE limits if legitimate users are getting blocked.
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,   // 15-minute window
-  max: 10,                      // max 10 requests in window
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: { message: 'Too many requests. Please wait before trying again.', retry_after_seconds: 60 },
 });
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,   // 15-minute window
-  max: 5,                       // max 5 login attempts in window
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: { message: 'Too many login attempts. Please wait before trying again.', retry_after_seconds: 60 },
+});
+const actionLimiter = rateLimit({
+  windowMs: 60 * 1000,         // 1-minute window
+  max: 60,                      // 60 write actions per minute per IP
+  message: { message: 'Too many requests. Please slow down.', retry_after_seconds: 30 },
 });
 
 // ── Auth middleware ────────────────────────────────────────────────────────────
@@ -148,11 +157,11 @@ function requireAdmin(req, res, next) {
 // (db, auth, middleware) and returns an Express router.
 // This pattern makes each file independently testable.
 const { router: authRouter }     = require('./routes/auth')({ db, auth, authLimiter, loginLimiter });
-const { router: employeeRouter } = require('./routes/employee')({ db, requireAuth, requireEmployee });
-const { router: clientRouter }   = require('./routes/client')({ db, requireAuth, requireClient });
+const { router: employeeRouter } = require('./routes/employee')({ db, requireAuth, requireEmployee, actionLimiter });
+const { router: clientRouter }   = require('./routes/client')({ db, requireAuth, requireClient, actionLimiter });
 const { router: adminRouter }    = require('./routes/admin')({ db, auth, requireAuth, requireAdmin });
-const { router: guestRouter }    = require('./routes/guest')({ db, requireAuth, requireEmployee, requireAdmin });
-const { router: patrolRouter }   = require('./routes/patrol')({ db, requireAuth, requireEmployee, requireAdmin });
+const { router: guestRouter }    = require('./routes/guest')({ db, requireAuth, requireEmployee, requireAdmin, actionLimiter });
+const { router: patrolRouter }   = require('./routes/patrol')({ db, requireAuth, requireEmployee, requireAdmin, actionLimiter });
 
 app.use('/api/auth',     authRouter);     // POST /api/auth/login, /register, /verify-otp, etc.
 app.use('/api',          employeeRouter); // GET/POST /api/attendance, /leave, /payslips, etc.

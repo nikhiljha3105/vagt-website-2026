@@ -25,7 +25,7 @@
 const express = require('express');
 const QRCode  = require('qrcode');
 
-module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
+module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin, actionLimiter }) {
   const router      = express.Router();
   const empGuard    = [requireAuth, requireEmployee];
   const adminGuard  = [requireAuth, requireAdmin];
@@ -33,7 +33,7 @@ module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
   // ── POST /api/patrol/checkpoint ──────────────────────────────────────────
   // Called when a guard taps an NFC tag. The NFC tag ID is read by the phone
   // via the Web NFC API (navigator.nfc / NDEFReader) and sent here.
-  router.post('/checkpoint', ...empGuard, async (req, res) => {
+  router.post('/checkpoint', ...empGuard, actionLimiter, async (req, res) => {
     const uid = req.user.uid;
     const { nfc_tag_id } = req.body;
 

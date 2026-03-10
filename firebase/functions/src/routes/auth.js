@@ -88,6 +88,20 @@
 'use strict';
 
 const express = require('express');
+const crypto  = require('crypto');
+
+// Generates a cryptographically secure 6-digit OTP (000000–999999).
+// Uses crypto.randomBytes instead of Math.random — Math.random is not
+// suitable for security-sensitive values because it is predictable.
+function secureOtp() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+// Generates a secure random token string (e.g. for reset_token, reg_token).
+// 24 hex chars = 96 bits of entropy — effectively unguessable.
+function secureToken(prefix) {
+  return `${prefix}_${crypto.randomBytes(12).toString('hex')}`;
+}
 
 module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
   const router = express.Router();
@@ -124,8 +138,8 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
 
       // Generate a 6-digit OTP and a unique token to tie the OTP to this reset attempt.
       // The token (not the OTP) is what gets passed between steps — the OTP is the secret.
-      const otp        = Math.floor(100000 + Math.random() * 900000).toString();
-      const resetToken = `rst_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const otp        = secureOtp();
+      const resetToken = secureToken('rst');
       const expiresAt  = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
 
       await db.collection('password_reset_tokens').doc(resetToken).set({
@@ -201,7 +215,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       if (!snap.exists)      return res.status(400).json({ message: 'Invalid reset token.' });
       if (snap.data().used)  return res.status(400).json({ message: 'Token already used.' });
 
-      const newOtp    = Math.floor(100000 + Math.random() * 900000).toString();
+      const newOtp    = secureOtp();
       const newExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
@@ -240,8 +254,8 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         // Expected: email not found → proceed
       }
 
-      const otp      = Math.floor(100000 + Math.random() * 900000).toString();
-      const regToken = `reg_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const otp      = secureOtp();
+      const regToken = secureToken('reg');
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
       // Store registration intent — NOT the password
@@ -293,7 +307,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       // Create the Firebase Auth account in a DISABLED state.
       // We use a random temp password — the real password is set later via reset link.
       // IMPORTANT: do not log or store this tempPassword anywhere.
-      const tempPassword = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const tempPassword = crypto.randomBytes(24).toString('base64url');
       const userRecord   = await auth.createUser({
         email:       data.email,
         password:    tempPassword,
@@ -334,7 +348,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       if (!snap.exists)          return res.status(400).json({ message: 'Invalid registration token.' });
       if (snap.data().verified)  return res.status(400).json({ message: 'Already verified.' });
 
-      const newOtp    = Math.floor(100000 + Math.random() * 900000).toString();
+      const newOtp    = secureOtp();
       const newExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });

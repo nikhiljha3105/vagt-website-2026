@@ -26,13 +26,13 @@ const express = require('express');
 const crypto  = require('crypto');
 const QRCode  = require('qrcode');
 
-module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
+module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin, actionLimiter }) {
   const router     = express.Router();
   const guard      = [requireAuth, requireEmployee];
   const adminGuard = [requireAuth, requireAdmin];
 
   // ── POST /api/guest/entry ────────────────────────────────────────────────
-  router.post('/entry', ...guard, async (req, res) => {
+  router.post('/entry', ...guard, actionLimiter, async (req, res) => {
     const uid = req.user.uid;
     const { visitor_name, visitor_type, purpose, visiting, site_id } = req.body;
 

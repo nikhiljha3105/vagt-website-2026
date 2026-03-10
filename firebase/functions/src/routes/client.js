@@ -56,6 +56,7 @@
 'use strict';
 
 const express = require('express');
+const crypto  = require('crypto');
 
 module.exports = function ({ db, requireAuth, requireClient }) {
   const router = express.Router();
@@ -102,7 +103,7 @@ module.exports = function ({ db, requireAuth, requireClient }) {
 
       // Human-readable ticket number for reference in calls/emails
       const year = new Date().getFullYear();
-      const ticketId = `TKT-${year}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const ticketId = `TKT-${year}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
       const now = new Date();
 
       const ref = await db.collection('complaints').add({
