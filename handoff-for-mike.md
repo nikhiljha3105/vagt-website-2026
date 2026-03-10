@@ -1,5 +1,5 @@
 # VAGT Website — Handoff for Mike
-**Last updated:** 2026-03-10 (end of day)
+**Last updated:** 2026-03-10 (end of day — security hardening session)
 
 ---
 
@@ -8,6 +8,22 @@
 You are Mike (or Mike 2, Mike 3, etc.). This file is your briefing. Read it fully before touching any code.
 
 Active branch: `claude/review-website-git-dPWyR`
+
+---
+
+## 🛑 NIKHIL'S STANDING INSTRUCTION — NO NEW BUILDING
+
+**Do not build new features or write new code until Nikhil says otherwise.**
+
+Nikhil wants to walk through the full current experience first before deciding what to build next. Your job right now is **manual tasks only** — things like:
+
+- Answering questions about what's already built
+- Cleaning up sensitive files / scripts (see Pending section)
+- Revoking service account keys
+- Configuring external services (MSG91, NFC tags) when Nikhil is ready
+- Running existing scripts if they haven't been run yet
+
+If you find yourself about to write a new route, a new HTML page, or a new feature — **stop and ask Nikhil first**.
 
 ---
 
@@ -26,7 +42,7 @@ Full-stack security services platform for **VAGT Security Services (Bengaluru)**
 
 ---
 
-## What Was Done Today (2026-03-10) — UPDATED end-of-session
+## What Was Done Today (2026-03-10) — UPDATED end-of-security-session
 
 ### Lens gap closed — all three portals now consistent
 
@@ -49,6 +65,14 @@ All features that guards can log are now visible to admins (across all sites) an
 - Beat Patrol + Visitor Log links added to all 5 client sidebar pages (client-portal, client-reports, client-invoices, client-patrol, client-guests)
 
 **All committed and pushed to `claude/review-website-git-dPWyR` (commit `3c627f6`).**
+
+### Security hardening — 5 critical fixes (latest session, commit `4d39dae`)
+
+1. **Insecure OTPs** — All `Math.random()` replaced with `crypto.randomInt()`/`crypto.randomBytes()` for OTPs, reset tokens, registration tokens, temp passwords (auth.js), and ticket IDs (client.js).
+2. **Employee ID race condition** — `nextEmployeeId()` now uses a Firestore transaction on `_meta/employee_counter`. Concurrent admin approvals can no longer produce duplicate VAGT-XXXX IDs.
+3. **Unbounded dashboard query** — Admin overview was reading ALL employees with no limit. Added `.limit(500)`.
+4. **Request size + spam protection** — `express.json({ limit: '1mb' })` added. `actionLimiter` (60 req/min) applied to check-in, checkout, guest entry, and NFC patrol endpoints.
+5. **Audit trail** — `logActivity()` now stores `actor_uid` (the admin's Firebase UID) on every admin action: approve, reject, payroll, complaint update, deactivate, keycode generation.
 
 ---
 
