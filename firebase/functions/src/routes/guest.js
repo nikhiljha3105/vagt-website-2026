@@ -1,12 +1,15 @@
 /**
  * Guest entry / visitor management routes
  *
- * All routes require a valid Firebase ID token with role === 'employee'.
- *
+ * Employee routes (role === 'employee'):
  * POST /api/guest/entry           — log a new visitor, returns QR data URL
  * POST /api/guest/exit/:token     — mark a visitor as exited
  * GET  /api/guest/active          — list active visitors logged by this guard
  * GET  /api/guest/history         — visitor log for today (or ?date=YYYY-MM-DD)
+ *
+ * Admin routes (role === 'admin'):
+ * GET  /api/guest/admin/logs      — all guest logs for a date (?date=YYYY-MM-DD) + optional ?site_id=
+ * GET  /api/guest/admin/active    — all currently active visitors across all sites
  *
  * Scheduled function (exported from index.js):
  *   expireGuestLogs — runs every 60 min, marks expired active entries
@@ -23,9 +26,10 @@ const express = require('express');
 const crypto  = require('crypto');
 const QRCode  = require('qrcode');
 
-module.exports = function ({ db, requireAuth, requireEmployee }) {
-  const router = express.Router();
-  const guard  = [requireAuth, requireEmployee];
+module.exports = function ({ db, requireAuth, requireEmployee, requireAdmin }) {
+  const router     = express.Router();
+  const guard      = [requireAuth, requireEmployee];
+  const adminGuard = [requireAuth, requireAdmin];
 
   // ── POST /api/guest/entry ────────────────────────────────────────────────
   router.post('/entry', ...guard, async (req, res) => {
@@ -171,6 +175,57 @@ module.exports = function ({ db, requireAuth, requireEmployee }) {
     } catch (err) {
       console.error('guest/history error:', err);
       return res.status(500).json({ message: 'Failed to fetch guest history.' });
+    }
+  });
+
+  // ── Admin: GET /api/guest/admin/logs ────────────────────────────────────
+  // All guest log entries for a given date across all sites.
+  // Optional ?site_id= to narrow to one site.
+  router.get('/admin/logs', ...adminGuard, async (req, res) => {
+    const date    = req.query.date || todayStr();
+    const site_id = req.query.site_id || null;
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ message: 'date must be YYYY-MM-DD.' });
+    }
+
+    const dayStart = new Date(date + 'T00:00:00+05:30');
+    const dayEnd   = new Date(date + 'T23:59:59+05:30');
+
+    try {
+      let query = db.collection('guest_logs')
+        .where('entry_time', '>=', dayStart)
+        .where('entry_time', '<=', dayEnd)
+        .orderBy('entry_time', 'desc')
+        .limit(500);
+
+      const snap  = await query.get();
+      let items   = snap.docs.map(doc => formatGuestLog(doc));
+
+      if (site_id) items = items.filter(i => i.site_id === site_id);
+
+      return res.json(items);
+    } catch (err) {
+      console.error('guest/admin/logs error:', err);
+      return res.status(500).json({ message: 'Failed to fetch guest logs.' });
+    }
+  });
+
+  // ── Admin: GET /api/guest/admin/active ──────────────────────────────────
+  // All visitors currently on-premises across all sites (status === 'active').
+  router.get('/admin/active', ...adminGuard, async (req, res) => {
+    try {
+      const snap  = await db.collection('guest_logs')
+        .where('status', '==', 'active')
+        .orderBy('entry_time', 'desc')
+        .limit(500)
+        .get();
+
+      const items = snap.docs.map(doc => formatGuestLog(doc));
+      return res.json(items);
+    } catch (err) {
+      console.error('guest/admin/active error:', err);
+      return res.status(500).json({ message: 'Failed to fetch active visitors.' });
     }
   });
 

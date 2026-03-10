@@ -151,7 +151,7 @@ const { router: authRouter }     = require('./routes/auth')({ db, auth, authLimi
 const { router: employeeRouter } = require('./routes/employee')({ db, requireAuth, requireEmployee });
 const { router: clientRouter }   = require('./routes/client')({ db, requireAuth, requireClient });
 const { router: adminRouter }    = require('./routes/admin')({ db, auth, requireAuth, requireAdmin });
-const { router: guestRouter }    = require('./routes/guest')({ db, requireAuth, requireEmployee });
+const { router: guestRouter }    = require('./routes/guest')({ db, requireAuth, requireEmployee, requireAdmin });
 const { router: patrolRouter }   = require('./routes/patrol')({ db, requireAuth, requireEmployee, requireAdmin });
 
 app.use('/api/auth',     authRouter);     // POST /api/auth/login, /register, /verify-otp, etc.

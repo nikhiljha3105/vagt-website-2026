@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visitor Log | VAGT Client Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="description" content="VAGT Security Services — secure client portal. Restricted access."/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .client-sidebar-profile { padding:14px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .client-sidebar-name    { font-size:13px; font-weight:700; color:var(--white); line-height:1.3; margin-bottom:2px; }
+    .client-sidebar-company { font-size:11px; color:var(--amber); font-weight:700; letter-spacing:0.5px; margin-bottom:4px; }
+    .client-sidebar-role    { font-size:10.5px; color:rgba(255,255,255,0.38); }
+    #authOverlay { position:fixed; inset:0; background:var(--white); display:flex; align-items:center; justify-content:center; z-index:9999; font-size:13px; color:var(--text-muted); }
+
+    .page-content { padding:40px 56px; }
+    @media (max-width:900px) { .page-content { padding:28px 24px; } }
+    .section-title { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--text-faint); margin-bottom:16px; }
+
+    /* Summary strip */
+    .stat-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:1px solid var(--border); margin-bottom:36px; max-width:600px; }
+    @media (max-width:560px) { .stat-strip { grid-template-columns:1fr 1fr; } }
+    .stat-cell { padding:18px 20px; border-right:1px solid var(--border); }
+    .stat-cell:last-child { border-right:none; }
+    .stat-value { font-size:26px; font-weight:900; color:var(--navy); letter-spacing:-1px; line-height:1; margin-bottom:4px; }
+    .stat-label { font-size:11px; color:var(--text-muted); font-weight:500; }
+
+    /* Filter bar */
+    .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; align-items:flex-end; }
+    .filter-bar label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); display:block; margin-bottom:5px; }
+    .filter-bar input[type="date"] { font-size:12px; padding:8px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); outline:none; }
+
+    /* Guest log table */
+    .guest-table { width:100%; border-collapse:collapse; }
+    .guest-table th { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); text-align:left; padding:0 12px 10px 0; border-bottom:1px solid var(--border); }
+    .guest-table td { padding:11px 12px 11px 0; border-bottom:1px solid var(--border); font-size:12.5px; color:var(--text); vertical-align:middle; }
+    .guest-table tr:last-child td { border-bottom:none; }
+    .visitor-name { font-weight:600; color:var(--navy); }
+
+    .type-tag { font-size:9px; font-weight:700; padding:2px 7px; text-transform:uppercase; letter-spacing:0.8px; }
+    .type-vendor    { background:#fff3e0; color:#b45309; }
+    .type-delivery  { background:#e8f4fd; color:#1565c0; }
+    .type-guest     { background:#f3e8ff; color:#6b21a8; }
+    .type-tradesman { background:#e6f4ea; color:#1a7f3c; }
+
+    .vstatus-active  { font-size:10px; font-weight:700; background:#e6f4ea; color:#1a7f3c; padding:2px 8px; }
+    .vstatus-exited  { font-size:10px; font-weight:700; background:#f0f0f0; color:#555; padding:2px 8px; }
+    .vstatus-expired { font-size:10px; font-weight:700; background:#fff3e0; color:#b45309; padding:2px 8px; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
+    </div>
+    <div class="client-sidebar-profile">
+      <div class="client-sidebar-name"    id="sidebarName">—</div>
+      <div class="client-sidebar-company" id="sidebarCompany">—</div>
+      <div class="client-sidebar-role">Client</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Client portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="client-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="client-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="client-guests.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Visitor Log
+      </a>
+      <a href="client-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Daily Reports
+      </a>
+      <a href="client-invoices.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Invoices
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Client Portal</div>
+      <h1>Visitor Log</h1>
+      <p>All visitors entering your premises — logged by VAGT guards.</p>
+    </div>
+
+    <div class="page-content">
+
+      <!-- Today's summary -->
+      <div class="section-title">Today's Visitor Activity</div>
+      <div class="stat-strip" id="statStrip">
+        <div class="stat-cell"><div class="stat-value" id="statTotal">—</div><div class="stat-label">Entries today</div></div>
+        <div class="stat-cell"><div class="stat-value" id="statOnsite">—</div><div class="stat-label">Currently on-site</div></div>
+        <div class="stat-cell"><div class="stat-value" id="statExited">—</div><div class="stat-label">Exited today</div></div>
+      </div>
+
+      <!-- Filter by date -->
+      <div class="section-title">Visitor Log</div>
+      <div class="filter-bar">
+        <div>
+          <label>Date</label>
+          <input type="date" id="filterDate"/>
+        </div>
+        <button id="loadBtn" class="btn btn-amber" style="font-size:12px; padding:9px 18px; align-self:flex-end;">Load</button>
+      </div>
+
+      <div id="guestError" class="portal-error" style="display:none; max-width:900px; margin-bottom:12px;" role="alert"></div>
+      <div id="guestWrap">
+        <div style="font-size:13px; color:var(--text-muted);">Select a date and press Load.</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const fbDb = firebase.firestore();
+
+  let idToken = null;
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+  function show(id) { const el = document.getElementById(id); if (el) el.style.display = ''; }
+  function hide(id) { const el = document.getElementById(id); if (el) el.style.display = 'none'; }
+  function showErr(id, m) { const el = document.getElementById(id); el.textContent = m; el.style.display = ''; }
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  async function apiFetch(path) {
+    const res = await fetch(path, { headers: { 'Authorization': 'Bearer ' + idToken } });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
+  }
+  function fmtDuration(entryIso, exitIso) {
+    if (!entryIso) return '—';
+    const end  = exitIso ? new Date(exitIso) : new Date();
+    const mins = Math.round((end - new Date(entryIso)) / 60000);
+    if (mins < 60) return mins + ' min';
+    return Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+  }
+
+  function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  // ── Load today stats ────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const logs = await apiFetch('/api/client/guests?date=' + encodeURIComponent(todayStr()));
+      setText('statTotal',  logs.length);
+      setText('statOnsite', logs.filter(function (g) { return g.status === 'active'; }).length);
+      setText('statExited', logs.filter(function (g) { return g.status === 'exited'; }).length);
+    } catch (e) { /* non-critical */ }
+  }
+
+  // ── Load visitor log ────────────────────────────────────────────────────────
+  document.getElementById('loadBtn').addEventListener('click', loadGuests);
+
+  async function loadGuests() {
+    hide('guestError');
+    const date = document.getElementById('filterDate').value;
+    if (!date) { showErr('guestError', 'Please select a date.'); return; }
+    setHTML('guestWrap', '<div style="font-size:13px; color:var(--text-muted);">Loading…</div>');
+
+    try {
+      const logs = await apiFetch('/api/client/guests?date=' + encodeURIComponent(date));
+
+      if (!logs.length) {
+        setHTML('guestWrap', '<div style="font-size:13px; color:var(--text-muted);">No visitor entries recorded for this date.</div>');
+        return;
+      }
+
+      const TYPE_LABELS = { vendor:'Vendor', delivery:'Delivery', guest:'Guest', tradesman:'Tradesman' };
+      const rows = logs.map(function (g) {
+        const typeTag   = `<span class="type-tag type-${escHtml(g.visitor_type)}">${escHtml(TYPE_LABELS[g.visitor_type] || g.visitor_type)}</span>`;
+        const statusTag = `<span class="vstatus-${escHtml(g.status)}">${escHtml(g.status)}</span>`;
+        return `<tr>
+          <td><span class="visitor-name">${escHtml(g.visitor_name)}</span></td>
+          <td>${typeTag}</td>
+          <td style="font-size:12px;">${escHtml(g.visiting)}</td>
+          <td style="font-size:12px; color:var(--text-muted);">${escHtml(g.purpose)}</td>
+          <td>${escHtml(g.site_name || '—')}</td>
+          <td>${escHtml(g.guard_name || '—')}</td>
+          <td>${fmtTime(g.entry_time)}</td>
+          <td>${g.exit_time ? fmtTime(g.exit_time) : '—'}</td>
+          <td>${fmtDuration(g.entry_time, g.exit_time)}</td>
+          <td>${statusTag}</td>
+        </tr>`;
+      }).join('');
+
+      setHTML('guestWrap', `
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">${logs.length} entr${logs.length !== 1 ? 'ies' : 'y'} on ${date}</p>
+        <div style="overflow-x:auto;">
+          <table class="guest-table">
+            <thead><tr>
+              <th>Visitor</th><th>Type</th><th>Going to</th><th>Purpose</th>
+              <th>Site</th><th>Guard</th><th>Entry</th><th>Exit</th><th>Duration</th><th>Status</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`);
+    } catch (err) {
+      showErr('guestError', err.message || 'Failed to load visitor log.');
+      setHTML('guestWrap', '');
+    }
+  }
+
+  // ── Nav & auth ──────────────────────────────────────────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+
+    const tokenResult = await user.getIdTokenResult();
+    if (tokenResult.claims.role !== 'client') { window.location.href = 'portal.html'; return; }
+
+    idToken = await user.getIdToken();
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    if (window.innerWidth < 900) document.getElementById('navToggle').style.display = '';
+
+    try {
+      const snap = await fbDb.collection('clients').doc(user.uid).get();
+      if (snap.exists) {
+        const d = snap.data();
+        setText('sidebarName',    d.name || '—');
+        setText('sidebarCompany', d.company_name || '—');
+      }
+    } catch (e) { /* non-critical */ }
+
+    const today = todayStr();
+    document.getElementById('filterDate').value = today;
+    loadStats();
+    loadGuests();
+  });
+
+})();
+</script>
+</body>
+</html>

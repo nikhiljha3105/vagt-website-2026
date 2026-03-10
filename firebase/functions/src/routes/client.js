@@ -376,10 +376,132 @@ module.exports = function ({ db, requireAuth, requireClient }) {
     }
   });
 
+  // ── GET /api/client/patrol ───────────────────────────────────────────────
+  // Patrol scan logs for the client's sites on a given date.
+  // Client sees which checkpoints were hit, by which guard, and when —
+  // giving them confidence that their premises were covered.
+  // Optional ?date=YYYY-MM-DD (defaults to today).
+  router.get('/client/patrol', ...guard, async (req, res) => {
+    const uid  = req.user.uid;
+    const date = req.query.date || todayStr();
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ message: 'date must be YYYY-MM-DD.' });
+    }
+
+    try {
+      // Fetch this client's site IDs
+      const sitesSnap = await db.collection('sites').where('client_uid', '==', uid).get();
+      if (sitesSnap.empty) return res.json([]);
+
+      const siteIds = sitesSnap.docs.map(d => d.id);
+
+      const start = new Date(date + 'T00:00:00+05:30');
+      const end   = new Date(date + 'T23:59:59+05:30');
+
+      // Firestore 'in' supports up to 30 values
+      const chunks = [];
+      for (let i = 0; i < siteIds.length; i += 30) chunks.push(siteIds.slice(i, i + 30));
+
+      const allLogs = [];
+      await Promise.all(chunks.map(async chunk => {
+        const snap = await db.collection('patrol_logs')
+          .where('site_id', 'in', chunk)
+          .where('scanned_at', '>=', start)
+          .where('scanned_at', '<=', end)
+          .orderBy('scanned_at', 'desc')
+          .limit(500)
+          .get();
+        snap.docs.forEach(doc => {
+          const d = doc.data();
+          allLogs.push({
+            id:               doc.id,
+            checkpoint_label: d.checkpoint_label,
+            site_name:        d.site_name || null,
+            guard_name:       d.guard_name,
+            scan_method:      d.scan_method || 'nfc',
+            scanned_at:       d.scanned_at ? d.scanned_at.toDate().toISOString() : null,
+          });
+        });
+      }));
+
+      allLogs.sort((a, b) => (b.scanned_at || '').localeCompare(a.scanned_at || ''));
+      return res.json(allLogs);
+    } catch (err) {
+      console.error('client/patrol error:', err);
+      return res.status(500).json({ message: 'Failed to fetch patrol logs.' });
+    }
+  });
+
+  // ── GET /api/client/guests ───────────────────────────────────────────────
+  // Guest log entries for the client's sites on a given date.
+  // Clients can see who visited their premises, via which guard, and whether
+  // they have exited.
+  // Optional ?date=YYYY-MM-DD (defaults to today).
+  router.get('/client/guests', ...guard, async (req, res) => {
+    const uid  = req.user.uid;
+    const date = req.query.date || todayStr();
+
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ message: 'date must be YYYY-MM-DD.' });
+    }
+
+    try {
+      const sitesSnap = await db.collection('sites').where('client_uid', '==', uid).get();
+      if (sitesSnap.empty) return res.json([]);
+
+      const siteIds = sitesSnap.docs.map(d => d.id);
+
+      const start = new Date(date + 'T00:00:00+05:30');
+      const end   = new Date(date + 'T23:59:59+05:30');
+
+      const chunks = [];
+      for (let i = 0; i < siteIds.length; i += 30) chunks.push(siteIds.slice(i, i + 30));
+
+      const allLogs = [];
+      await Promise.all(chunks.map(async chunk => {
+        const snap = await db.collection('guest_logs')
+          .where('site_id', 'in', chunk)
+          .where('entry_time', '>=', start)
+          .where('entry_time', '<=', end)
+          .orderBy('entry_time', 'desc')
+          .limit(500)
+          .get();
+        snap.docs.forEach(doc => {
+          const d = doc.data();
+          allLogs.push({
+            id:           doc.id,
+            token:        d.token,
+            visitor_name: d.visitor_name,
+            visitor_type: d.visitor_type,
+            purpose:      d.purpose,
+            visiting:     d.visiting,
+            site_name:    d.site_name || null,
+            guard_name:   d.guard_name || null,
+            entry_time:   d.entry_time  ? d.entry_time.toDate().toISOString()  : null,
+            exit_time:    d.exit_time   ? d.exit_time.toDate().toISOString()   : null,
+            status:       d.status,
+          });
+        });
+      }));
+
+      allLogs.sort((a, b) => (b.entry_time || '').localeCompare(a.entry_time || ''));
+      return res.json(allLogs);
+    } catch (err) {
+      console.error('client/guests error:', err);
+      return res.status(500).json({ message: 'Failed to fetch visitor log.' });
+    }
+  });
+
   return { router };
 };
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 // Returns the first moment of the current calendar month (midnight on the 1st).
 // Used to filter "incidents this month" in the deployment summary.
