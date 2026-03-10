@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beat Patrol | VAGT Employee Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .emp-sidebar-profile { padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    #authOverlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 9999; font-size: 13px; color: var(--text-muted); }
+    .dash-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 24px; } }
+    .dash-section-title { font-size: 9px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* NFC scan panel */
+    .nfc-panel {
+      background: var(--white); border: 1px solid var(--border);
+      padding: 32px 28px; max-width: 480px; margin-bottom: 48px; text-align: center;
+    }
+    .nfc-icon {
+      width: 64px; height: 64px; margin: 0 auto 16px;
+      background: var(--amber-soft); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nfc-icon svg { width: 32px; height: 32px; stroke: var(--amber); fill: none; stroke-width: 1.8; }
+    .nfc-title { font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 8px; }
+    .nfc-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.55; }
+    .nfc-btn   { width: 100%; max-width: 280px; font-size: 14px; padding: 13px 0; }
+
+    /* Scan result toast */
+    .scan-result {
+      display: none; margin-top: 20px; padding: 14px 18px;
+      border-left: 4px solid var(--amber); background: #fffbf0;
+      text-align: left;
+    }
+    .scan-result.success { border-color: #1a7f3c; background: #f0faf4; }
+    .scan-result.error   { border-color: #c0392b; background: #fff5f5; }
+    .scan-result-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .scan-result-meta  { font-size: 12px; color: var(--text-muted); }
+
+    /* NFC not supported */
+    .nfc-unsupported {
+      background: #fff8f0; border: 1px solid #f5cba7;
+      padding: 16px 20px; max-width: 480px; margin-bottom: 24px;
+      font-size: 12.5px; color: #b45309; line-height: 1.55;
+    }
+
+    /* Today's patrol log */
+    .patrol-log-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0; border-bottom: 1px solid var(--border); max-width: 620px;
+    }
+    .patrol-log-item:last-child { border-bottom: none; }
+    .patrol-log-time {
+      font-size: 12px; font-weight: 700; color: var(--amber); font-family: monospace;
+      white-space: nowrap; min-width: 56px;
+    }
+    .patrol-log-label { font-size: 13.5px; font-weight: 700; color: var(--navy); }
+    .patrol-log-site  { font-size: 11px; color: var(--text-faint); margin-top: 2px; }
+
+    /* Checkpoint list */
+    .checkpoint-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border); max-width: 480px;
+    }
+    .checkpoint-item:last-child { border-bottom: none; }
+    .cp-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--amber); flex-shrink: 0;
+    }
+    .cp-label { font-size: 13px; font-weight: 700; color: var(--navy); }
+    .cp-tag   { font-size: 11px; color: var(--text-faint); font-family: monospace; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Employee portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+      </a>
+      <a href="employee-guests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Guest Log
+      </a>
+      <a href="employee-patrol.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="employee-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incident Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Employee Portal</div>
+      <h1>Beat Patrol</h1>
+      <p>Tap your phone on each NFC checkpoint as you complete your patrol round.</p>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- NFC not supported notice (shown only when NFC unavailable) -->
+      <div id="nfcUnsupportedNotice" class="nfc-unsupported" style="display:none;">
+        <strong>NFC not available on this device or browser.</strong><br/>
+        Web NFC requires Android Chrome 89+. If your phone has NFC, make sure you're using Chrome and NFC is enabled in your phone settings.
+      </div>
+
+      <!-- NFC scan panel -->
+      <div class="dash-section-title">Scan Checkpoint</div>
+      <div class="nfc-panel" id="nfcPanel">
+        <div class="nfc-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 7a2 2 0 012 2v6a2 2 0 01-2 2"/><path d="M17 5a5 5 0 010 14"/><path d="M14 7a3 3 0 010 10"/><rect x="2" y="8" width="8" height="8" rx="1"/></svg>
+        </div>
+        <div class="nfc-title">Ready to Scan</div>
+        <div class="nfc-sub" id="nfcSub">
+          Hold your phone against the NFC tag at the checkpoint. Scanning starts when you press the button below.
+        </div>
+        <button class="btn btn-navy nfc-btn" id="startScanBtn">Start NFC Scan</button>
+        <div class="scan-result" id="scanResult">
+          <div class="scan-result-title" id="scanResultTitle">—</div>
+          <div class="scan-result-meta"  id="scanResultMeta">—</div>
+        </div>
+      </div>
+
+      <!-- Today's patrol log -->
+      <div class="dash-section-title">Today's Patrol Log</div>
+      <div id="patrolLogList">
+        <div style="font-size:13px; color:var(--text-muted);">Loading patrol log…</div>
+      </div>
+
+      <!-- Checkpoints at this site -->
+      <div class="dash-section-title" style="margin-top:40px;">Checkpoints at My Site</div>
+      <div id="checkpointList">
+        <div style="font-size:13px; color:var(--text-muted);">Loading checkpoints…</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  const API = '/api';
+  let idToken = null;
+  let nfcReader = null;
+  let scanning  = false;
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+  function show(id)       { document.getElementById(id).style.display = ''; }
+  function hide(id)       { document.getElementById(id).style.display = 'none'; }
+
+  async function apiFetch(path, opts) {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { 'Authorization': 'Bearer ' + idToken, 'Content-Type': 'application/json', ...(opts && opts.headers) },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  // ── Show scan result ───────────────────────────────────────────────────────
+  function showScanResult(type, title, meta) {
+    const el = document.getElementById('scanResult');
+    el.className = 'scan-result ' + type;
+    setText('scanResultTitle', title);
+    setText('scanResultMeta',  meta);
+    el.style.display = '';
+    // Auto-hide after 6 seconds
+    setTimeout(function () { el.style.display = 'none'; }, 6000);
+  }
+
+  // ── Log checkpoint via API ─────────────────────────────────────────────────
+  async function logCheckpoint(nfcTagId) {
+    try {
+      const data = await apiFetch('/patrol/checkpoint', {
+        method: 'POST',
+        body: JSON.stringify({ nfc_tag_id: nfcTagId }),
+      });
+      showScanResult('success',
+        '✓ ' + (data.checkpoint_label || 'Checkpoint logged'),
+        'Scanned at ' + fmtTime(data.scanned_at) + (data.site_name ? ' · ' + data.site_name : '')
+      );
+      loadPatrolLog();
+    } catch (err) {
+      showScanResult('error', 'Scan failed', err.message || 'Unknown error');
+    }
+  }
+
+  // ── NFC scanning ───────────────────────────────────────────────────────────
+  const nfcSupported = 'NDEFReader' in window;
+
+  function initNfc() {
+    if (!nfcSupported) {
+      show('nfcUnsupportedNotice');
+      document.getElementById('startScanBtn').disabled = true;
+      document.getElementById('startScanBtn').textContent = 'NFC Not Available';
+      return;
+    }
+  }
+
+  document.getElementById('startScanBtn').addEventListener('click', async function () {
+    if (!nfcSupported) return;
+
+    const btn = this;
+
+    if (scanning) {
+      // Stop scanning
+      if (nfcReader && nfcReader.abort) nfcReader.abort();
+      scanning = false;
+      btn.textContent = 'Start NFC Scan';
+      btn.classList.remove('btn-amber');
+      btn.classList.add('btn-navy');
+      setText('nfcSub', 'Hold your phone against the NFC tag at the checkpoint. Scanning starts when you press the button below.');
+      return;
+    }
+
+    try {
+      nfcReader = new NDEFReader();
+
+      await nfcReader.scan();
+      scanning = true;
+      btn.textContent = 'Stop Scanning';
+      btn.classList.remove('btn-navy');
+      btn.classList.add('btn-amber');
+      setText('nfcSub', 'Scanning active. Hold your phone close to a checkpoint tag…');
+
+      nfcReader.addEventListener('reading', function ({ message, serialNumber }) {
+        // Use the tag's serial number as the NFC tag ID (universally unique per tag)
+        const tagId = serialNumber || (message.records.length > 0 ? message.records[0].data : null);
+        if (tagId) {
+          logCheckpoint(typeof tagId === 'string' ? tagId : serialNumber);
+        }
+      });
+
+      nfcReader.addEventListener('readingerror', function () {
+        showScanResult('error', 'Could not read tag', 'Move your phone closer to the NFC tag and try again.');
+      });
+
+    } catch (err) {
+      scanning = false;
+      btn.textContent = 'Start NFC Scan';
+      if (err.name === 'NotAllowedError') {
+        showScanResult('error', 'Permission denied', 'Please allow NFC access when prompted.');
+      } else {
+        showScanResult('error', 'NFC error', err.message || 'Could not start NFC scan.');
+      }
+    }
+  });
+
+  // ── Load today's patrol log ────────────────────────────────────────────────
+  async function loadPatrolLog() {
+    try {
+      const items = await apiFetch('/patrol/today', { method: 'GET' });
+
+      if (!items.length) {
+        setHTML('patrolLogList', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>No checkpoints scanned today.</div>');
+        return;
+      }
+
+      const html = items.map(function (log) {
+        return `
+          <div class="patrol-log-item">
+            <div class="patrol-log-time">${fmtTime(log.scanned_at)}</div>
+            <div>
+              <div class="patrol-log-label">${log.checkpoint_label}</div>
+              ${log.site_name ? `<div class="patrol-log-site">${log.site_name}</div>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+      setHTML('patrolLogList', html);
+    } catch (e) {
+      setHTML('patrolLogList', '<div style="font-size:13px; color:var(--text-muted);">Could not load patrol log. Please refresh.</div>');
+    }
+  }
+
+  // ── Load checkpoints ───────────────────────────────────────────────────────
+  async function loadCheckpoints() {
+    try {
+      const items = await apiFetch('/patrol/checkpoints', { method: 'GET' });
+
+      if (!items.length) {
+        setHTML('checkpointList', '<div style="font-size:13px; color:var(--text-muted);">No checkpoints configured for your site yet. Ask your admin to add them.</div>');
+        return;
+      }
+
+      const html = items.map(function (cp) {
+        return `
+          <div class="checkpoint-item">
+            <div class="cp-dot"></div>
+            <div>
+              <div class="cp-label">${cp.label}</div>
+              <div class="cp-tag">Tag: ${cp.nfc_tag_id}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      setHTML('checkpointList', html);
+    } catch (e) {
+      setHTML('checkpointList', '<div style="font-size:13px; color:var(--text-muted);">Could not load checkpoints.</div>');
+    }
+  }
+
+  // ── Nav & auth ─────────────────────────────────────────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+
+    const tokenResult = await user.getIdTokenResult();
+    if (tokenResult.claims.role && tokenResult.claims.role !== 'employee') {
+      window.location.href = 'portal.html'; return;
+    }
+
+    idToken = await user.getIdToken();
+
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    if (window.innerWidth < 900) {
+      document.getElementById('navToggle').style.display = '';
+    }
+
+    // Sidebar profile
+    try {
+      const snap = await db.collection('employees').doc(user.uid).get();
+      if (snap.exists) {
+        const d = snap.data();
+        setText('sidebarName', d.name || '—');
+        setText('sidebarId',   d.employee_id || '—');
+        setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+      }
+    } catch (e) { /* sidebar not critical */ }
+
+    initNfc();
+    loadPatrolLog();
+    loadCheckpoints();
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guest Log | VAGT Employee Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .emp-sidebar-profile { padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    #authOverlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 9999; font-size: 13px; color: var(--text-muted); }
+    .dash-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 24px; } }
+    .dash-section-title { font-size: 9px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* Entry form */
+    .guest-form-card {
+      background: var(--white); border: 1px solid var(--border);
+      padding: 28px 28px 32px; max-width: 640px; margin-bottom: 48px;
+    }
+    .guest-form-card h3 {
+      font-size: 15px; font-weight: 800; color: var(--navy);
+      margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .guest-form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+    }
+    @media (max-width: 600px) { .guest-form-grid { grid-template-columns: 1fr; } }
+    .guest-form-full { grid-column: 1 / -1; }
+
+    /* Active guest cards */
+    .guest-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 18px 0; border-bottom: 1px solid var(--border); max-width: 760px;
+    }
+    .guest-item:last-child { border-bottom: none; }
+    .guest-token {
+      font-size: 9px; font-weight: 700; color: var(--amber); text-transform: uppercase;
+      letter-spacing: 1px; background: var(--amber-soft); padding: 3px 8px;
+      white-space: nowrap; flex-shrink: 0; margin-top: 2px; font-family: monospace;
+    }
+    .guest-body { flex: 1; min-width: 0; }
+    .guest-name  { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .guest-meta  { font-size: 12px; color: var(--text-mid); margin-bottom: 6px; line-height: 1.5; }
+    .guest-footer { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .guest-time  { font-size: 11px; color: var(--text-faint); }
+    .guest-status-pill {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 2px 8px;
+    }
+    .pill-active   { background: #e6f4ea; color: #1a7f3c; }
+    .pill-exited   { background: #f0f0f0; color: #666; }
+    .pill-expired  { background: #fff3e0; color: #b45309; }
+    .exit-btn {
+      font-size: 11px; font-weight: 700; color: var(--white); background: var(--navy);
+      border: none; padding: 5px 12px; cursor: pointer; letter-spacing: 0.5px;
+    }
+    .exit-btn:hover { background: var(--amber); color: var(--navy); }
+
+    /* QR Slip Modal */
+    .slip-overlay {
+      position: fixed; inset: 0; background: rgba(10,22,40,0.72);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 8000; padding: 20px;
+    }
+    .slip-modal {
+      background: var(--white); max-width: 400px; width: 100%;
+      padding: 0; position: relative; box-shadow: 0 24px 64px rgba(0,0,0,0.32);
+    }
+    .slip-close {
+      position: absolute; top: 12px; right: 14px;
+      background: none; border: none; font-size: 20px; cursor: pointer;
+      color: var(--text-muted); line-height: 1;
+    }
+
+    /* ── Printable slip ── */
+    .slip-print {
+      padding: 24px 28px 20px;
+    }
+    .slip-header {
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 2px solid var(--navy); padding-bottom: 12px; margin-bottom: 16px;
+    }
+    .slip-brand { font-size: 16px; font-weight: 900; color: var(--navy); letter-spacing: 0.5px; }
+    .slip-brand-sub { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .slip-visitor-pass {
+      font-size: 9px; font-weight: 700; color: var(--amber); text-transform: uppercase;
+      letter-spacing: 2px; margin-bottom: 14px;
+    }
+    .slip-row { display: flex; gap: 6px; margin-bottom: 7px; font-size: 12px; }
+    .slip-label { font-weight: 700; color: var(--navy); min-width: 90px; flex-shrink: 0; }
+    .slip-value { color: var(--text-mid); }
+    .slip-qr { text-align: center; margin: 18px 0 12px; }
+    .slip-qr img { width: 160px; height: 160px; display: block; margin: 0 auto; }
+    .slip-token-label {
+      text-align: center; font-size: 11px; font-weight: 700; letter-spacing: 3px;
+      color: var(--navy); font-family: monospace; margin-top: 4px;
+    }
+    .slip-expiry {
+      text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 8px;
+    }
+    .slip-note {
+      font-size: 9.5px; color: var(--text-faint); text-align: center;
+      border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; line-height: 1.5;
+    }
+    .slip-actions {
+      padding: 14px 28px 20px; display: flex; gap: 10px;
+    }
+    .slip-actions .btn { flex: 1; text-align: center; }
+
+    /* Exit token form */
+    .token-exit-form { display: flex; gap: 10px; align-items: flex-end; max-width: 400px; margin-bottom: 32px; }
+    .token-exit-form .form-group { flex: 1; margin-bottom: 0; }
+
+    @media print {
+      body * { visibility: hidden; }
+      .slip-print, .slip-print * { visibility: visible; }
+      .slip-print { position: fixed; inset: 0; padding: 32px; }
+      .slip-modal { box-shadow: none; }
+      .slip-actions, .slip-close { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Employee portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+      </a>
+      <a href="employee-guests.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Guest Log
+      </a>
+      <a href="employee-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="employee-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incident Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Employee Portal</div>
+      <h1>Guest Log</h1>
+      <p>Log visitors in and out. Print a QR slip for each visitor.</p>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- Log new visitor -->
+      <div class="dash-section-title">Log New Visitor</div>
+      <div class="guest-form-card">
+        <h3>Visitor Entry</h3>
+        <div id="guestError"   class="portal-error"       style="display:none;" role="alert"></div>
+        <div id="guestSuccess" class="portal-success-msg" style="display:none;" role="status"></div>
+        <form id="guestForm" novalidate>
+          <div class="guest-form-grid">
+            <div class="form-group">
+              <label for="visitorName">Visitor name <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="visitorName" placeholder="Full name" required autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label for="visitorType">Visitor type <span style="color:var(--amber)">*</span></label>
+              <select id="visitorType" required>
+                <option value="">— Select —</option>
+                <option value="guest">Guest</option>
+                <option value="vendor">Vendor</option>
+                <option value="delivery">Delivery Agent</option>
+                <option value="tradesman">Tradesman</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="visiting">Building / Flat / Dept <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="visiting" placeholder="e.g. Block B, Flat 204" required autocomplete="off"/>
+            </div>
+            <div class="form-group">
+              <label for="purpose">Purpose of visit <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="purpose" placeholder="e.g. Delivery, Meeting" required autocomplete="off"/>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-navy" id="logEntryBtn">Log Entry &amp; Print Slip</button>
+        </form>
+      </div>
+
+      <!-- Mark exit by token -->
+      <div class="dash-section-title">Mark Exit by Token</div>
+      <div style="margin-bottom: 40px;">
+        <div id="exitError"   class="portal-error"       style="display:none; max-width:400px; margin-bottom:10px;" role="alert"></div>
+        <div id="exitSuccess" class="portal-success-msg" style="display:none; max-width:400px; margin-bottom:10px;" role="status"></div>
+        <div class="token-exit-form">
+          <div class="form-group">
+            <label for="exitToken">Slip token (8 characters)</label>
+            <input type="text" id="exitToken" maxlength="8" placeholder="e.g. A3F9C12B"
+              autocomplete="off" style="text-transform:uppercase; letter-spacing:2px; font-family:monospace;"/>
+          </div>
+          <button class="btn btn-navy" id="exitBtn" style="flex-shrink:0;">Mark Exit</button>
+        </div>
+        <p style="font-size:11.5px; color:var(--text-faint); margin-top:4px;">
+          The token is printed on the visitor's slip. You can also mark exit from the Active Guests list below.
+        </p>
+      </div>
+
+      <!-- Active guests -->
+      <div class="dash-section-title">Active Guests</div>
+      <div id="activeGuestsList">
+        <div style="font-size:13px; color:var(--text-muted);">Loading active guests…</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- QR Slip Modal -->
+<div class="slip-overlay" id="slipOverlay" style="display:none;" role="dialog" aria-modal="true" aria-label="Visitor slip">
+  <div class="slip-modal" id="slipModal">
+    <button class="slip-close" id="slipClose" aria-label="Close">&times;</button>
+
+    <!-- Printable area -->
+    <div class="slip-print" id="slipPrint">
+      <div class="slip-header">
+        <div>
+          <div class="slip-brand">VAGT</div>
+          <div class="slip-brand-sub">Security Services</div>
+        </div>
+      </div>
+      <div class="slip-visitor-pass">Visitor Pass</div>
+
+      <div class="slip-row"><span class="slip-label">Name</span>      <span class="slip-value" id="slipName">—</span></div>
+      <div class="slip-row"><span class="slip-label">Type</span>      <span class="slip-value" id="slipType">—</span></div>
+      <div class="slip-row"><span class="slip-label">Visiting</span>  <span class="slip-value" id="slipVisiting">—</span></div>
+      <div class="slip-row"><span class="slip-label">Purpose</span>   <span class="slip-value" id="slipPurpose">—</span></div>
+      <div class="slip-row"><span class="slip-label">Entry time</span><span class="slip-value" id="slipEntry">—</span></div>
+      <div class="slip-row"><span class="slip-label">Site</span>      <span class="slip-value" id="slipSite">—</span></div>
+
+      <div class="slip-qr">
+        <img id="slipQrImg" src="" alt="Visitor QR code"/>
+        <div class="slip-token-label" id="slipToken">——————</div>
+      </div>
+
+      <div class="slip-expiry" id="slipExpiry"></div>
+      <div class="slip-note">
+        Please keep this slip and return it when leaving.<br/>
+        Slip expires automatically after 8 hours.
+      </div>
+    </div>
+
+    <div class="slip-actions">
+      <button class="btn btn-navy" onclick="window.print()">Print Slip</button>
+      <button class="btn btn-ghost" id="slipCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  const API = '/api';
+  let idToken = null;
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+  function show(id)       { document.getElementById(id).style.display = ''; }
+  function hide(id)       { document.getElementById(id).style.display = 'none'; }
+  function showMsg(id, m) { document.getElementById(id).textContent = m; show(id); }
+
+  async function apiFetch(path, opts) {
+    const res = await fetch(API + path, {
+      ...opts,
+      headers: { 'Authorization': 'Bearer ' + idToken, 'Content-Type': 'application/json', ...(opts && opts.headers) },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+  function fmtDateTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+  function capitalise(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  // ── Log new visitor ──────────────────────────────────────────────────────
+  document.getElementById('guestForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hide('guestError'); hide('guestSuccess');
+
+    const name    = document.getElementById('visitorName').value.trim();
+    const type    = document.getElementById('visitorType').value;
+    const visiting = document.getElementById('visiting').value.trim();
+    const purpose = document.getElementById('purpose').value.trim();
+
+    if (!name || !type || !visiting || !purpose) {
+      showMsg('guestError', 'Please fill in all required fields.'); return;
+    }
+
+    const btn = document.getElementById('logEntryBtn');
+    btn.textContent = 'Logging…';
+    btn.disabled = true;
+
+    try {
+      const data = await apiFetch('/guest/entry', {
+        method: 'POST',
+        body: JSON.stringify({ visitor_name: name, visitor_type: type, purpose, visiting }),
+      });
+      showMsg('guestSuccess', 'Visitor logged. Print or show the slip below.');
+      document.getElementById('guestForm').reset();
+      openSlip(data);
+      loadActiveGuests();
+    } catch (err) {
+      showMsg('guestError', err.message || 'Failed to log visitor.');
+    }
+
+    btn.textContent = 'Log Entry & Print Slip';
+    btn.disabled = false;
+  });
+
+  // ── Mark exit by token ────────────────────────────────────────────────────
+  document.getElementById('exitBtn').addEventListener('click', async function () {
+    hide('exitError'); hide('exitSuccess');
+    const token = document.getElementById('exitToken').value.trim().toUpperCase();
+    if (!token || token.length !== 8) {
+      showMsg('exitError', 'Enter the 8-character token from the visitor slip.'); return;
+    }
+
+    const btn = this;
+    btn.textContent = 'Marking…';
+    btn.disabled = true;
+
+    try {
+      await apiFetch('/guest/exit/' + encodeURIComponent(token), { method: 'POST' });
+      showMsg('exitSuccess', 'Exit recorded for token ' + token + '.');
+      document.getElementById('exitToken').value = '';
+      loadActiveGuests();
+    } catch (err) {
+      showMsg('exitError', err.message || 'Could not mark exit.');
+    }
+
+    btn.textContent = 'Mark Exit';
+    btn.disabled = false;
+  });
+
+  // ── Mark exit inline from active list ────────────────────────────────────
+  document.getElementById('activeGuestsList').addEventListener('click', async function (e) {
+    const btn = e.target.closest('.exit-btn[data-token]');
+    if (!btn) return;
+
+    const token = btn.dataset.token;
+    const name  = btn.dataset.name;
+    hide('exitError'); hide('exitSuccess');
+
+    btn.textContent = '…';
+    btn.disabled = true;
+
+    try {
+      await apiFetch('/guest/exit/' + encodeURIComponent(token), { method: 'POST' });
+      showMsg('exitSuccess', name + ' marked as exited.');
+      loadActiveGuests();
+    } catch (err) {
+      showMsg('exitError', err.message || 'Could not mark exit.');
+      btn.textContent = 'Exit';
+      btn.disabled = false;
+    }
+  });
+
+  // ── Load active guests ────────────────────────────────────────────────────
+  async function loadActiveGuests() {
+    try {
+      const items = await apiFetch('/guest/active', { method: 'GET' });
+
+      if (!items.length) {
+        setHTML('activeGuestsList', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>No active visitors right now.</div>');
+        return;
+      }
+
+      const html = items.map(function (g) {
+        const expiresAt  = g.expires_at ? new Date(g.expires_at) : null;
+        const now        = Date.now();
+        const minsLeft   = expiresAt ? Math.max(0, Math.round((expiresAt - now) / 60000)) : null;
+        const expiryNote = minsLeft !== null
+          ? (minsLeft < 60 ? minsLeft + ' min left' : Math.floor(minsLeft / 60) + 'h left')
+          : '';
+
+        return `
+          <div class="guest-item">
+            <div class="guest-token">${g.token}</div>
+            <div class="guest-body">
+              <div class="guest-name">${g.visitor_name}</div>
+              <div class="guest-meta">
+                ${capitalise(g.visitor_type)} &nbsp;&middot;&nbsp; ${g.purpose}
+                &nbsp;&middot;&nbsp; Visiting: <strong>${g.visiting}</strong>
+              </div>
+              <div class="guest-footer">
+                <span class="guest-time">In: ${fmtTime(g.entry_time)}</span>
+                <span class="guest-status-pill pill-active">Active</span>
+                ${expiryNote ? `<span class="guest-time">${expiryNote}</span>` : ''}
+                <button class="exit-btn" data-token="${g.token}" data-name="${g.visitor_name}">Mark Exit</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      setHTML('activeGuestsList', html);
+    } catch (err) {
+      setHTML('activeGuestsList', '<div style="font-size:13px; color:var(--text-muted);">Could not load active guests. Please refresh.</div>');
+    }
+  }
+
+  // ── QR Slip modal ─────────────────────────────────────────────────────────
+  function openSlip(data) {
+    setText('slipName',    data.visitor_name || '—');
+    setText('slipType',    capitalise(data.visitor_type) || '—');
+    setText('slipVisiting', data.visiting || '—');
+    setText('slipPurpose', data.purpose || '—');
+    setText('slipEntry',   fmtDateTime(data.entry_time));
+    setText('slipSite',    data.site_name || '—');
+    setText('slipToken',   data.token || '—');
+
+    const qrImg = document.getElementById('slipQrImg');
+    qrImg.src = data.qr_data_url || '';
+    qrImg.alt = 'QR code for token ' + (data.token || '');
+
+    const expires = data.expires_at ? new Date(data.expires_at) : null;
+    setText('slipExpiry', expires
+      ? 'Valid until: ' + expires.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) + ', ' + expires.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+      : '');
+
+    show('slipOverlay');
+  }
+
+  function closeSlip() { hide('slipOverlay'); }
+  document.getElementById('slipClose').addEventListener('click', closeSlip);
+  document.getElementById('slipCloseBtn').addEventListener('click', closeSlip);
+  document.getElementById('slipOverlay').addEventListener('click', function (e) {
+    if (e.target === this) closeSlip();
+  });
+
+  // ── Nav & auth ─────────────────────────────────────────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+
+    const tokenResult = await user.getIdTokenResult();
+    if (tokenResult.claims.role && tokenResult.claims.role !== 'employee') {
+      window.location.href = 'portal.html'; return;
+    }
+
+    idToken = await user.getIdToken();
+
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    // Only show mobile nav toggle on small screens
+    if (window.innerWidth < 900) {
+      document.getElementById('navToggle').style.display = '';
+    }
+
+    // Sidebar profile
+    try {
+      const snap = await db.collection('employees').doc(user.uid).get();
+      if (snap.exists) {
+        const d = snap.data();
+        setText('sidebarName', d.name || '—');
+        setText('sidebarId',   d.employee_id || '—');
+        setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+      }
+    } catch (e) { /* sidebar not critical */ }
+
+    loadActiveGuests();
+  });
+
+})();
+</script>
+</body>
+</html>

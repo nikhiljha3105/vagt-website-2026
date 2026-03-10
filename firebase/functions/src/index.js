@@ -151,11 +151,15 @@ const { router: authRouter }     = require('./routes/auth')({ db, auth, authLimi
 const { router: employeeRouter } = require('./routes/employee')({ db, requireAuth, requireEmployee });
 const { router: clientRouter }   = require('./routes/client')({ db, requireAuth, requireClient });
 const { router: adminRouter }    = require('./routes/admin')({ db, auth, requireAuth, requireAdmin });
+const { router: guestRouter }    = require('./routes/guest')({ db, requireAuth, requireEmployee });
+const { router: patrolRouter }   = require('./routes/patrol')({ db, requireAuth, requireEmployee, requireAdmin });
 
 app.use('/api/auth',     authRouter);     // POST /api/auth/login, /register, /verify-otp, etc.
 app.use('/api',          employeeRouter); // GET/POST /api/attendance, /leave, /payslips, etc.
 app.use('/api',          clientRouter);   // GET/POST /api/complaints, /client/invoices, etc.
 app.use('/api/admin',    adminRouter);    // All /api/admin/... routes
+app.use('/api/guest',    guestRouter);    // GET/POST /api/guest/entry, /exit/:token, /active
+app.use('/api/patrol',   patrolRouter);   // GET/POST /api/patrol/checkpoint, /checkpoints, /today
 
 // ── 404 catch-all ─────────────────────────────────────────────────────────────
 // If a request reaches here, no route matched. Prevents Express from sending
@@ -178,3 +182,35 @@ app.use(function (err, req, res, _next) {
 exports.api = functions
   .region('asia-south1')
   .https.onRequest(app);
+
+// ── Scheduled: expire guest log entries every hour ────────────────────────────
+exports.expireGuestLogs = functions
+  .region('asia-south1')
+  .pubsub.schedule('every 60 minutes')
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const now  = new Date();
+    const snap = await db.collection('guest_logs')
+      .where('status', '==', 'active')
+      .where('expires_at', '<=', now)
+      .limit(500)
+      .get();
+
+    if (snap.empty) return null;
+
+    let batch  = db.batch();
+    let count  = 0;
+    const commits = [];
+    for (const doc of snap.docs) {
+      batch.update(doc.ref, { status: 'expired' });
+      count++;
+      if (count === 499) {
+        commits.push(batch.commit());
+        batch = db.batch();
+        count = 0;
+      }
+    }
+    if (count > 0) commits.push(batch.commit());
+    await Promise.all(commits);
+    return null;
+  });

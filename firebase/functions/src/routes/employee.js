@@ -19,6 +19,7 @@
  *   GET  /api/leave/history            — Show me all my leave requests
  *   POST /api/leave/apply              — Apply for leave
  *   GET  /api/payslips                 — List my payslips (last 24 months)
+ *   GET  /api/payslips/:id/download    — Download payslip as PDF
  *   GET  /api/employee/schedule        — What shifts am I assigned to?
  *   GET  /api/employee/sites           — Which sites am I deployed at?
  *   GET  /api/employee/incidents       — My filed incident reports
@@ -60,6 +61,7 @@
 'use strict';
 
 const express = require('express');
+const PDFDocument = require('pdfkit');
 
 module.exports = function ({ db, requireAuth, requireEmployee }) {
   const router = express.Router();
@@ -331,6 +333,126 @@ module.exports = function ({ db, requireAuth, requireEmployee }) {
     } catch (err) {
       console.error('payslips error:', err);
       return res.status(500).json({ message: 'Failed to fetch payslips.' });
+    }
+  });
+
+  // ── GET /api/payslips/:id/download ──────────────────────────────────────
+  router.get('/payslips/:id/download', ...guard, async (req, res) => {
+    const uid = req.user.uid;
+    try {
+      const slipSnap = await db.collection('payslips').doc(req.params.id).get();
+      if (!slipSnap.exists) return res.status(404).json({ message: 'Payslip not found.' });
+
+      const d = slipSnap.data();
+      if (d.employee_uid !== uid) return res.status(403).json({ message: 'Access denied.' });
+
+      // Parse period (YYYY-MM) into a human label
+      const [year, month] = (d.period || '').split('-');
+      const monthLabel = month && year
+        ? new Date(year, parseInt(month, 10) - 1).toLocaleString('en-IN', { month: 'long' }) + ' ' + year
+        : (d.period || '');
+
+      const generatedDate = d.generated_at
+        ? d.generated_at.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+        : new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      // ── Build PDF in memory ──────────────────────────────────────────────
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      const chunks = [];
+      doc.on('data', c => chunks.push(c));
+
+      await new Promise((resolve, reject) => {
+        doc.on('end',   resolve);
+        doc.on('error', reject);
+
+        const NAVY   = '#0a1628';
+        const AMBER  = '#f59e0b';
+        const MID    = '#555e6d';
+        const FAINT  = '#9aa3ae';
+        const BORDER = '#e2e6ea';
+
+        // Header band
+        doc.rect(0, 0, doc.page.width, 90).fill(NAVY);
+        doc.fill('#ffffff').font('Helvetica-Bold').fontSize(22).text('VAGT', 50, 28);
+        doc.fill(AMBER).font('Helvetica').fontSize(10).text('Security Services', 50, 54);
+        doc.fill('#ffffff').font('Helvetica').fontSize(10)
+          .text('PAYSLIP', 0, 38, { align: 'right', width: doc.page.width - 50 });
+        doc.fill(AMBER).font('Helvetica-Bold').fontSize(13)
+          .text(monthLabel, 0, 54, { align: 'right', width: doc.page.width - 50 });
+
+        // Employee details box
+        doc.roundedRect(50, 108, doc.page.width - 100, 80, 4).stroke(BORDER);
+        doc.fill(NAVY).font('Helvetica-Bold').fontSize(11)
+          .text(d.employee_name || '—', 66, 120);
+        doc.fill(MID).font('Helvetica').fontSize(9)
+          .text('Employee ID: ' + (d.employee_id || '—'), 66, 136)
+          .text('Generated: ' + generatedDate, 66, 150)
+          .text('Period: ' + monthLabel, 66, 164);
+
+        // Earnings table header
+        const tableTop = 214;
+        doc.rect(50, tableTop, doc.page.width - 100, 24).fill('#f1f4f8');
+        doc.fill(NAVY).font('Helvetica-Bold').fontSize(9)
+          .text('EARNINGS',   66,  tableTop + 8)
+          .text('AMOUNT (₹)', 380, tableTop + 8);
+
+        // Rows
+        let y = tableTop + 34;
+        const rowH = 22;
+        const rows = [
+          ['Basic Salary', d.basic || 0],
+          ['Allowances',   d.allowances || 0],
+        ];
+        rows.forEach(([label, amount]) => {
+          doc.fill('#444').font('Helvetica').fontSize(9)
+            .text(label, 66, y)
+            .text('₹ ' + Number(amount).toLocaleString('en-IN'), 380, y);
+          doc.moveTo(50, y + rowH - 2).lineTo(doc.page.width - 50, y + rowH - 2).strokeColor(BORDER).lineWidth(0.5).stroke();
+          y += rowH;
+        });
+
+        // Gross pay row
+        y += 6;
+        doc.rect(50, y, doc.page.width - 100, 24).fill('#f7f9fb');
+        doc.fill(NAVY).font('Helvetica-Bold').fontSize(9)
+          .text('Gross Pay', 66, y + 8)
+          .text('₹ ' + Number(d.gross_pay || 0).toLocaleString('en-IN'), 380, y + 8);
+        y += 34;
+
+        // Deductions section
+        doc.rect(50, y, doc.page.width - 100, 24).fill('#f1f4f8');
+        doc.fill(NAVY).font('Helvetica-Bold').fontSize(9)
+          .text('DEDUCTIONS', 66, y + 8)
+          .text('AMOUNT (₹)', 380, y + 8);
+        y += 34;
+        doc.fill('#444').font('Helvetica').fontSize(9)
+          .text('Total Deductions', 66, y)
+          .text('₹ ' + Number(d.deductions || 0).toLocaleString('en-IN'), 380, y);
+        doc.moveTo(50, y + rowH - 2).lineTo(doc.page.width - 50, y + rowH - 2).strokeColor(BORDER).lineWidth(0.5).stroke();
+        y += rowH + 14;
+
+        // Net pay box
+        doc.rect(50, y, doc.page.width - 100, 40).fill(NAVY);
+        doc.fill('#ffffff').font('Helvetica').fontSize(10).text('NET PAY', 66, y + 13);
+        doc.fill(AMBER).font('Helvetica-Bold').fontSize(14)
+          .text('₹ ' + Number(d.net_pay || 0).toLocaleString('en-IN'), 0, y + 11, { align: 'right', width: doc.page.width - 66 });
+
+        // Footer
+        doc.fill(FAINT).font('Helvetica').fontSize(8)
+          .text('This is a computer-generated payslip. No signature required.', 50, doc.page.height - 60, { align: 'center', width: doc.page.width - 100 })
+          .text('VAGT Security Services Pvt. Ltd. · Bengaluru, Karnataka', 50, doc.page.height - 46, { align: 'center', width: doc.page.width - 100 });
+
+        doc.end();
+      });
+
+      const filename = `VAGT-Payslip-${d.employee_id || uid}-${d.period || 'slip'}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', Buffer.concat(chunks).length);
+      return res.end(Buffer.concat(chunks));
+    } catch (err) {
+      console.error('payslips/download error:', err);
+      return res.status(500).json({ message: 'Failed to generate payslip PDF.' });
     }
   });
 
