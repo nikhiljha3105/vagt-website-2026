@@ -1,5 +1,5 @@
 # VAGT Website — Handoff for Mike
-**Last updated:** 2026-03-09 (end of day)
+**Last updated:** 2026-03-10 (end of day)
 
 ---
 
@@ -26,7 +26,33 @@ Full-stack security services platform for **VAGT Security Services (Bengaluru)**
 
 ---
 
-## What Was Done Today (2026-03-09) — UPDATED end-of-session
+## What Was Done Today (2026-03-10) — UPDATED end-of-session
+
+### Lens gap closed — all three portals now consistent
+
+All features that guards can log are now visible to admins (across all sites) and clients (scoped to their own sites). Both lens gaps are fully resolved.
+
+**New backend routes:**
+- `GET /api/guest/admin/logs?date=&site_id=` — all visitor entries for any date (admin)
+- `GET /api/guest/admin/active` — live "who's on-premises right now" across all sites (admin)
+- `GET /api/client/patrol?date=` — patrol scan logs scoped to client's sites
+- `GET /api/client/guests?date=` — visitor log scoped to client's sites
+- `index.js` updated to pass `requireAdmin` into guestRouter
+
+**New frontend pages:**
+- `pages/admin-guests.html` — live stats (active/total/exited), tab between By Date and Active Now, full visitor table with duration
+- `pages/client-patrol.html` — today's coverage summary (scans, checkpoints hit, unique guards), date-filtered patrol scan log
+- `pages/client-guests.html` — today's visitor stats (on-site/exited/total), date-filtered visitor table with duration
+
+**Sidebar nav updated:**
+- Visitor Log link added to all 5 admin sidebar pages (admin-portal, admin-employees, admin-patrol, admin-complaints, admin-guests)
+- Beat Patrol + Visitor Log links added to all 5 client sidebar pages (client-portal, client-reports, client-invoices, client-patrol, client-guests)
+
+**All committed and pushed to `claude/review-website-git-dPWyR` (commit `3c627f6`).**
+
+---
+
+## What Was Done Previously (2026-03-09 — 2026-03-10)
 
 ### Backend — Cloud Functions (done via mobile session)
 Six security and performance fixes committed and pushed:
@@ -144,15 +170,17 @@ Not built. Top client complaint.
 
 ## What Still Needs to Be Built
 
-| Priority | Feature | Status |
-|----------|---------|--------|
-| 1 | SMS/OTP delivery (MSG91) | Stubbed — not wired |
-| 2 | Guest entry module | Not built — top client complaint |
-| 3 | Beat patrol / guard tour (GPS) | Not built — second top complaint |
-| 4 | Selfie check-in | Not built — third top complaint |
-| 5 | Password reset link on approval | Code exists, commented out — needs SMS first |
-| 6 | Wire "Add Employee" admin form | Needs Cloud Function — can't create Auth accounts client-side |
-| 7 | Intelligent Surveillance page | Currently a Coming Soon placeholder |
+| Priority | Feature | Status | Blocked on |
+|----------|---------|--------|------------|
+| 1 | SMS/OTP delivery (MSG91) | Stubbed — not wired | Owner signs up at msg91.com + gets API key + DLT sender ID |
+| 2 | Password reset link on approval | Code in `admin.js:167` commented out | SMS above (same blocker) |
+| 3 | NFC checkpoint registration | API exists, NFC stickers not arrived | Physical NFC 213 stickers to arrive + admin registers each via `POST /api/patrol/admin/checkpoints` |
+| 4 | Selfie check-in | Not designed or built | Product decision needed first |
+| 5 | Intelligent Surveillance page | Coming Soon placeholder | Content / product copy |
+| ~~2~~ | ~~Guest entry module~~ | ✅ Done | — |
+| ~~3~~ | ~~Beat patrol (NFC)~~ | ✅ Done | — |
+| ~~6~~ | ~~Admin guest/patrol views~~ | ✅ Done | — |
+| ~~7~~ | ~~Client patrol/guest views~~ | ✅ Done | — |
 
 ---
 
