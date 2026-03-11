@@ -1,5 +1,5 @@
 # VAGT Website — Handoff for Mike
-**Last updated:** 2026-03-10 (end of day — security hardening session)
+**Last updated:** 2026-03-11 (deployment session)
 
 ---
 
@@ -42,7 +42,35 @@ Full-stack security services platform for **VAGT Security Services (Bengaluru)**
 
 ---
 
-## What Was Done Today (2026-03-10) — UPDATED end-of-security-session
+## What Was Done Today (2026-03-11) — Deployment session
+
+### Deployment unblocked — 3 root causes fixed
+
+1. **`firebase-config.js` was missing** — file was in `.gitignore` by mistake. Client-side Firebase config is not a secret. Removed from `.gitignore`, created with correct API key (`AIzaSyB8jO...`), committed permanently. This will never be lost again.
+2. **Wrong project ID everywhere** — `firebase/.firebaserc` and README both had placeholder `vagt-security-prod`. Real project is `vagt---services` (owned by `nkjha3105@gmail.com`). Fixed and committed.
+3. **Missing `firestore.indexes.json`** — deploy was failing because file didn't exist. Created empty indexes file and committed.
+
+### Firestore rules deployed ✅
+Rules are live on `vagt---services`. Commit `7bd3ac6`.
+
+### Cloud Functions — ONE STEP REMAINING ⚠️
+Functions deploy is blocked on **Blaze (pay-as-you-go) plan upgrade**.
+Nikhil needs to:
+1. Open: `https://console.firebase.google.com/project/vagt---services/usage/details`
+2. Click **Modify plan** → select **Blaze** → add billing card
+3. Then run in Terminal (from `firebase/` folder, logged in as `nkjha3105@gmail.com`):
+   ```
+   firebase deploy --only functions --project vagt---services
+   ```
+
+### Account clarification
+- Firebase project `vagt---services` is owned by `nkjha3105@gmail.com`
+- `jha4all@gmail.com` owns a DIFFERENT project `vagt-services` — this is likely a duplicate and can be deleted
+- Always deploy with `nkjha3105@gmail.com`
+
+---
+
+## What Was Done Previously (2026-03-10) — UPDATED end-of-security-session
 
 ### Lens gap closed — all three portals now consistent
 
