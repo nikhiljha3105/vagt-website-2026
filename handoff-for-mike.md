@@ -42,7 +42,50 @@ Full-stack security services platform for **VAGT Security Services (Bengaluru)**
 
 ---
 
-## What Was Done Today (2026-03-11) — Deployment session
+## What Was Done Today (2026-03-11) — Login debugging session
+
+### Login failure — full diagnosis
+
+Nikhil tried to log in after deployment. It failed. Here is the complete root-cause analysis.
+
+**Symptom:** `POST identitytoolkit.googleapis.com/v1/accounts:signInWithPassword — 403 Forbidden`
+
+**Root cause 1 — Fixed ✅:** The Firebase API key had HTTP referrer restrictions in GCP Console that didn't include `vagt---services.web.app`. Fixed by Nikhil in GCP Console → APIs & Services → Credentials → added:
+- `https://vagt---services.web.app/*`
+- `https://vagt---services.firebaseapp.com/*`
+
+Note: GCP takes **1–2 minutes** to propagate this change. Nikhil may have tried logging in before propagation completed. Try again if not already done.
+
+**Root cause 2 — Bug found, NOT yet fixed ⚠️:** The `_headers` file has a broken `connect-src` directive:
+```
+connect-src 'self' https://api.vagtsecurityservices.com
+```
+This does NOT include `https://identitytoolkit.googleapis.com` (Firebase Auth). However, **Firebase Hosting does not read the `_headers` file** — that format is Netlify/Vercel only. Firebase Hosting needs headers in `firebase.json`. So this is currently harmless (headers are not being applied at all), but it means **no security headers are being served** in production. Needs fixing — see Known Issues section.
+
+**Root cause 3 — Wrong login URL given:** In the last session I sent Nikhil to `pages/admin-portal.html` directly. That's the dashboard, not the login page. `admin-portal.html` immediately redirects unauthenticated users to `portal.html`, so Nikhil would have ended up at the right place — but it caused confusion. The correct login URL is:
+
+👉 **`https://vagt---services.web.app/pages/portal.html`**
+
+Login flow: `portal.html` → pick role (Admin/Employee/Client) → enter email+password → redirects to correct dashboard.
+
+### Next session — do this first
+
+1. Go to `https://vagt---services.web.app/pages/portal.html`
+2. Click **Admin**
+3. Enter: `admin@vagtsecurityservices.com` / `Vagt@Admin2026!`
+4. If it still fails with 403: check the GCP API key referrer restriction was saved correctly (GCP Console → APIs & Services → Credentials → Browser key → HTTP referrers should show the two web.app domains)
+5. If it fails with "Incorrect email or password": the admin account may not exist yet. Check Firebase Console → Authentication → Users. If missing, run `finalize_setup.py` from Mac (see Pending section).
+
+### Localhost referrer restriction — TODO
+
+GCP API key referrer list does not include localhost yet. When testing locally, add:
+- `http://localhost:5000/*`
+
+Go to: `https://console.cloud.google.com/apis/credentials?project=vagt---services` → click the Browser key → add under HTTP referrers.
+
+---
+
+## What Was Done Today (2026-03-11) — Deployment session (earlier)
 
 ### Deployment unblocked — 3 root causes fixed
 
@@ -238,6 +281,8 @@ Not built. Top client complaint.
 
 ## Known Issues / Technical Debt
 
+- **No HTTP security headers in production** — `_headers` file exists but Firebase Hosting ignores it (that format is Netlify/Vercel only). Headers need to be added to `firebase.json` under a `"headers"` key. Until this is done, `X-Frame-Options`, `Content-Security-Policy`, etc. are NOT being served. Fix: copy the rules from `_headers` into `firebase.json` headers format.
+- **`localhost` missing from GCP API key referrer list** — add `http://localhost:5000/*` when local testing is needed (GCP Console → APIs & Services → Credentials)
 - No input validation library (joi/zod) — manual checks only
 - `activity_log` collection unbounded — no TTL or archival
 - Denormalized employee/site names — no cleanup on updates
