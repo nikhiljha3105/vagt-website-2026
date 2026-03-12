@@ -1,0 +1,47 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// VAGT Security Services — Firebase Storage Security Rules
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// NOTE: Payslip PDFs are accessed ONLY through Cloud Functions (Admin SDK),
+// which bypasses these rules entirely. These rules are a defence-in-depth layer
+// in case direct Storage SDK access is ever added to the frontend.
+//
+// /payslips/{payslipId}.pdf  — employee downloads via Cloud Function (admin bypass)
+// /brochures/**              — public marketing PDFs (future: upload from Mac)
+// /docs/**                   — internal documents — authenticated users only
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Payslips: Cloud Functions handles all access via Admin SDK ──────────
+    // Guard against any accidental direct-SDK access from the frontend.
+    // Only the employee whose UID matches the payslip's employee_uid may read.
+    match /payslips/{payslipId} {
+      allow read: if request.auth != null
+                  && firestore.get(
+                       /databases/(default)/documents/payslips/$(payslipId)
+                     ).data.employee_uid == request.auth.uid;
+      allow write: if false; // writes only via Admin SDK (Cloud Functions)
+    }
+
+    // ── Public marketing brochures ──────────────────────────────────────────
+    match /brochures/{filename} {
+      allow read:  if true;   // public — anyone can download brochures
+      allow write: if false;  // uploads via Firebase Console or Admin SDK only
+    }
+
+    // ── Internal documents (audits, questionnaires) ─────────────────────────
+    match /docs/{filename} {
+      allow read:  if request.auth != null; // any logged-in user
+      allow write: if false;
+    }
+
+    // ── Default: deny everything else ──────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

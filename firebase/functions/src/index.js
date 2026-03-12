@@ -192,6 +192,52 @@ exports.api = functions
   .region('asia-south1')
   .https.onRequest(app);
 
+// ── Scheduled: daily Firestore backup to Cloud Storage ────────────────────────
+// Runs at 02:00 IST (20:30 UTC) every day.
+// Exports entire Firestore database to gs://vagt---services-backups/YYYY-MM-DD/
+//
+// ONE-TIME SETUP (run from Mac, once, before first deploy):
+//
+//   gcloud config set project vagt---services
+//
+//   # Create the backup bucket in Mumbai (same region as the Cloud Function)
+//   gsutil mb -l asia-south1 gs://vagt---services-backups
+//
+//   # Auto-delete exports older than 30 days to control costs
+//   echo '{"rule":[{"action":{"type":"Delete"},"condition":{"age":30}}]}' > /tmp/lc.json
+//   gsutil lifecycle set /tmp/lc.json gs://vagt---services-backups
+//   rm /tmp/lc.json
+//
+//   # Grant the Cloud Functions service account export permissions
+//   SA="vagt---services@appspot.gserviceaccount.com"
+//   gcloud projects add-iam-policy-binding vagt---services \
+//     --member="serviceAccount:$SA" --role="roles/datastore.importExportAdmin"
+//   gcloud projects add-iam-policy-binding vagt---services \
+//     --member="serviceAccount:$SA" --role="roles/storage.objectAdmin"
+//
+// To sync the GCS exports down to iCloud on your Mac:
+//   bash scripts/sync-backups-to-icloud.sh
+//
+exports.scheduledFirestoreBackup = functions
+  .region('asia-south1')
+  .pubsub.schedule('30 20 * * *')    // 20:30 UTC = 02:00 IST
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const { v1 } = require('@google-cloud/firestore');
+    const client    = new v1.FirestoreAdminClient();
+    const projectId = process.env.GCLOUD_PROJECT || 'vagt---services';
+    const date      = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const outputUri = `gs://${projectId}-backups/${date}`;
+
+    const [operation] = await client.exportDocuments({
+      name:            client.databasePath(projectId, '(default)'),
+      outputUriPrefix: outputUri,
+    });
+
+    console.info(`Firestore backup started → ${outputUri}  (operation: ${operation.name})`);
+    return null;
+  });
+
 // ── Scheduled: expire guest log entries every hour ────────────────────────────
 exports.expireGuestLogs = functions
   .region('asia-south1')

@@ -43,6 +43,14 @@ dist/
 build/
 .cache/
 
+# ── Large binary assets (served from Firebase Storage, not git) ───────────────
+# These files are too large to live in git. Upload them to Firebase Storage:
+#   firebase deploy --only storage  (deploys rules)
+#   Then manually upload via Firebase Console → Storage → brochures/
+# or: gsutil cp assets/brochures/*.pdf gs://vagt---services.firebasestorage.app/brochures/
+assets/brochures/*.pdf
+assets/brochures/*.docx
+
 # ── Test artifacts ────────────────────────────────────────────────────────────
 tests/__pycache__/
 tests/*.pyc

@@ -60,8 +60,9 @@
 
 'use strict';
 
-const express = require('express');
+const express     = require('express');
 const PDFDocument = require('pdfkit');
+const admin       = require('firebase-admin'); // already initialised in index.js — safe to require again
 
 module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) {
   const router = express.Router();
@@ -337,6 +338,9 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
   });
 
   // ── GET /api/payslips/:id/download ──────────────────────────────────────
+  // First call: generates PDF with pdfkit, stores it in Firebase Storage, serves it.
+  // Subsequent calls: retrieves the stored PDF from Storage — no pdfkit needed.
+  // Storage path: payslips/{payslipId}.pdf
   router.get('/payslips/:id/download', ...guard, async (req, res) => {
     const uid = req.user.uid;
     try {
@@ -346,7 +350,18 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
       const d = slipSnap.data();
       if (d.employee_uid !== uid) return res.status(403).json({ message: 'Access denied.' });
 
-      // Parse period (YYYY-MM) into a human label
+      const filename = `VAGT-Payslip-${d.employee_id || uid}-${d.period || 'slip'}.pdf`;
+
+      // ── Serve from Storage if already generated ────────────────────────
+      if (d.pdf_path) {
+        const [pdfBuf] = await admin.storage().bucket().file(d.pdf_path).download();
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', pdfBuf.length);
+        return res.end(pdfBuf);
+      }
+
+      // ── Parse period (YYYY-MM) into a human label ──────────────────────
       const [year, month] = (d.period || '').split('-');
       const monthLabel = month && year
         ? new Date(year, parseInt(month, 10) - 1).toLocaleString('en-IN', { month: 'long' }) + ' ' + year
@@ -445,11 +460,24 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
         doc.end();
       });
 
-      const filename = `VAGT-Payslip-${d.employee_id || uid}-${d.period || 'slip'}.pdf`;
+      const pdfBuf     = Buffer.concat(chunks);
+      const storagePath = `payslips/${req.params.id}.pdf`;
+
+      // ── Store in Firebase Storage (fire-and-forget on failure — still serve the PDF) ──
+      try {
+        await admin.storage().bucket().file(storagePath).save(pdfBuf, {
+          metadata: { contentType: 'application/pdf' },
+        });
+        await db.collection('payslips').doc(req.params.id).update({ pdf_path: storagePath });
+      } catch (storeErr) {
+        // Storage failure is non-fatal — guard still gets their payslip; will retry next download
+        console.error('payslip storage save failed (non-fatal):', storeErr);
+      }
+
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-      res.setHeader('Content-Length', Buffer.concat(chunks).length);
-      return res.end(Buffer.concat(chunks));
+      res.setHeader('Content-Length', pdfBuf.length);
+      return res.end(pdfBuf);
     } catch (err) {
       console.error('payslips/download error:', err);
       return res.status(500).json({ message: 'Failed to generate payslip PDF.' });
