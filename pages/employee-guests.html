@@ -59,9 +59,22 @@
     .pill-active   { background: #e6f4ea; color: #1a7f3c; }
     .pill-exited   { background: #f0f0f0; color: #666; }
     .pill-expired  { background: #fff3e0; color: #b45309; }
+    /* ── Toast notification ── */
+    .toast-msg {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1a7f3c; color: #fff; font-size: 14px; font-weight: 700;
+      padding: 14px 24px; z-index: 9001; box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      white-space: nowrap; pointer-events: none;
+      animation: toastIn 0.2s ease;
+    }
+    .toast-msg.error { background: #c0392b; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
     .exit-btn {
-      font-size: 11px; font-weight: 700; color: var(--white); background: var(--navy);
-      border: none; padding: 5px 12px; cursor: pointer; letter-spacing: 0.5px;
+      font-size: 13px; font-weight: 700; color: var(--white); background: var(--navy);
+      border: none; padding: 10px 16px; min-height: 44px; cursor: pointer; letter-spacing: 0.5px;
     }
     .exit-btn:hover { background: var(--amber); color: var(--navy); }
 
@@ -211,22 +224,22 @@
               <input type="text" id="visitorName" placeholder="Full name" required autocomplete="off"/>
             </div>
             <div class="form-group">
-              <label for="visitorType">Visitor type <span style="color:var(--amber)">*</span></label>
+              <label for="visitorType">Type of visitor <span style="color:var(--amber)">*</span></label>
               <select id="visitorType" required>
                 <option value="">— Select —</option>
-                <option value="guest">Guest</option>
-                <option value="vendor">Vendor</option>
-                <option value="delivery">Delivery Agent</option>
-                <option value="tradesman">Tradesman</option>
+                <option value="guest">Friend or Family</option>
+                <option value="vendor">Supplier</option>
+                <option value="delivery">Courier / Delivery</option>
+                <option value="tradesman">Repair Person</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="visiting">Building / Flat / Dept <span style="color:var(--amber)">*</span></label>
+              <label for="visiting">Where are they going? <span style="color:var(--amber)">*</span></label>
               <input type="text" id="visiting" placeholder="e.g. Block B, Flat 204" required autocomplete="off"/>
             </div>
             <div class="form-group">
-              <label for="purpose">Purpose of visit <span style="color:var(--amber)">*</span></label>
-              <input type="text" id="purpose" placeholder="e.g. Delivery, Meeting" required autocomplete="off"/>
+              <label for="purpose">Why are they visiting? <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="purpose" placeholder="e.g. Delivery, Meeting, Repair" required autocomplete="off"/>
             </div>
           </div>
           <button type="submit" class="btn btn-navy" id="logEntryBtn">Log Entry &amp; Print Slip</button>
@@ -240,14 +253,14 @@
         <div id="exitSuccess" class="portal-success-msg" style="display:none; max-width:400px; margin-bottom:10px;" role="status"></div>
         <div class="token-exit-form">
           <div class="form-group">
-            <label for="exitToken">Slip token (8 characters)</label>
+            <label for="exitToken">8-letter code from the visitor's slip</label>
             <input type="text" id="exitToken" maxlength="8" placeholder="e.g. A3F9C12B"
-              autocomplete="off" style="text-transform:uppercase; letter-spacing:2px; font-family:monospace;"/>
+              autocomplete="off" style="text-transform:uppercase; letter-spacing:2px; font-family:monospace; min-height:44px;"/>
           </div>
-          <button class="btn btn-navy" id="exitBtn" style="flex-shrink:0;">Mark Exit</button>
+          <button class="btn btn-navy" id="exitBtn" style="flex-shrink:0; min-height:44px;">Mark Exit</button>
         </div>
         <p style="font-size:11.5px; color:var(--text-faint); margin-top:4px;">
-          The token is printed on the visitor's slip. You can also mark exit from the Active Guests list below.
+          The 8-letter code is printed at the top of the visitor's slip. You can also tap Mark Exit in the Active Guests list below.
         </p>
       </div>
 
@@ -290,14 +303,17 @@
 
       <div class="slip-expiry" id="slipExpiry"></div>
       <div class="slip-note">
-        Please keep this slip and return it when leaving.<br/>
+        Give this slip to the visitor. They must return it when leaving.<br/>
         Slip expires automatically after 8 hours.
       </div>
     </div>
 
-    <div class="slip-actions">
-      <button class="btn btn-navy" onclick="window.print()">Print Slip</button>
-      <button class="btn btn-ghost" id="slipCloseBtn">Close</button>
+    <div class="slip-actions" style="flex-direction:column; gap:8px;">
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-navy" onclick="window.print()" style="flex:1;">Print Slip</button>
+        <button class="btn btn-ghost" id="slipCloseBtn" style="flex:1;">Close</button>
+      </div>
+      <p style="font-size:11px; color:var(--text-faint); text-align:center; margin:0;">If no printer — close this and show the QR code on screen to the visitor.</p>
     </div>
   </div>
 </div>
@@ -322,6 +338,15 @@
   function show(id)       { document.getElementById(id).style.display = ''; }
   function hide(id)       { document.getElementById(id).style.display = 'none'; }
   function showMsg(id, m) { document.getElementById(id).textContent = m; show(id); }
+  function showToast(msg, type) {
+    const old = document.querySelector('.toast-msg');
+    if (old) old.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-msg' + (type === 'error' ? ' error' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.remove(); }, 3500);
+  }
 
   async function apiFetch(path, opts) {
     const res = await fetch(API + path, {
@@ -366,7 +391,7 @@
         method: 'POST',
         body: JSON.stringify({ visitor_name: name, visitor_type: type, purpose, visiting }),
       });
-      showMsg('guestSuccess', 'Visitor logged. Print or show the slip below.');
+      showMsg('guestSuccess', 'Visitor added. Slip is shown below — print it and give to the visitor.');
       document.getElementById('guestForm').reset();
       openSlip(data);
       loadActiveGuests();
@@ -383,7 +408,7 @@
     hide('exitError'); hide('exitSuccess');
     const token = document.getElementById('exitToken').value.trim().toUpperCase();
     if (!token || token.length !== 8) {
-      showMsg('exitError', 'Enter the 8-character token from the visitor slip.'); return;
+      showMsg('exitError', 'Enter the 8-letter code from the top of the visitor slip (like: A3F9C12B).'); return;
     }
 
     const btn = this;
@@ -410,6 +435,9 @@
 
     const token = btn.dataset.token;
     const name  = btn.dataset.name;
+
+    if (!confirm('Mark ' + name + ' as leaving?')) return;
+
     hide('exitError'); hide('exitSuccess');
 
     btn.textContent = '…';
@@ -417,11 +445,11 @@
 
     try {
       await apiFetch('/guest/exit/' + encodeURIComponent(token), { method: 'POST' });
-      showMsg('exitSuccess', name + ' marked as exited.');
+      showToast(name + ' marked as exited.');
       loadActiveGuests();
     } catch (err) {
-      showMsg('exitError', err.message || 'Could not mark exit.');
-      btn.textContent = 'Exit';
+      showMsg('exitError', err.message || 'Could not mark exit. Check your internet and try again.');
+      btn.textContent = 'Mark Exit';
       btn.disabled = false;
     }
   });
@@ -501,6 +529,11 @@
   // ── Nav & auth ─────────────────────────────────────────────────────────────
   document.getElementById('navToggle').addEventListener('click', function () {
     document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-link').forEach(function (a) {
+    a.addEventListener('click', function () {
+      document.getElementById('sidebar').classList.remove('open');
+    });
   });
   document.getElementById('signOutBtn').addEventListener('click', function () {
     auth.signOut().then(function () { window.location.href = 'portal.html'; });

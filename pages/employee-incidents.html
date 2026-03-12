@@ -138,36 +138,54 @@
         <form id="incidentForm" novalidate>
           <div class="inc-form-grid">
             <div class="form-group">
-              <label for="incType">Incident type</label>
+              <label for="incType">What type of incident? <span style="color:var(--amber)">*</span></label>
               <select id="incType" required>
                 <option value="">— Select —</option>
                 <option>Trespassing</option>
-                <option>Theft / Attempted theft</option>
+                <option>Theft</option>
+                <option>Attempted theft</option>
                 <option>Vandalism</option>
                 <option>Medical emergency</option>
-                <option>Fire / Smoke</option>
-                <option>Suspicious activity</option>
-                <option>Equipment failure</option>
-                <option>Altercation</option>
+                <option>Fire or smoke</option>
+                <option>Suspicious person</option>
+                <option>Fight</option>
+                <option>Equipment broken</option>
                 <option>Other</option>
               </select>
             </div>
             <div class="form-group">
-              <label for="incSite">Site / Location</label>
-              <input type="text" id="incSite" placeholder="e.g. HatsOff HQ — Gate 2" required/>
+              <label for="incSite">Where did it happen? <span style="color:var(--amber)">*</span></label>
+              <input type="text" id="incSite" placeholder="e.g. Main Gate, Block B" required/>
+              <div style="font-size:11px; color:var(--text-faint); margin-top:4px;">Pre-filled from your profile. Change if the incident happened elsewhere.</div>
             </div>
             <div class="form-group">
-              <label for="incDate">Date of incident</label>
+              <label for="incDate">Date <span style="color:var(--amber)">*</span></label>
               <input type="date" id="incDate" required/>
             </div>
             <div class="form-group">
-              <label for="incTime">Approximate time</label>
+              <label for="incTime">Time (approx.)</label>
               <input type="time" id="incTime"/>
             </div>
             <div class="form-group inc-form-full">
-              <label for="incDesc">Description</label>
-              <textarea id="incDesc" rows="4" required
-                placeholder="Describe what happened, who was involved, and any actions you took."></textarea>
+              <label for="incWhat">What happened? <span style="color:var(--amber)">*</span></label>
+              <textarea id="incWhat" rows="3" required
+                placeholder="Describe what you saw or what happened."></textarea>
+            </div>
+            <div class="form-group">
+              <label for="incWho">Who was involved?</label>
+              <input type="text" id="incWho" placeholder="e.g. 2 unknown men, resident from Flat 304"/>
+            </div>
+            <div class="form-group">
+              <label for="incAction">What did you do? <span style="color:var(--amber)">*</span></label>
+              <select id="incAction" required>
+                <option value="">— Select —</option>
+                <option>Reported to supervisor</option>
+                <option>Called police (100)</option>
+                <option>Called ambulance (108)</option>
+                <option>Moved people away from the area</option>
+                <option>Stopped the incident myself</option>
+                <option>Nothing yet — need help</option>
+              </select>
             </div>
           </div>
           <button type="submit" class="btn btn-navy" id="submitIncBtn">Submit Report</button>
@@ -176,6 +194,9 @@
 
       <!-- Incident history -->
       <div class="dash-section-title">My Reports</div>
+      <p style="font-size:11.5px; color:var(--text-faint); margin-bottom:16px; margin-top:-10px;">
+        Each report has a reference number (e.g. INC-001). Share it with your supervisor if following up.
+      </p>
       <div id="incidentsList">
         <div style="font-size:13px; color:var(--text-muted);">Loading your reports…</div>
       </div>
@@ -211,6 +232,12 @@
     const map = { submitted:'pill-open', acknowledged:'pill-progress', resolved:'pill-resolved', closed:'pill-closed' };
     return map[(status||'').toLowerCase()] || 'pill-open';
   }
+  const STATUS_LABELS = {
+    submitted:    'Submitted — waiting for review',
+    acknowledged: 'Being reviewed',
+    resolved:     'Resolved',
+    closed:       'Closed',
+  };
 
   // Set today's date as default
   document.getElementById('incDate').value = (function () {
@@ -228,16 +255,23 @@
     const btn = document.getElementById('submitIncBtn');
     hide('incidentError'); hide('incidentSuccess');
 
-    const type = document.getElementById('incType').value;
-    const site = document.getElementById('incSite').value.trim();
-    const desc = document.getElementById('incDesc').value.trim();
-    const date = document.getElementById('incDate').value;
-    const time = document.getElementById('incTime').value;
+    const type   = document.getElementById('incType').value;
+    const site   = document.getElementById('incSite').value.trim();
+    const what   = document.getElementById('incWhat').value.trim();
+    const who    = document.getElementById('incWho').value.trim();
+    const action = document.getElementById('incAction').value;
+    const date   = document.getElementById('incDate').value;
+    const time   = document.getElementById('incTime').value;
 
-    if (!type || !site || !desc || !date) {
+    if (!type || !site || !what || !action || !date) {
       showMsg('incidentError', 'Please fill in all required fields.');
       return;
     }
+
+    // Combine structured fields into a single description for the backend
+    const desc = 'What happened: ' + what +
+      (who ? '\nWho was involved: ' + who : '') +
+      '\nAction taken: ' + action;
 
     btn.textContent = 'Submitting…';
     btn.disabled = true;
@@ -254,12 +288,12 @@
         submitted_at:  firebase.firestore.FieldValue.serverTimestamp(),
       });
 
-      showMsg('incidentSuccess', 'Report submitted. Your supervisor will be notified.');
+      showMsg('incidentSuccess', 'Report submitted. Your supervisor has been notified.');
       document.getElementById('incidentForm').reset();
       document.getElementById('incDate').value = date; // keep date default
       loadIncidents(currentUid);
     } catch (err) {
-      showMsg('incidentError', 'Submission failed: ' + err.message);
+      showMsg('incidentError', 'Could not submit report. Check your internet and try again.');
     }
     btn.textContent = 'Submit Report';
     btn.disabled = false;
@@ -275,7 +309,7 @@
         .get();
 
       if (snap.empty) {
-        setHTML('incidentsList', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>No incidents filed yet.</div>');
+        setHTML('incidentsList', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>No incidents filed yet. If something happened at your site, use the form above to report it.</div>');
         return;
       }
 
@@ -293,7 +327,7 @@
                 <span>${d.site || '—'}</span>
                 <span>${d.incident_date || '—'}</span>
                 <span>Filed: ${fmtTimestamp(d.submitted_at)}</span>
-                <span class="complaint-status-pill ${pillCls}">${d.status || 'submitted'}</span>
+                <span class="complaint-status-pill ${pillCls}">${STATUS_LABELS[(d.status||'').toLowerCase()] || d.status || 'Submitted'}</span>
               </div>
             </div>
           </div>`;
@@ -308,6 +342,11 @@
   // ── Nav & auth ─────────────────────────────────────────────────────────────
   document.getElementById('navToggle').addEventListener('click', function () {
     document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-link').forEach(function (a) {
+    a.addEventListener('click', function () {
+      document.getElementById('sidebar').classList.remove('open');
+    });
   });
   document.getElementById('signOutBtn').addEventListener('click', function () {
     auth.signOut().then(function () { window.location.href = 'portal.html'; });

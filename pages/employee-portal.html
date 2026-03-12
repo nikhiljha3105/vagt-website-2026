@@ -12,6 +12,20 @@
   <meta http-equiv="Cache-Control" content="no-store"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
+    /* ── Toast notification ── */
+    .toast-msg {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1a7f3c; color: #fff; font-size: 14px; font-weight: 700;
+      padding: 14px 24px; z-index: 9001; box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      white-space: nowrap; pointer-events: none;
+      animation: toastIn 0.2s ease;
+    }
+    .toast-msg.error { background: #c0392b; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
     /* ── Employee sidebar profile block ── */
     .emp-sidebar-profile {
       padding: 14px 20px 16px;
@@ -198,15 +212,15 @@
           <div class="info-strip" style="max-width:100%; margin-bottom:20px;">
             <div class="info-strip-cell">
               <div class="info-strip-value" id="leaveCasual">—</div>
-              <div class="info-strip-label">Casual</div>
+              <div class="info-strip-label">Casual Leave</div>
             </div>
             <div class="info-strip-cell">
               <div class="info-strip-value" id="leaveSick">—</div>
-              <div class="info-strip-label">Sick</div>
+              <div class="info-strip-label">Sick Leave</div>
             </div>
             <div class="info-strip-cell">
               <div class="info-strip-value" id="leaveEarned">—</div>
-              <div class="info-strip-label">Earned</div>
+              <div class="info-strip-label">Earned Days</div>
             </div>
           </div>
           <!-- Latest payslip -->
@@ -225,7 +239,7 @@
           <div style="font-size:13px; color:var(--text-muted);">Loading shifts…</div>
         </div>
         <div style="margin-top:14px;">
-          <a href="employee-schedule.html" style="font-size:12px; color:var(--navy); font-weight:600; text-decoration:none;">
+          <a href="employee-schedule.html" style="display:inline-block; font-size:13px; color:var(--navy); font-weight:700; text-decoration:none; padding:10px 0; min-height:44px; line-height:24px;">
             View full schedule →
           </a>
         </div>
@@ -272,6 +286,17 @@
     return 'Good evening';
   }
 
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  function showToast(msg, type) {
+    const old = document.querySelector('.toast-msg');
+    if (old) old.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-msg' + (type === 'error' ? ' error' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.remove(); }, 3500);
+  }
+
   // ── Live clock ────────────────────────────────────────────────────────────
   function startClock() {
     function tick() {
@@ -286,6 +311,11 @@
   // ── Mobile nav ────────────────────────────────────────────────────────────
   document.getElementById('navToggle').addEventListener('click', function () {
     document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-link').forEach(function (a) {
+    a.addEventListener('click', function () {
+      document.getElementById('sidebar').classList.remove('open');
+    });
   });
 
   // ── Sign out ──────────────────────────────────────────────────────────────
@@ -372,7 +402,7 @@
 
     if (!log) {
       // Not checked in yet
-      badge.textContent = 'Not Checked In';
+      badge.textContent = 'Not Started';
       badge.className   = 'attendance-status-badge status-idle';
       setText('logCheckIn',  '—');
       setText('logCheckOut', '—');
@@ -386,7 +416,7 @@
     } else if (log.check_in && !log.check_out) {
       // Checked in, not out
       todayLogId = log.id;
-      badge.textContent = 'On Duty';
+      badge.textContent = 'You are working';
       badge.className   = 'attendance-status-badge status-active';
       setText('logCheckIn',  fmtTime(log.check_in));
       setText('logCheckOut', '—');
@@ -400,7 +430,7 @@
     } else {
       // Shift complete
       todayLogId = log.id;
-      badge.textContent = 'Shift Complete';
+      badge.textContent = 'Shift finished';
       badge.className   = 'attendance-status-badge status-done';
       setText('logCheckIn',  fmtTime(log.check_in));
       setText('logCheckOut', fmtTime(log.check_out));
@@ -420,7 +450,7 @@
       const res = await fetch('/api/payslips/' + slipId + '/download', {
         headers: { Authorization: 'Bearer ' + token },
       });
-      if (!res.ok) throw new Error('Download failed (' + res.status + ')');
+      if (!res.ok) throw new Error('server error');
       const blob = await res.blob();
       const url  = URL.createObjectURL(blob);
       const a    = document.createElement('a');
@@ -431,9 +461,9 @@
       a.remove();
       URL.revokeObjectURL(url);
     } catch (e) {
-      alert('Could not download payslip. Please try again.\n' + e.message);
+      alert('Could not download payslip. Check your internet and try again.');
     } finally {
-      btn.textContent = '⬇ Download PDF';
+      btn.textContent = 'Download Payslip';
       btn.disabled = false;
     }
   };
@@ -450,8 +480,10 @@
       });
       todayLogId = ref.id;
       await loadAttendance(uid);
+      const now = new Date();
+      showToast('Check-in recorded at ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }));
     } catch (e) {
-      alert('Check-in failed. Please try again.\n' + e.message);
+      showToast('Check-in failed. Check your internet and try again.', 'error');
       if (btn) { btn.textContent = 'Check In'; btn.disabled = false; }
     }
   };
@@ -465,8 +497,10 @@
         check_out: firebase.firestore.FieldValue.serverTimestamp(),
       });
       await loadAttendance(uid);
+      const now = new Date();
+      showToast('Check-out recorded at ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }));
     } catch (e) {
-      alert('Check-out failed. Please try again.\n' + e.message);
+      showToast('Check-out failed. Check your internet and try again.', 'error');
       if (btn) { btn.textContent = 'Check Out'; btn.disabled = false; }
     }
   };
@@ -508,7 +542,7 @@
       setHTML('shiftsBlock', html);
     } catch (e) {
       console.error('Shifts load failed:', e);
-      setHTML('shiftsBlock', '<div style="font-size:13px; color:var(--text-muted);">Could not load shifts.</div>');
+      setHTML('shiftsBlock', '<div style="font-size:13px; color:var(--text-muted);">Could not load shifts. Please refresh.</div>');
     }
   }
 
@@ -539,14 +573,14 @@
         <div class="payslip-preview-row"><span class="k">Allowances</span><span class="v">${fmt(s.allowances)}</span></div>
         <div class="payslip-preview-row"><span class="k">Deductions</span><span class="v">${fmt(s.deductions)}</span></div>
         <div style="margin-top:14px;">
-          <button onclick="downloadPayslip('${slipId}')" class="btn btn-outline-navy" style="font-size:11px; padding:8px 16px;">
-            ⬇ Download PDF
+          <button onclick="downloadPayslip('${slipId}')" class="btn btn-outline-navy" style="font-size:12px; padding:10px 20px; min-height:44px;">
+            Download Payslip
           </button>
         </div>
       `);
     } catch (e) {
       console.error('Payslip load failed:', e);
-      setHTML('payslipBlock', '<div style="font-size:13px; color:var(--text-muted);">Could not load payslip.</div>');
+      setHTML('payslipBlock', '<div style="font-size:13px; color:var(--text-muted);">Could not load payslip. Please refresh.</div>');
     }
   }
 

@@ -51,15 +51,26 @@
     .scan-sub    { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.55; }
     .scan-btn    { width: 100%; max-width: 280px; font-size: 14px; padding: 13px 0; }
 
+    /* Scan active pulse */
+    @keyframes scanPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+      50%       { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+    }
+    .scan-panel.scanning .scan-icon { animation: scanPulse 1.2s ease-in-out infinite; }
+
     /* Scan result toast */
     .scan-result {
       display: none; margin-top: 20px; padding: 14px 18px;
-      border-left: 4px solid var(--amber); background: #fffbf0; text-align: left;
+      border-left: 4px solid var(--amber); background: #fffbf0; text-align: left; position: relative;
     }
     .scan-result.success { border-color: #1a7f3c; background: #f0faf4; }
     .scan-result.error   { border-color: #c0392b; background: #fff5f5; }
     .scan-result-title { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
     .scan-result-meta  { font-size: 12px; color: var(--text-muted); }
+    .scan-result-dismiss {
+      position: absolute; top: 8px; right: 10px;
+      background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text-muted); line-height: 1;
+    }
 
     /* ── QR camera view ── */
     .qr-camera-wrap {
@@ -228,6 +239,7 @@
         <div id="manualHint" style="display:none;"></div>
 
         <div class="scan-result" id="scanResult">
+          <button class="scan-result-dismiss" id="scanResultDismiss" aria-label="Dismiss">×</button>
           <div class="scan-result-title" id="scanResultTitle">—</div>
           <div class="scan-result-meta"  id="scanResultMeta">—</div>
         </div>
@@ -299,8 +311,14 @@
     setText('scanResultTitle', title);
     setText('scanResultMeta',  meta);
     el.style.display = '';
-    setTimeout(function () { el.style.display = 'none'; }, 6000);
+    // Auto-hide after 10s but guard can dismiss early
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(function () { el.style.display = 'none'; }, 10000);
   }
+
+  document.getElementById('scanResultDismiss').addEventListener('click', function () {
+    document.getElementById('scanResult').style.display = 'none';
+  });
 
   // ── Log a checkpoint ───────────────────────────────────────────────────────
   async function logCheckpoint(tagId, method) {
@@ -337,40 +355,44 @@
       '<path d="M14 7a3 3 0 010 10"/><rect x="2" y="8" width="8" height="8" rx="1"/></svg>';
 
     setText('scanTitle', 'Ready to Scan');
-    setText('scanSub',   'Press the button, then hold your phone flat against the NFC sticker at each checkpoint.');
+    setText('scanSub',   'Press the button below. Then hold the back of your phone against the NFC sticker for 1–2 seconds.');
     show('nfcBtn');
 
     document.getElementById('nfcBtn').addEventListener('click', async function () {
       const btn = this;
+      const panel = document.querySelector('.scan-panel');
       if (nfcActive) {
         if (nfcReader && nfcReader.abort) nfcReader.abort();
         nfcActive = false;
+        panel.classList.remove('scanning');
         btn.textContent = 'Start NFC Scan';
         btn.classList.replace('btn-amber', 'btn-navy');
-        setText('scanSub', 'Press the button, then hold your phone flat against the NFC sticker at each checkpoint.');
+        setText('scanSub', 'Press the button below. Then hold the back of your phone against the NFC sticker for 1–2 seconds.');
         return;
       }
       try {
         nfcReader = new NDEFReader();
         await nfcReader.scan();
         nfcActive = true;
+        panel.classList.add('scanning');
         btn.textContent = 'Stop Scanning';
         btn.classList.replace('btn-navy', 'btn-amber');
-        setText('scanSub', 'Scanning active. Hold your phone against a checkpoint tag…');
+        setText('scanSub', 'Scanning active. Hold the back of your phone flat against the NFC sticker and keep still…');
 
         nfcReader.addEventListener('reading', function ({ serialNumber }) {
           if (serialNumber) logCheckpoint(serialNumber, 'nfc');
         });
         nfcReader.addEventListener('readingerror', function () {
-          showResult('error', 'Tag read error', 'Move your phone closer to the NFC tag.');
+          showResult('error', 'Could not read tag', 'Try again — move your phone slowly over the sticker.');
         });
       } catch (err) {
         nfcActive = false;
+        panel.classList.remove('scanning');
         btn.textContent = 'Start NFC Scan';
         if (err.name === 'NotAllowedError') {
-          showResult('error', 'Permission denied', 'Please allow NFC access when prompted.');
+          showResult('error', 'NFC access denied', 'Allow NFC access when your phone asks for permission.');
         } else {
-          showResult('error', 'NFC error', err.message || 'Could not start NFC scan.');
+          showResult('error', 'NFC not available', 'Could not start NFC scan. Try again or use Manual mode.');
         }
       }
     });
@@ -392,7 +414,7 @@
       '<rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>';
 
     setText('scanTitle', 'Ready to Scan QR');
-    setText('scanSub',   'Press Start, then point your camera at the QR code on the checkpoint sticker.');
+    setText('scanSub',   'Press Start, then hold your phone 15–20 cm from the QR code. Keep it steady — it scans automatically.');
     show('qrBtn');
 
     const video    = document.getElementById('qrVideo');
@@ -419,12 +441,13 @@
     function stopQR() {
       qrActive = false;
       cancelAnimationFrame(qrRafHandle);
-      if (qrStream) { qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
+      if (qrStream) { qrStream.getTracks().forEach(function (t) { t.stop(); }); qrStream = null; }
       document.getElementById('qrCameraWrap').classList.remove('active');
+      document.querySelector('.scan-panel').classList.remove('scanning');
       const btn = document.getElementById('qrBtn');
       btn.textContent = 'Start QR Scan';
       btn.classList.replace('btn-amber', 'btn-navy');
-      setText('scanSub', 'Press Start, then point your camera at the QR code on the checkpoint sticker.');
+      setText('scanSub', 'Press Start, then hold your phone 15–20 cm from the QR code. Keep it steady — it scans automatically.');
     }
 
     document.getElementById('qrBtn').addEventListener('click', async function () {
@@ -433,15 +456,16 @@
         qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         video.srcObject = qrStream;
         document.getElementById('qrCameraWrap').classList.add('active');
+        document.querySelector('.scan-panel').classList.add('scanning');
         qrActive = true;
         this.textContent = 'Stop Scanning';
         this.classList.replace('btn-navy', 'btn-amber');
-        setText('scanSub', 'Scanning active. Hold the QR code steady in the frame…');
+        setText('scanSub', 'Scanning. Center the QR code inside the frame and keep your phone steady.');
         qrDetectLoop();
       } catch (err) {
-        showResult('error', 'Camera error', err.name === 'NotAllowedError'
-          ? 'Please allow camera access when prompted.'
-          : err.message || 'Could not open camera.');
+        showResult('error', 'Camera not available', err.name === 'NotAllowedError'
+          ? 'Allow camera access when your phone asks for permission.'
+          : 'Could not open camera. Try again or use Manual mode.');
       }
     });
   }
@@ -502,11 +526,7 @@
       // Track which checkpoints were already done (for manual button refresh)
       scannedToday = new Set(items.map(function (i) { return i.checkpoint_id || i.checkpoint_label; }));
 
-      const ICONS = {
-        nfc:    '📶',
-        qr:     '📷',
-        manual: '👆',
-      };
+      const METHOD_LABELS = { nfc: 'NFC', qr: 'Camera', manual: 'Manual' };
 
       const html = items.map(function (log) {
         const method = log.scan_method || 'nfc';
@@ -517,7 +537,7 @@
               <div class="patrol-log-label">${log.checkpoint_label}</div>
               <div class="patrol-log-meta">
                 ${log.site_name ? `<span>${log.site_name}</span>` : ''}
-                <span class="method-tag ${method}">${ICONS[method] || ''} ${method}</span>
+                <span class="method-tag ${method}">${METHOD_LABELS[method] || method}</span>
               </div>
             </div>
           </div>`;
@@ -541,7 +561,7 @@
 
   function renderCheckpoints() {
     if (!checkpoints.length) {
-      setHTML('checkpointList', '<div style="font-size:13px; color:var(--text-muted);">No checkpoints configured for your site. Ask your admin to add them.</div>');
+      setHTML('checkpointList', '<div style="font-size:13px; color:var(--text-muted);">No checkpoints set up for your site yet. Ask your supervisor to contact the admin.</div>');
       return;
     }
 
@@ -562,7 +582,7 @@
             <div class="cp-dot" style="${done ? 'background:#1a7f3c' : ''}"></div>
             <div>
               <div class="cp-label">${cp.label}</div>
-              <div class="cp-tag">Tag: ${cp.nfc_tag_id}</div>
+              <div class="cp-tag" style="display:none;">Tag: ${cp.nfc_tag_id}</div>
             </div>
           </div>
           ${btnHtml}
@@ -594,6 +614,11 @@
   // ── Nav & auth ─────────────────────────────────────────────────────────────
   document.getElementById('navToggle').addEventListener('click', function () {
     document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-link').forEach(function (a) {
+    a.addEventListener('click', function () {
+      document.getElementById('sidebar').classList.remove('open');
+    });
   });
   document.getElementById('signOutBtn').addEventListener('click', function () {
     auth.signOut().then(function () { window.location.href = 'portal.html'; });
