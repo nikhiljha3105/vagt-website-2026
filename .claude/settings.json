@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git fetch origin && git checkout claude/review-website-git-dPWyR && git pull origin claude/review-website-git-dPWyR"
+          }
+        ]
+      }
+    ]
+  }
+}
