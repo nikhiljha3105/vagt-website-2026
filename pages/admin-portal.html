@@ -56,6 +56,10 @@
     .btn-approve { font-size:11px; font-weight:700; padding:5px 12px; background:var(--navy); color:var(--white); border:none; cursor:pointer; }
     .btn-approve:hover { background:var(--navy-400); }
     .btn-reject  { font-size:11px; font-weight:700; padding:5px 12px; background:none; color:var(--red); border:1px solid var(--red); cursor:pointer; }
+    /* Clickable stat cells */
+    .stat-cell-link { display:block; text-decoration:none; color:inherit; }
+    .stat-cell-link:hover { background:rgba(0,40,100,0.04); }
+    .stat-cell-link .stat-value { color:var(--navy); }
   </style>
 </head>
 <body>
@@ -132,31 +136,32 @@
     <div class="page-header">
       <div class="section-label">Admin Portal</div>
       <h1 id="pageGreeting">Overview</h1>
-      <p id="pageSubtitle">Operations dashboard</p>
+      <p id="pageSubtitle" style="color:var(--text-muted);font-size:13px;"></p>
     </div>
 
     <div class="dash-content">
 
       <!-- Stat strip -->
       <div class="stat-strip">
-        <div class="stat-cell">
+        <a href="admin-employees.html" class="stat-cell stat-cell-link">
           <div class="stat-value" id="statEmployees">—</div>
           <div class="stat-label">Active employees</div>
           <div class="stat-sub" id="statPending"></div>
-        </div>
+        </a>
         <div class="stat-cell">
           <div class="stat-value" id="statCheckedIn">—</div>
           <div class="stat-label">Checked in today</div>
           <div class="stat-sub" id="statOnDuty"></div>
         </div>
-        <div class="stat-cell">
+        <a href="admin-complaints.html" class="stat-cell stat-cell-link">
           <div class="stat-value" id="statTickets">—</div>
           <div class="stat-label">Open tickets</div>
           <div class="stat-sub" id="statUrgent"></div>
-        </div>
+        </a>
         <div class="stat-cell">
           <div class="stat-value" id="statLeaves">—</div>
           <div class="stat-label">Pending leaves</div>
+          <div class="stat-sub" id="statIncidents"></div>
         </div>
       </div>
 
@@ -242,8 +247,11 @@
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('portalLayout').style.display = '';
     document.getElementById('navToggle').style.display = '';
-    setText('sidebarName', user.displayName || user.email || 'Admin');
-    setText('pageGreeting', greeting());
+    const displayName = user.displayName || user.email || 'Admin';
+    const firstName = displayName.split(' ')[0];
+    setText('sidebarName', displayName);
+    setText('pageGreeting', greeting() + ', ' + firstName);
+    setText('pageSubtitle', new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' }));
     loadAll();
   });
 
@@ -253,26 +261,30 @@
 
   async function loadOverview() {
     try {
-      const [empSnap, attendSnap, ticketsSnap, leavesSnap] = await Promise.all([
-        db.collection('employees').get(),
-        db.collection('attendance_logs').where('date', '==', todayStr()).get(),
+      const today = todayStr();
+      const [empSnap, attendSnap, ticketsSnap, leavesSnap, incidentsSnap] = await Promise.all([
+        db.collection('employees').where('status', '==', 'active').get(),
+        db.collection('attendance_logs').where('date', '==', today).get(),
         db.collection('complaints').where('status', 'in', ['open', 'in_progress']).get(),
         db.collection('leave_requests').where('status', '==', 'pending').get(),
+        db.collection('incidents').where('submitted_at', '>=', new Date(today)).get(),
       ]);
-      const emps    = empSnap.docs.map(d => d.data());
-      const active  = emps.filter(e => e.status === 'active').length;
-      const pending = emps.filter(e => e.status === 'pending').length;
-      const checkedIn = attendSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
-      const onDuty  = attendSnap.size;
-      const urgent  = ticketsSnap.docs.filter(d => d.data().priority === 'urgent').length;
 
-      setText('statEmployees', active);
-      setText('statPending', pending > 0 ? pending + ' pending approval' : '');
+      // Pending-approval count from a separate query (not fetching all employees)
+      const pendingSnap = await db.collection('employees').where('status', '==', 'pending').get();
+
+      const checkedIn = attendSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
+      const onDuty    = attendSnap.size;
+      const urgent    = ticketsSnap.docs.filter(d => d.data().priority === 'urgent').length;
+
+      setText('statEmployees', empSnap.size);
+      setText('statPending', pendingSnap.size > 0 ? pendingSnap.size + ' pending approval' : '');
       setText('statCheckedIn', checkedIn);
       setText('statOnDuty', onDuty > 0 ? 'of ' + onDuty + ' on duty' : '');
       setText('statTickets', ticketsSnap.size);
       setText('statUrgent', urgent > 0 ? urgent + ' urgent' : '');
       setText('statLeaves', leavesSnap.size);
+      setText('statIncidents', incidentsSnap.size > 0 ? incidentsSnap.size + ' incident' + (incidentsSnap.size > 1 ? 's' : '') + ' today' : '');
     } catch (e) { console.error(e); }
   }
 
@@ -300,34 +312,38 @@
 
   async function loadRegistrations() {
     try {
-      const snap = await db.collection('pending_registrations')
-        .where('verified', '==', true)
-        .orderBy('verified_at', 'desc')
-        .limit(5)
-        .get();
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/admin/pending-registrations', {
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      if (!resp.ok) throw new Error(resp.statusText);
+      const items = await resp.json();
 
-      if (snap.empty) {
-        setHTML('registrationsBlock', '<div style="font-size:13px;color:var(--text-muted);">No pending registrations.</div>');
+      if (!items.length) {
+        setHTML('registrationsBlock', '<div style="font-size:13px;color:var(--text-muted);">No pending registrations. ✓</div>');
         return;
       }
 
-      const html = snap.docs.map(doc => {
-        const d = doc.data();
-        const initials = (d.phone || '?').slice(-2);
-        return `<div class="pending-item" id="reg-${doc.id}">
+      const html = items.map(d => {
+        const initials = (d.name || d.phone || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() || (d.phone||'?').slice(-2);
+        const appliedDate = d.applied_at ? new Date(d.applied_at).toLocaleDateString('en-IN') : '—';
+        return `<div class="pending-item" id="reg-${d.id}">
           <div class="pending-avatar">${esc(initials)}</div>
           <div>
             <div class="pending-name">${esc(d.name || d.phone)}</div>
-            <div class="pending-meta">${esc(d.phone)} · Applied ${d.created_at ? d.created_at.toDate().toLocaleDateString('en-IN') : '—'}</div>
+            <div class="pending-meta">${esc(d.phone)} · Applied ${appliedDate}</div>
           </div>
           <div class="pending-actions">
-            <button class="btn-approve" onclick="approveReg('${doc.id}')">Approve</button>
-            <button class="btn-reject"  onclick="rejectReg('${doc.id}')">Reject</button>
+            <button class="btn-approve" onclick="approveReg('${d.id}')">Approve</button>
+            <button class="btn-reject"  onclick="rejectReg('${d.id}')">Reject</button>
           </div>
         </div>`;
       }).join('');
       setHTML('registrationsBlock', html);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+      console.error(e);
+      setHTML('registrationsBlock', '<div style="font-size:13px;color:var(--text-muted);">Could not load registrations.</div>');
+    }
   }
 
   async function loadLeaves() {
@@ -370,20 +386,44 @@
   }
 
   window.approveReg = async function (id) {
-    if (!confirm('Approve this registration?')) return;
+    if (!confirm('Approve this registration?\n\nThis will enable the guard\'s account and set their role. They can log in immediately after.')) return;
+    const btn = document.querySelector('#reg-' + id + ' .btn-approve');
+    if (btn) { btn.disabled = true; btn.textContent = 'Approving…'; }
     try {
-      await db.collection('pending_registrations').doc(id).update({ approved: true, approved_at: new Date() });
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/admin/registrations/' + id + '/approve', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      });
+      const data = await resp.json();
+      if (!resp.ok) { alert('Failed: ' + (data.message || resp.statusText)); if (btn) { btn.disabled=false; btn.textContent='Approve'; } return; }
       document.getElementById('reg-' + id)?.remove();
-      // Note: full account creation requires Cloud Functions (admin SDK). This marks it for processing.
-    } catch (e) { alert('Failed: ' + e.message); }
+      // Decrement pending count in overview
+      const el = document.getElementById('statPending');
+      if (el) {
+        const n = parseInt(el.textContent) || 0;
+        el.textContent = n > 1 ? (n - 1) + ' pending approval' : '';
+      }
+    } catch (e) { alert('Network error: ' + e.message); if (btn) { btn.disabled=false; btn.textContent='Approve'; } }
   };
+
   window.rejectReg = async function (id) {
     const reason = prompt('Reason for rejection (optional):');
-    if (reason === null) return;
+    if (reason === null) return; // cancelled
+    if (!confirm('Reject this registration? The guard\'s account will be deleted.')) return;
+    const btn = document.querySelector('#reg-' + id + ' .btn-reject');
+    if (btn) { btn.disabled = true; btn.textContent = 'Rejecting…'; }
     try {
-      await db.collection('pending_registrations').doc(id).update({ rejected: true, reject_reason: reason, rejected_at: new Date() });
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/admin/registrations/' + id + '/reject', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) { alert('Failed: ' + (data.message || resp.statusText)); if (btn) { btn.disabled=false; btn.textContent='Reject'; } return; }
       document.getElementById('reg-' + id)?.remove();
-    } catch (e) { alert('Failed: ' + e.message); }
+    } catch (e) { alert('Network error: ' + e.message); if (btn) { btn.disabled=false; btn.textContent='Reject'; } }
   };
   window.approveLeave = async function (id) {
     if (!confirm('Approve this leave request?')) return;

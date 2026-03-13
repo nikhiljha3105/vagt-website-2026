@@ -37,7 +37,7 @@
       <div id="stepPicker">
         <div class="role-picker-grid">
 
-          <button class="role-card" onclick="goToLogin()">
+          <button class="role-card" onclick="goToLogin('employee')">
             <div class="role-card-icon">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
             </div>
@@ -46,7 +46,7 @@
             <div class="role-card-arrow">→</div>
           </button>
 
-          <button class="role-card" onclick="goToLogin()">
+          <button class="role-card" onclick="goToLogin('client')">
             <div class="role-card-icon">
               <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
@@ -55,7 +55,7 @@
             <div class="role-card-arrow">→</div>
           </button>
 
-          <button class="role-card" onclick="goToLogin()">
+          <button class="role-card" onclick="goToLogin('admin')">
             <div class="role-card-icon">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
             </div>
@@ -281,22 +281,39 @@
   });
 
   // ── Navigation ────────────────────────────────────────────────────────────
-  window.goToLogin = function () {
+  window.goToLogin = function (role) {
     hide('stepPicker'); hide('stepForgot'); show('stepLogin');
     hide('loginError');
-    setHeader('Employee Login', 'Sign in to your account',
-              'Use the email and password provided by your VAGT manager.');
+
+    if (role === 'admin') {
+      setHeader('Admin Login', 'Sign in to the admin portal',
+                'Use the email and password set up by your VAGT administrator.');
+      // Admins don't use guard keycodes — hide that tab
+      hide('loginTabs');
+      switchTab('email');
+    } else if (role === 'client') {
+      setHeader('Client Login', 'Sign in to your client portal',
+                'Use the email and password provided by your VAGT account manager.');
+      hide('loginTabs');
+      switchTab('email');
+    } else {
+      setHeader('Employee Login', 'Sign in to your account',
+                'Use the email and password provided by your VAGT manager.');
+      show('loginTabs');
+    }
   };
 
   window.goToForgot = function () {
     hide('stepLogin'); hide('stepPicker'); show('stepForgot');
     hide('forgotError'); hide('forgotSuccess');
+    show('loginTabs'); // restore for next time
     setHeader('Password Reset', 'Reset your password',
               'We\'ll send a reset link to your registered work email.');
   };
 
   window.goBack = function () {
     hide('stepLogin'); hide('stepForgot'); show('stepPicker');
+    show('loginTabs'); // restore tabs for next login
     setHeader('VAGT Portals', 'Choose your access level',
               'Select your role to continue to the secure login area.');
   };

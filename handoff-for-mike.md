@@ -1,5 +1,5 @@
 # VAGT Website — Handoff for Mike
-**Last updated:** 2026-03-12
+**Last updated:** 2026-03-13
 
 ---
 
@@ -11,11 +11,27 @@ Active branch: `claude/review-website-git-dPWyR`
 
 ---
 
-## 🛑 NIKHIL'S STANDING INSTRUCTION — NO NEW BUILDING
+## Session Update — 2026-03-13
 
-**Do not build new features or write new code until Nikhil says otherwise.**
+### All 5 disabled admin pages are now BUILT
 
-Your job right now is **manual tasks only** (see Pending section). If you find yourself about to write a new route, a new HTML page, or a new feature — **stop and ask Nikhil first**.
+| Page | Lines | Status |
+|------|-------|--------|
+| `admin-payroll.html` | 319 | Built — month nav, stat strip, payroll table, run payroll button |
+| `admin-reports.html` | 267 | Built — period selector, attendance by site, SLA compliance, incidents, leave |
+| `admin-schedule.html` | 356 | Built — week view, shift table, create shift modal, delete shift |
+| `admin-clients.html` | 315 | Built — client list with detail drawer, sites, open tickets |
+| `admin-sites.html` | 241 | Built — site list with coverage badges, guard roster, filter by client |
+
+### Bug fixed this session
+- **admin-reports.html** was missing `firebase-firestore-compat.js` script tag — added
+
+### Workflow reference created
+- `WORKFLOW-REFERENCE-2026-03-13.md` — comprehensive step-by-step reference for ALL platform features across all 4 portals
+
+### Still blocked
+- **Admin custom claim** — `set-admin-claim.js` still needs to be run from Mac
+- **Deploy** — local changes need `firebase deploy`
 
 ---
 
