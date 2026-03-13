@@ -47,6 +47,16 @@
     .note-input { font-size:12px; padding:7px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); outline:none; flex:1; min-width:160px; }
     .btn-update { font-size:12px; font-weight:700; padding:7px 16px; background:var(--navy); color:var(--white); border:none; cursor:pointer; }
     .btn-update:hover { background:var(--navy-400); }
+
+    /* Stat strip */
+    .cmp-stat-strip { display:flex; gap:0; border:1px solid var(--border); margin-bottom:28px; }
+    .cmp-stat-cell  { flex:1; padding:16px 20px; border-right:1px solid var(--border); }
+    .cmp-stat-cell:last-child { border-right:none; }
+    .cmp-stat-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); margin-bottom:5px; }
+    .cmp-stat-value { font-size:26px; font-weight:900; color:var(--navy); line-height:1; }
+    .cmp-stat-value.red   { color:#7a0000; }
+    .cmp-stat-value.amber { color:#5a4200; }
+    .cmp-stat-value.green { color:#005c30; }
   </style>
 </head>
 <body>
@@ -127,6 +137,25 @@
     </div>
     <div class="page-content">
 
+      <div class="cmp-stat-strip">
+        <div class="cmp-stat-cell">
+          <div class="cmp-stat-label">Open</div>
+          <div class="cmp-stat-value red" id="cntOpen">—</div>
+        </div>
+        <div class="cmp-stat-cell">
+          <div class="cmp-stat-label">In Progress</div>
+          <div class="cmp-stat-value amber" id="cntInProgress">—</div>
+        </div>
+        <div class="cmp-stat-cell">
+          <div class="cmp-stat-label">Resolved</div>
+          <div class="cmp-stat-value green" id="cntResolved">—</div>
+        </div>
+        <div class="cmp-stat-cell">
+          <div class="cmp-stat-label">Total</div>
+          <div class="cmp-stat-value" id="cntTotal">—</div>
+        </div>
+      </div>
+
       <div class="filter-bar">
         <div>
           <label>Search</label>
@@ -197,11 +226,19 @@
     loadComplaints();
   });
 
+  function updateStatStrip() {
+    setText('cntOpen',       allComplaints.filter(c => c.status === 'open').length);
+    setText('cntInProgress', allComplaints.filter(c => c.status === 'in_progress').length);
+    setText('cntResolved',   allComplaints.filter(c => c.status === 'resolved').length);
+    setText('cntTotal',      allComplaints.length);
+  }
+
   async function loadComplaints() {
     setHTML('complaintsWrap', '<div style="font-size:13px;color:var(--text-muted);">Loading…</div>');
     try {
       const snap = await db.collection('complaints').orderBy('created_at', 'desc').limit(100).get();
       allComplaints = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      updateStatStrip();
       renderComplaints(allComplaints);
     } catch (e) {
       console.error(e);
@@ -268,9 +305,10 @@
         admin_note: note || null,
         updated_at: new Date(),
       });
-      // Update in-memory and re-render
+      // Update in-memory
       const idx = allComplaints.findIndex(c => c.id === id);
       if (idx >= 0) { allComplaints[idx].status = newStatus; allComplaints[idx].admin_note = note; }
+      updateStatStrip();
       // Update just this card's badges without full re-render
       const card = document.getElementById('cmp-' + id);
       if (card) {

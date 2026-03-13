@@ -20,6 +20,16 @@
     .page-content { padding: 40px 56px; }
     @media (max-width: 900px) { .page-content { padding: 28px 24px; } }
 
+    /* Stat strip */
+    .emp-stat-strip { display:flex; gap:0; border:1px solid var(--border); margin-bottom:28px; }
+    .emp-stat-cell  { flex:1; padding:16px 20px; border-right:1px solid var(--border); }
+    .emp-stat-cell:last-child { border-right:none; }
+    .emp-stat-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); margin-bottom:5px; }
+    .emp-stat-value { font-size:26px; font-weight:900; color:var(--navy); line-height:1; }
+    .emp-stat-value.green  { color:#005c30; }
+    .emp-stat-value.amber  { color:#5a4200; }
+    .emp-stat-value.muted  { color:var(--text-muted); }
+
     .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; align-items:flex-end; }
     .filter-bar label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); display:block; margin-bottom:5px; }
     .filter-bar select, .filter-bar input[type="search"] { font-size:12px; padding:8px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); outline:none; }
@@ -143,6 +153,25 @@
     </div>
     <div class="page-content">
 
+      <div class="emp-stat-strip">
+        <div class="emp-stat-cell">
+          <div class="emp-stat-label">Active</div>
+          <div class="emp-stat-value green" id="countActive">—</div>
+        </div>
+        <div class="emp-stat-cell">
+          <div class="emp-stat-label">Pending Approval</div>
+          <div class="emp-stat-value amber" id="countPending">—</div>
+        </div>
+        <div class="emp-stat-cell">
+          <div class="emp-stat-label">Inactive</div>
+          <div class="emp-stat-value muted" id="countInactive">—</div>
+        </div>
+        <div class="emp-stat-cell">
+          <div class="emp-stat-label">Total</div>
+          <div class="emp-stat-value" id="countTotal">—</div>
+        </div>
+      </div>
+
       <div class="filter-bar">
         <div>
           <label>Search</label>
@@ -227,7 +256,17 @@
     try {
       const snap = await db.collection('employees').orderBy('name').get();
       allEmployees = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setText('pageSubtitle', allEmployees.length + ' employee' + (allEmployees.length !== 1 ? 's' : '') + ' registered.');
+
+      // Populate stat strip
+      const active   = allEmployees.filter(e => e.status === 'active').length;
+      const pending  = allEmployees.filter(e => e.status === 'pending').length;
+      const inactive = allEmployees.filter(e => e.status === 'inactive').length;
+      setText('countActive',   active);
+      setText('countPending',  pending);
+      setText('countInactive', inactive);
+      setText('countTotal',    allEmployees.length);
+      setText('pageSubtitle',  allEmployees.length + ' employee' + (allEmployees.length !== 1 ? 's' : '') + ' registered.');
+
       renderTable(allEmployees);
     } catch (e) {
       console.error(e);
@@ -258,7 +297,7 @@
         <td><span class="status-badge badge-${esc(e.status || 'pending')}">${esc(e.status || 'pending')}</span></td>
         <td style="white-space:nowrap;">
           ${actionBtn}
-          <button class="action-btn" style="margin-left:6px;" onclick="generateKeycode('${e.id}')">Keycode</button>
+          <button class="action-btn" data-kc="1" style="margin-left:6px;" onclick="generateKeycode('${e.id}')">Keycode</button>
         </td>
       </tr>`;
     }).join('');
@@ -317,26 +356,53 @@
   });
 
   window.toggleStatus = async function (uid, newStatus) {
+    const emp   = allEmployees.find(e => e.id === uid);
+    const name  = emp ? (emp.name || 'this employee') : 'this employee';
     const label = newStatus === 'inactive' ? 'Deactivate' : 'Activate';
-    if (!confirm(label + ' this employee?')) return;
+    if (!confirm(label + ' ' + name + '?\n\n' + (newStatus === 'inactive' ? 'They will no longer be able to log in.' : 'They will be able to log in again.'))) return;
+
+    const row = document.getElementById('emp-' + uid);
+    if (row) { const btn = row.querySelector('.action-btn:not(.danger), .action-btn.danger'); if (btn) { btn.disabled = true; btn.textContent = '…'; } }
+
     try {
-      await db.collection('employees').doc(uid).update({ status: newStatus, updated_at: new Date() });
+      const token    = await firebase.auth().currentUser.getIdToken();
+      const endpoint = newStatus === 'inactive' ? 'deactivate' : 'reactivate';
+      const resp     = await fetch('/api/admin/employees/' + uid + '/' + endpoint, {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        alert('Failed: ' + (data.message || resp.statusText));
+        if (row) { const btn = row.querySelector('.action-btn'); if (btn) { btn.disabled = false; btn.textContent = label; } }
+        return;
+      }
+
       // Update in memory
-      const emp = allEmployees.find(e => e.id === uid);
       if (emp) emp.status = newStatus;
-      // Update row badge
-      const row = document.getElementById('emp-' + uid);
+
+      // Update stat strip counts
+      const active   = allEmployees.filter(e => e.status === 'active').length;
+      const inactive = allEmployees.filter(e => e.status === 'inactive').length;
+      setText('countActive',   active);
+      setText('countInactive', inactive);
+
+      // Update row in place
       if (row) {
         const badge = row.querySelector('.status-badge');
         if (badge) { badge.className = 'status-badge badge-' + newStatus; badge.textContent = newStatus; }
-        const btn = row.querySelector('.action-btn');
+        const btn = row.querySelector('.action-btn:not([data-kc])');
         if (btn) {
+          btn.disabled = false;
           btn.className = newStatus === 'active' ? 'action-btn danger' : 'action-btn';
           btn.textContent = newStatus === 'active' ? 'Deactivate' : 'Activate';
           btn.setAttribute('onclick', `toggleStatus('${uid}', '${newStatus === 'active' ? 'inactive' : 'active'}')`);
         }
       }
-    } catch (e) { alert('Failed: ' + e.message); }
+    } catch (e) {
+      alert('Network error: ' + e.message);
+      if (row) { const btn = row.querySelector('.action-btn'); if (btn) { btn.disabled = false; btn.textContent = label; } }
+    }
   };
 
 })();
