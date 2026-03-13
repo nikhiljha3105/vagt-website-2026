@@ -77,6 +77,20 @@ Full-stack platform for VAGT Security Services (Bengaluru).
 
 ---
 
+## File Handling — Critical Rule
+
+When Nikhil shares any file (PDF, DOCX, XLSX, image, or other format), you MUST:
+
+1. Extract all relevant content from the file immediately
+2. Save it to the repo — use `client-briefs/` for client documents, `assets/docs/` for reference material
+3. Commit and push before doing anything else with that session
+
+**Never rely on the file being re-uploaded in the next session. It will not be there.**
+
+Filenames should be descriptive and dated: `client-briefs/dsmax-security-requirements-2026-03.md`
+
+---
+
 ## Known Technical Debt
 
 - No input validation library (joi/zod) — manual checks only

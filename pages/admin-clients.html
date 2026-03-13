@@ -3,143 +3,313 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin — Clients | VAGT Security Services</title>
+  <title>Clients &amp; Sites | VAGT Admin Portal</title>
   <meta name="robots" content="noindex, nofollow"/>
-  <meta name="description" content="This section of the VAGT portal is temporarily unavailable while security configuration is completed. Please contact info@vagtsecurityservices.com for assistance."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://api.vagtsecurityservices.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
   <style>
-    .maintenance-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg, #f5f5f5);
-      padding: 40px 20px;
-    }
-    .maintenance-card {
-      background: #fff;
-      border: 1px solid var(--border, #e0e0e0);
-      border-radius: 12px;
-      max-width: 480px;
-      width: 100%;
-      padding: 48px 40px 40px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-    }
-    .maintenance-icon {
-      width: 64px;
-      height: 64px;
-      background: rgba(0,40,100,0.07);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-    }
-    .maintenance-icon svg {
-      width: 28px;
-      height: 28px;
-      stroke: var(--navy, #002864);
-      fill: none;
-      stroke-width: 1.8;
-    }
-    .maintenance-badge {
-      display: inline-block;
-      background: rgba(245,196,0,0.15);
-      color: #7a5c00;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid rgba(245,196,0,0.35);
-      margin-bottom: 18px;
-    }
-    .maintenance-card h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--navy, #002864);
-      margin: 0 0 14px;
-      line-height: 1.3;
-    }
-    .maintenance-card p {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.75;
-      margin: 0 0 28px;
-    }
-    .maintenance-divider {
-      border: none;
-      border-top: 1px solid #eee;
-      margin: 0 0 24px;
-    }
-    .maintenance-contact {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.65;
-    }
-    .maintenance-contact a {
-      color: var(--navy, #002864);
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .maintenance-home-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--navy, #002864);
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 13px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      letter-spacing: 0.02em;
-      margin-bottom: 28px;
-    }
-    .maintenance-home-btn svg {
-      width: 14px; height: 14px;
-      stroke: currentColor; fill: none; stroke-width: 2.2;
-    }
+    .admin-sidebar-profile { padding:14px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .admin-sidebar-name  { font-size:13px; font-weight:700; color:var(--white); line-height:1.3; margin-bottom:2px; }
+    .admin-sidebar-badge { display:inline-block; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:2px 8px; background:var(--amber); color:var(--navy); }
+    #authOverlay { position:fixed; inset:0; background:var(--white); display:flex; align-items:center; justify-content:center; z-index:9999; font-size:13px; color:var(--text-muted); }
+    .page-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .page-content { padding: 28px 24px; } }
+
+    /* Tabs */
+    .tab-bar { display:flex; border-bottom:2px solid var(--border); margin-bottom:28px; gap:0; }
+    .tab-btn { font-size:12px; font-weight:700; padding:10px 20px; border:none; background:none; color:var(--text-muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; }
+    .tab-btn.active { color:var(--navy); border-bottom-color:var(--navy); }
+
+    /* Clients table */
+    .client-table { width:100%; border-collapse:collapse; }
+    .client-table th { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); text-align:left; padding:0 12px 10px 0; border-bottom:1px solid var(--border); }
+    .client-table td { padding:14px 12px 14px 0; border-bottom:1px solid var(--border); font-size:13px; color:var(--text); vertical-align:top; }
+
+    .client-name { font-weight:700; color:var(--navy); margin-bottom:2px; }
+    .client-contact { font-size:11px; color:var(--text-muted); }
+
+    .badge-active   { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; background:rgba(0,150,80,0.12); color:#005c30; }
+    .badge-inactive { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; background:rgba(0,0,0,0.07); color:var(--text-muted); }
+
+    .expand-btn { font-size:11px; font-weight:600; padding:4px 10px; border:1px solid var(--border); background:none; color:var(--text); cursor:pointer; }
+    .expand-btn:hover { background:var(--warm-grey); }
+
+    .client-detail { background:var(--warm-grey,#f8f8f6); border-top:none; }
+    .client-detail td { padding:16px 20px 20px 20px !important; }
+    .detail-inner { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    @media (max-width:600px) { .detail-inner { grid-template-columns:1fr; } }
+    .detail-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); margin-bottom:4px; }
+    .detail-value { font-size:13px; color:var(--text); }
+    .site-list { margin-top:12px; }
+    .site-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+    .site-row:last-child { border-bottom:none; }
+    .site-name { font-weight:600; color:var(--navy); flex:1; }
+    .site-meta  { font-size:11px; color:var(--text-muted); }
+
+    /* Sites tab table (reuse same styles) */
+    .sites-table { width:100%; border-collapse:collapse; }
+    .sites-table th { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); text-align:left; padding:0 12px 10px 0; border-bottom:1px solid var(--border); }
+    .sites-table td { padding:13px 12px 13px 0; border-bottom:1px solid var(--border); font-size:13px; color:var(--text); vertical-align:middle; }
+    .sites-table tr:last-child td { border-bottom:none; }
+
+    .cov-full    { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; background:rgba(0,150,80,0.12); color:#005c30; }
+    .cov-partial { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; background:rgba(245,196,0,0.15); color:#5a4200; }
+    .cov-none    { font-size:10px; font-weight:700; padding:2px 9px; border-radius:20px; background:rgba(0,0,0,0.07); color:var(--text-muted); }
   </style>
 </head>
 <body>
-<div class="maintenance-wrap">
-  <div class="maintenance-card">
 
-    <div class="maintenance-icon">
-      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+<div id="authOverlay">Checking access…</div>
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-white.png" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
     </div>
-
-    <div class="maintenance-badge">Portal Temporarily Disabled</div>
-
-    <h2>Portal Access Unavailable</h2>
-
-    <p>
-      Our client, employee, and admin portals are currently offline
-      while we complete security configuration.
-      We will restore access as soon as the infrastructure is ready.
-    </p>
-
-    <a href="../index.html" class="maintenance-home-btn">
-      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Back to VAGT Home
-    </a>
-
-    <hr class="maintenance-divider"/>
-
-    <div class="maintenance-contact">
-      Need immediate assistance?<br>
-      <a href="mailto:info@vagtsecurityservices.com">info@vagtsecurityservices.com</a>
-      &nbsp;&middot;&nbsp;
-      <a href="tel:+919008977711">+91 90089 77711</a>
+    <div class="admin-sidebar-profile">
+      <div class="admin-sidebar-name" id="sidebarName">—</div>
+      <span class="admin-sidebar-badge">Admin</span>
     </div>
+    <nav class="sidebar-nav" aria-label="Admin portal">
+      <div class="nav-group-label">Operations</div>
+      <a href="admin-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="admin-employees.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Employees
+      </a>
+      <a href="admin-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </a>
+      <a href="admin-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="admin-guests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Visitor Log
+      </a>
+      <div class="nav-group-label">Clients</div>
+      <a href="admin-clients.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Clients &amp; Sites
+      </a>
+      <a href="admin-complaints.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Complaints
+      </a>
+      <div class="nav-group-label">Finance &amp; Reports</div>
+      <a href="admin-payroll.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Payroll
+      </a>
+      <a href="admin-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
 
-  </div>
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Admin Portal</div>
+      <h1>Clients &amp; Sites</h1>
+      <p id="pageSubtitle">All client accounts and deployment sites</p>
+    </div>
+    <div class="page-content">
+
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="clients">Clients</button>
+        <button class="tab-btn" data-tab="sites">All Sites</button>
+      </div>
+
+      <div id="clientsTab">
+        <div style="font-size:13px;color:var(--text-muted);">Loading clients…</div>
+      </div>
+      <div id="sitesTab" style="display:none;">
+        <div style="font-size:13px;color:var(--text-muted);">Loading sites…</div>
+      </div>
+
+    </div>
+  </main>
 </div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  let clientsLoaded = false, sitesLoaded = false;
+  let activeTab = 'clients';
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  document.getElementById('navToggle').addEventListener('click', function () { document.getElementById('sidebar').classList.toggle('open'); });
+  document.getElementById('signOutBtn').addEventListener('click', function () { auth.signOut().then(function () { window.location.href = 'portal.html'; }); });
+
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      activeTab = this.dataset.tab;
+      document.getElementById('clientsTab').style.display = activeTab === 'clients' ? '' : 'none';
+      document.getElementById('sitesTab').style.display   = activeTab === 'sites'   ? '' : 'none';
+      if (activeTab === 'sites' && !sitesLoaded) loadSites();
+    });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role !== 'admin') { window.location.href = 'portal.html'; return; }
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display = '';
+    setText('sidebarName', user.displayName || user.email || 'Admin');
+    loadClients();
+  });
+
+  async function loadClients() {
+    try {
+      const snap = await db.collection('clients').orderBy('name').get();
+      clientsLoaded = true;
+      setText('pageSubtitle', snap.size + ' client' + (snap.size !== 1 ? 's' : ''));
+
+      if (snap.empty) {
+        setHTML('clientsTab', '<div style="font-size:13px;color:var(--text-muted);">No clients yet.</div>');
+        return;
+      }
+
+      const rows = snap.docs.map(function (doc) {
+        const d = doc.data();
+        const statusCls = d.status === 'active' ? 'badge-active' : 'badge-inactive';
+        const contractStr = d.contract_start ? new Date(d.contract_start).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }) : '—';
+        return '<tr>'
+          + '<td><div class="client-name">' + esc(d.name || '—') + '</div>'
+          + '<div class="client-contact">' + esc(d.contact_name || '') + '</div></td>'
+          + '<td>' + esc(d.contact_email || '—') + '<div class="client-contact">' + esc(d.contact_phone || '') + '</div></td>'
+          + '<td style="text-align:center;">' + (d.sites_count || 0) + '</td>'
+          + '<td>' + contractStr + '</td>'
+          + '<td>' + (d.sla_response_hours || 4) + ' hrs</td>'
+          + '<td><span class="' + statusCls + '">' + esc(d.status || 'active') + '</span></td>'
+          + '<td><button class="expand-btn" onclick="toggleDetail(\'' + esc(doc.id) + '\', this)">Details</button></td>'
+          + '</tr>'
+          + '<tr id="detail-' + esc(doc.id) + '" class="client-detail" style="display:none;">'
+          + '<td colspan="7">'
+          + '<div class="detail-inner">'
+          + '<div><div class="detail-label">Email</div><div class="detail-value">' + esc(d.contact_email || '—') + '</div></div>'
+          + '<div><div class="detail-label">Phone</div><div class="detail-value">' + esc(d.contact_phone || '—') + '</div></div>'
+          + '<div><div class="detail-label">SLA Response</div><div class="detail-value">' + (d.sla_response_hours || 4) + ' hours</div></div>'
+          + '<div><div class="detail-label">Contract Start</div><div class="detail-value">' + contractStr + '</div></div>'
+          + (d.notes ? '<div style="grid-column:1/-1"><div class="detail-label">Notes</div><div class="detail-value">' + esc(d.notes) + '</div></div>' : '')
+          + '</div>'
+          + '<div class="site-list" id="sites-' + esc(doc.id) + '"><div style="font-size:12px;color:var(--text-muted);margin-top:12px;">Loading sites…</div></div>'
+          + '</td></tr>';
+      }).join('');
+
+      setHTML('clientsTab', '<table class="client-table">'
+        + '<thead><tr><th>Client</th><th>Contact</th><th style="text-align:center;">Sites</th><th>Contract Start</th><th>SLA</th><th>Status</th><th></th></tr></thead>'
+        + '<tbody>' + rows + '</tbody></table>');
+    } catch (e) {
+      console.error(e);
+      setHTML('clientsTab', '<div style="font-size:13px;color:var(--text-muted);">Could not load clients. ' + esc(e.message) + '</div>');
+    }
+  }
+
+  window.toggleDetail = async function (clientId, btn) {
+    const row = document.getElementById('detail-' + clientId);
+    if (!row) return;
+    const isOpen = row.style.display !== 'none';
+    row.style.display = isOpen ? 'none' : '';
+    btn.textContent = isOpen ? 'Details' : 'Close';
+    if (!isOpen) {
+      // Load sites for this client
+      const sitesEl = document.getElementById('sites-' + clientId);
+      if (sitesEl && sitesEl.dataset.loaded !== 'true') {
+        try {
+          const snap = await db.collection('sites').where('client_uid', '==', clientId).get();
+          if (snap.empty) {
+            sitesEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);margin-top:12px;">No sites assigned.</div>';
+          } else {
+            const header = '<div class="detail-label" style="margin-top:14px;">Deployed Sites (' + snap.size + ')</div>';
+            const items = snap.docs.map(function (s) {
+              const sd = s.data();
+              return '<div class="site-row"><div class="site-name">' + esc(sd.name || '—') + '</div>'
+                + '<div class="site-meta">' + esc(sd.address || '') + '</div>'
+                + '<div class="site-meta">' + (sd.guards_deployed || 0) + ' guards</div></div>';
+            }).join('');
+            sitesEl.innerHTML = header + items;
+          }
+          sitesEl.dataset.loaded = 'true';
+        } catch (e) {
+          sitesEl.innerHTML = '<div style="font-size:12px;color:var(--text-muted);">Could not load sites.</div>';
+        }
+      }
+    }
+  };
+
+  async function loadSites() {
+    try {
+      const snap = await db.collection('sites').orderBy('name').get();
+      sitesLoaded = true;
+
+      if (snap.empty) {
+        setHTML('sitesTab', '<div style="font-size:13px;color:var(--text-muted);">No sites yet.</div>');
+        return;
+      }
+
+      const rows = snap.docs.map(function (doc) {
+        const d = doc.data();
+        const covCls = d.coverage_status === 'full' ? 'cov-full' : d.coverage_status === 'partial' ? 'cov-partial' : 'cov-none';
+        const covLabel = d.coverage_status === 'full' ? 'Full' : d.coverage_status === 'partial' ? 'Partial' : 'None';
+        return '<tr>'
+          + '<td style="font-weight:600;color:var(--navy);">' + esc(d.name || '—') + '</td>'
+          + '<td>' + esc(d.client_name || '—') + '</td>'
+          + '<td>' + esc(d.address || '—') + '</td>'
+          + '<td style="text-align:center;">' + (d.posts_required || 0) + '</td>'
+          + '<td style="text-align:center;">' + (d.guards_deployed || 0) + '</td>'
+          + '<td><span class="' + covCls + '">' + covLabel + '</span></td>'
+          + '</tr>';
+      }).join('');
+
+      setHTML('sitesTab', '<table class="sites-table">'
+        + '<thead><tr><th>Site Name</th><th>Client</th><th>Address</th><th style="text-align:center;">Posts Required</th><th style="text-align:center;">Guards Deployed</th><th>Coverage</th></tr></thead>'
+        + '<tbody>' + rows + '</tbody></table>');
+    } catch (e) {
+      console.error(e);
+      setHTML('sitesTab', '<div style="font-size:13px;color:var(--text-muted);">Could not load sites. ' + esc(e.message) + '</div>');
+    }
+  }
+
+})();
+</script>
 </body>
 </html>
