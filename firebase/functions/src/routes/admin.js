@@ -1039,6 +1039,69 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
+  // ── GET /admins — list all admin accounts ─────────────────────────────────
+  router.get('/admins', ...guard, async (req, res) => {
+    try {
+      const snap   = await db.collection('admins').orderBy('created_at', 'desc').get();
+      const admins = snap.docs.map(d => ({ id: d.id, ...d.data(),
+        created_at: d.data().created_at ? d.data().created_at.toDate().toISOString() : null,
+      }));
+      return res.json({ admins });
+    } catch (e) {
+      console.error('admins list error:', e);
+      return res.status(500).json({ message: 'Failed to load admins.' });
+    }
+  });
+
+  // ── POST /admins — create a new admin account ─────────────────────────────
+  router.post('/admins', ...guard, async (req, res) => {
+    const { name, email, password } = req.body || {};
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required.' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+    }
+    try {
+      const userRecord = await auth.createUser({ email, password, displayName: name, emailVerified: true });
+      await auth.setCustomUserClaims(userRecord.uid, { role: 'admin' });
+      await db.collection('admins').doc(userRecord.uid).set({
+        name, email, status: 'active',
+        created_by: req.user.uid,
+        created_at: new Date(),
+      });
+      await logActivity(db, 'admin_created',
+        `Admin account created for ${name} (${email})`, 'admin', req.user.uid);
+      return res.json({ uid: userRecord.uid, name, email });
+    } catch (e) {
+      console.error('admins create error:', e);
+      if (e.code === 'auth/email-already-exists') {
+        return res.status(400).json({ message: 'An account with this email already exists.' });
+      }
+      return res.status(500).json({ message: e.message });
+    }
+  });
+
+  // ── DELETE /admins/:uid — revoke admin access ──────────────────────────────
+  router.delete('/admins/:uid', ...guard, async (req, res) => {
+    const { uid } = req.params;
+    if (uid === req.user.uid) {
+      return res.status(400).json({ message: "You can't remove your own admin access." });
+    }
+    try {
+      await auth.setCustomUserClaims(uid, {});
+      await db.collection('admins').doc(uid).update({
+        status: 'revoked', revoked_at: new Date(), revoked_by: req.user.uid,
+      });
+      await logActivity(db, 'admin_removed',
+        `Admin access revoked for UID ${uid}`, 'admin', req.user.uid);
+      return res.json({ message: 'Admin access revoked.' });
+    } catch (e) {
+      console.error('admins delete error:', e);
+      return res.status(500).json({ message: e.message });
+    }
+  });
+
   // ── GET /sign-in-events ───────────────────────────────────────────────────
   // Audit log of all keycode sign-ins — who, when, where (GPS), from what device.
   // Optional: ?employee_uid=xxx to filter to one guard. ?limit=N (max 200).

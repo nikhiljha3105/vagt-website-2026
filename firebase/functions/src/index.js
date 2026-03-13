@@ -152,6 +152,47 @@ function requireAdmin(req, res, next) {
   return res.status(403).json({ message: 'Access denied. Admin role required.' });
 }
 
+// ── One-time first-admin setup endpoint ───────────────────────────────────────
+// Solves the bootstrap problem: before ANY admin exists, there's no way to call
+// an admin-protected endpoint.  This endpoint is protected by a passphrase
+// instead of a Firebase token and self-disables once the claim is already set.
+//
+// USAGE (call once from a browser or curl after deploying):
+//   POST https://vagtsecurityservices.com/api/setup/first-admin
+//   Body: { "passphrase": "VAGT-SETUP-2026" }
+//
+// It is safe to leave this in — it does nothing if the claim is already set.
+const SETUP_PASSPHRASE = 'VAGT-SETUP-2026';
+const FIRST_ADMIN_EMAIL = 'admin@vagtsecurityservices.com';
+
+app.post('/api/setup/first-admin', async (req, res) => {
+  const { passphrase } = req.body || {};
+  if (passphrase !== SETUP_PASSPHRASE) {
+    return res.status(403).json({ message: 'Wrong passphrase.' });
+  }
+  try {
+    const user = await auth.getUserByEmail(FIRST_ADMIN_EMAIL);
+    if (user.customClaims && user.customClaims.role === 'admin') {
+      return res.json({ message: 'Admin claim already set. Nothing to do.', uid: user.uid });
+    }
+    await auth.setCustomUserClaims(user.uid, { role: 'admin' });
+    await db.collection('admins').doc(user.uid).set({
+      name:       user.displayName || 'Admin',
+      email:      FIRST_ADMIN_EMAIL,
+      created_at: new Date(),
+      status:     'active',
+    }, { merge: true });
+    await db.collection('activity_log').add({
+      action: 'first_admin_setup', uid: user.uid, email: FIRST_ADMIN_EMAIL,
+      timestamp: new Date(), note: 'Admin claim set via setup endpoint',
+    });
+    return res.json({ message: '✅ Done. Sign out and back in to activate your admin session.', uid: user.uid });
+  } catch (e) {
+    console.error('first-admin setup error:', e);
+    return res.status(500).json({ message: e.message });
+  }
+});
+
 // ── Mount route modules ───────────────────────────────────────────────────────
 // Each route file exports a factory function that receives shared dependencies
 // (db, auth, middleware) and returns an Express router.
