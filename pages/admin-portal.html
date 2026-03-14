@@ -6,7 +6,6 @@
   <title>Admin Portal | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
   <meta http-equiv="Cache-Control" content="no-store"/>
@@ -247,7 +246,7 @@
 
   auth.onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = 'portal.html'; return; }
-    const token = await user.getIdTokenResult();
+    const token = await user.getIdTokenResult(true); // force refresh so custom claims are current
     if (token.claims.role !== 'admin') { window.location.href = 'portal.html'; return; }
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('portalLayout').style.display = '';
