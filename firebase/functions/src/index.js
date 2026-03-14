@@ -165,7 +165,9 @@ function requireAdmin(req, res, next) {
 const SETUP_PASSPHRASE = 'VAGT-SETUP-2026';
 const FIRST_ADMIN_EMAIL = 'admin@vagtsecurityservices.com';
 
-app.post('/api/setup/first-admin', async (req, res) => {
+// Route registered at both paths: via Firebase Hosting the full /api/setup/... path
+// is preserved; via direct Cloud Function URL only /setup/... is seen by Express.
+app.post(['/api/setup/first-admin', '/setup/first-admin'], async (req, res) => {
   const { passphrase } = req.body || {};
   if (passphrase !== SETUP_PASSPHRASE) {
     return res.status(403).json({ message: 'Wrong passphrase.' });
