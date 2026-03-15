@@ -237,7 +237,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
   // IMPORTANT: The password entered here is validated for length but NOT stored.
   // The guard sets their real password later via a reset link sent on admin approval.
   router.post('/employee/register', authLimiter, async (req, res) => {
-    const { phone, email, password } = req.body || {};
+    const { phone, email, password, name } = req.body || {};
     if (!phone || !email || !password) {
       return res.status(400).json({ message: 'phone, email, and password are required.' });
     }
@@ -262,6 +262,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       await db.collection('pending_registrations').doc(regToken).set({
         phone,
         email,
+        name:       (name || '').trim().slice(0, 100) || null,
         otp,
         expires_at: expiresAt,
         verified:   false,

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Join VAGT | New Guard Registration</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+</head>
+<body>
+<div class="portal-login-wrap">
+  <div class="portal-login-card">
+
+    <div class="portal-login-header">
+      <div class="portal-login-icon">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+      </div>
+      <div class="portal-role-badge" id="stepBadge">New Guard Account</div>
+      <h2 id="stepTitle">Create your VAGT account</h2>
+      <p id="stepSub">Fill in your details below. Your account will be active once your manager approves it.</p>
+    </div>
+
+    <div class="portal-login-body">
+
+      <!-- ── STEP 1: Details ── -->
+      <div id="step1">
+        <div id="regError" class="portal-error" style="display:none;" role="alert"></div>
+
+        <form id="regForm" novalidate>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label for="regName">Your full name</label>
+            <input type="text" id="regName" autocomplete="name" required
+                   placeholder="e.g. Rajan Kumar" maxlength="100"/>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label for="regPhone">Mobile number</label>
+            <input type="tel" id="regPhone" autocomplete="tel" required
+                   placeholder="10-digit number (e.g. 9876543210)" maxlength="10"
+                   inputmode="numeric" pattern="[6-9][0-9]{9}"/>
+            <span class="form-hint">This is how your manager will reach you.</span>
+          </div>
+          <div class="form-group" style="margin-bottom:14px;">
+            <label for="regEmail">Email address</label>
+            <input type="email" id="regEmail" autocomplete="email" required
+                   placeholder="yourname@example.com"/>
+            <span class="form-hint">Used to log in. Must be yours — not shared.</span>
+          </div>
+          <div class="form-group" style="margin-bottom:24px;">
+            <label for="regPass">
+              Choose a password
+              <button type="button" class="pw-toggle" id="togglePass" aria-label="Show password">Show</button>
+            </label>
+            <input type="password" id="regPass" autocomplete="new-password" required
+                   placeholder="At least 8 characters" minlength="8"/>
+          </div>
+
+          <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
+                  id="regBtn">Continue →</button>
+        </form>
+
+        <div style="text-align:center; margin-top:18px; font-size:12px; color:var(--text-muted);">
+          Already have an account? <a href="portal.html" style="color:var(--navy);">Sign in</a>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: OTP verification ── -->
+      <div id="step2" style="display:none;">
+        <div id="otpInfo" class="portal-success-msg" style="margin-bottom:16px;" role="status">
+          We have sent a 6-digit code to your phone number. Enter it below to verify your account.
+        </div>
+        <div id="otpError" class="portal-error" style="display:none;" role="alert"></div>
+
+        <form id="otpForm" novalidate>
+          <div class="form-group" style="margin-bottom:8px;">
+            <label for="otpInput">Verification code</label>
+            <input type="text" id="otpInput" autocomplete="one-time-code" required
+                   placeholder="6-digit code" maxlength="6" inputmode="numeric"
+                   pattern="[0-9]{6}"
+                   style="letter-spacing:8px; font-size:22px; font-weight:700; text-align:center;"/>
+          </div>
+          <div style="text-align:right; margin-bottom:20px;">
+            <button type="button" class="portal-forgot-link" id="resendBtn"
+                    onclick="resendOtp()">Resend code</button>
+          </div>
+          <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
+                  id="otpBtn">Verify & Submit →</button>
+        </form>
+
+        <p style="font-size:11px; color:var(--text-muted); margin-top:20px; text-align:center; line-height:1.6;">
+          Did not receive the code? Contact your VAGT supervisor and ask them to check the pending registration.
+          <br/>You can also try with a different phone number by
+          <button type="button" class="portal-forgot-link" onclick="goBack()">going back</button>.
+        </p>
+      </div>
+
+      <!-- ── STEP 3: Success ── -->
+      <div id="step3" style="display:none; text-align:center;">
+        <div style="font-size:48px; margin-bottom:16px;">✅</div>
+        <h3 style="margin:0 0 8px; color:var(--navy);">Phone verified!</h3>
+        <p style="color:var(--text-muted); font-size:14px; line-height:1.6; margin-bottom:24px;">
+          Your registration has been submitted to your manager for approval.
+          Once approved, you will receive an email at <strong id="confirmedEmail"></strong>
+          with a link to set your password and log in.
+        </p>
+        <a href="portal.html" class="btn btn-navy" style="justify-content:center;">Back to Sign In</a>
+      </div>
+
+    </div><!-- /portal-login-body -->
+  </div><!-- /portal-login-card -->
+</div>
+
+<style>
+  .portal-login-wrap { background: #f0f0ec; }
+  .portal-forgot-link {
+    background: none; border: none; cursor: pointer;
+    font-size: 12px; color: var(--text-muted); text-decoration: underline;
+  }
+  .portal-forgot-link:hover { color: var(--navy); }
+  .form-hint {
+    display: block; font-size: 11px; color: var(--text-muted); margin-top: 4px;
+  }
+  .pw-toggle {
+    background: none; border: none; cursor: pointer;
+    font-size: 11px; color: var(--text-muted); text-decoration: underline;
+    float: right; font-weight: normal; padding: 0;
+  }
+  .pw-toggle:hover { color: var(--navy); }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  const API = '/api/auth';
+  let regToken = null;
+
+  // ── Helpers ─────────────────────────────────────────────────────────────
+  function show(id)       { document.getElementById(id).style.display = ''; }
+  function hide(id)       { document.getElementById(id).style.display = 'none'; }
+  function setText(id, t) { document.getElementById(id).textContent = t; }
+  function showErr(id, m) { setText(id, m); show(id); }
+
+  function setStep(n) {
+    ['step1','step2','step3'].forEach((s,i) => {
+      document.getElementById(s).style.display = (i === n-1) ? '' : 'none';
+    });
+  }
+
+  // ── Password show/hide toggle ────────────────────────────────────────────
+  document.getElementById('togglePass').addEventListener('click', function () {
+    const inp = document.getElementById('regPass');
+    const show = inp.type === 'password';
+    inp.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Hide' : 'Show';
+  });
+
+  // ── OTP: digits only ────────────────────────────────────────────────────
+  document.getElementById('otpInput').addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+  });
+
+  // ── STEP 1: Register ─────────────────────────────────────────────────────
+  document.getElementById('regForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hide('regError');
+
+    const name  = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass  = document.getElementById('regPass').value;
+    const btn   = document.getElementById('regBtn');
+
+    // Client-side validation
+    if (!name) return showErr('regError', 'Please enter your full name.');
+    if (!/^[6-9][0-9]{9}$/.test(phone))
+      return showErr('regError', 'Please enter a valid 10-digit Indian mobile number.');
+    if (!email.includes('@'))
+      return showErr('regError', 'Please enter a valid email address.');
+    if (pass.length < 8)
+      return showErr('regError', 'Password must be at least 8 characters.');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      const resp = await fetch(`${API}/employee/register`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ name, phone, email, password: pass }),
+      });
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        showErr('regError', data.message || 'Registration failed. Please try again.');
+        btn.disabled = false; btn.textContent = 'Continue →';
+        return;
+      }
+
+      regToken = data.registration_token;
+      // Show OTP step
+      setText('stepBadge', 'Phone Verification');
+      setText('stepTitle', 'Enter your verification code');
+      setText('stepSub', 'A 6-digit code was sent to +91 ' + phone + '. It is valid for 15 minutes.');
+      setStep(2);
+
+    } catch {
+      showErr('regError', 'Network error. Check your connection and try again.');
+      btn.disabled = false; btn.textContent = 'Continue →';
+    }
+  });
+
+  // ── STEP 2: Verify OTP ────────────────────────────────────────────────────
+  document.getElementById('otpForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hide('otpError');
+
+    const otp = document.getElementById('otpInput').value.trim();
+    const btn = document.getElementById('otpBtn');
+
+    if (!/^[0-9]{6}$/.test(otp))
+      return showErr('otpError', 'Please enter the 6-digit code.');
+
+    btn.disabled = true;
+    btn.textContent = 'Verifying…';
+
+    try {
+      const resp = await fetch(`${API}/employee/verify-otp`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ registration_token: regToken, otp }),
+      });
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        showErr('otpError', data.message || 'Incorrect code. Please try again.');
+        btn.disabled = false; btn.textContent = 'Verify & Submit →';
+        return;
+      }
+
+      // Success
+      const email = document.getElementById('regEmail').value.trim();
+      document.getElementById('confirmedEmail').textContent = email;
+      setText('stepBadge', 'Registration Submitted');
+      setText('stepTitle', 'You\'re on the list!');
+      setText('stepSub', '');
+      setStep(3);
+
+    } catch {
+      showErr('otpError', 'Network error. Check your connection and try again.');
+      btn.disabled = false; btn.textContent = 'Verify & Submit →';
+    }
+  });
+
+  // ── Resend OTP ────────────────────────────────────────────────────────────
+  let resendCooldown = false;
+  window.resendOtp = async function () {
+    if (resendCooldown || !regToken) return;
+    const btn = document.getElementById('resendBtn');
+    hide('otpError');
+    resendCooldown = true;
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    try {
+      await fetch(`${API}/employee/resend-otp`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ registration_token: regToken }),
+      });
+    } catch { /* non-fatal */ }
+
+    // 30-second cooldown before allowing another resend
+    let secs = 30;
+    const timer = setInterval(() => {
+      secs--;
+      btn.textContent = `Resend code (${secs}s)`;
+      if (secs <= 0) {
+        clearInterval(timer);
+        btn.disabled = false;
+        btn.textContent = 'Resend code';
+        resendCooldown = false;
+      }
+    }, 1000);
+  };
+
+  // ── Go back to step 1 ─────────────────────────────────────────────────────
+  window.goBack = function () {
+    regToken = null;
+    setText('stepBadge', 'New Guard Account');
+    setText('stepTitle', 'Create your VAGT account');
+    setText('stepSub', 'Fill in your details below. Your account will be active once your manager approves it.');
+    document.getElementById('regBtn').disabled = false;
+    document.getElementById('regBtn').textContent = 'Continue →';
+    hide('regError');
+    setStep(1);
+  };
+
+})();
+</script>
+</body>
+</html>

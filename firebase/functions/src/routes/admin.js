@@ -150,23 +150,30 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
   // These are the cards the admin sees in the "New Registrations" section.
   router.get('/pending-registrations', ...guard, async (req, res) => {
     try {
-      const snap  = await db.collection('pending_registrations')
+      // Return all verified registrations (pending + approved + rejected)
+      // so the admin UI can show all tabs. Ordered newest first.
+      const snap = await db.collection('pending_registrations')
         .where('verified', '==', true)
         .orderBy('verified_at', 'desc')
         .get();
 
-      const items = snap.docs.map(doc => {
+      const registrations = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id:            doc.id,
-          name:          d.name          || null,
-          phone:         d.phone,
-          aadhaar_last4: d.aadhaar_last4 || null,
-          applied_at:    d.created_at ? d.created_at.toDate().toISOString() : null,
+          id:          doc.id,
+          name:        d.name        || null,
+          phone:       d.phone       || null,
+          email:       d.email       || null,
+          approved:    d.approved    || false,
+          rejected:    d.rejected    || false,
+          approved_at: d.approved_at || null,
+          rejected_at: d.rejected_at || null,
+          created_at:  d.created_at  || null,
+          verified_at: d.verified_at || null,
         };
       });
 
-      return res.json(items);
+      return res.json({ registrations });
     } catch (err) {
       console.error('pending-registrations error:', err);
       return res.status(500).json({ message: 'Failed to fetch registrations.' });
@@ -215,10 +222,25 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       await regRef.update({ approved: true, approved_at: new Date() });
       await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin', req.user.uid);
 
-      // ── TODO: Send password reset link via SMS ─────────────────────────
-      // Uncomment this once SMS (MSG91) is integrated:
-      // const resetLink = await auth.generatePasswordResetLink(reg.email);
-      // await sendSms(reg.phone, `Your VAGT account is approved. Set your password: ${resetLink}`);
+      // ── Send password reset email via Firebase ─────────────────────────
+      // Firebase's Identity Toolkit sends a password-reset email using the
+      // template configured in Firebase Console → Authentication → Templates.
+      // This is free, requires no third-party service, and the guard will
+      // receive a link to set their own password before first login.
+      // When SMS (MSG91) is ready, add a parallel sendSms() call here.
+      try {
+        await fetch(
+          `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY || 'AIzaSyB8jOeTk3u6QkXz190qb3Q-I8RiWVuPXv4'}`,
+          {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ requestType: 'PASSWORD_RESET', email: reg.email }),
+          }
+        );
+      } catch (emailErr) {
+        // Non-fatal — account is approved regardless. Log and continue.
+        console.warn('approval email failed (non-fatal):', emailErr.message);
+      }
       // ──────────────────────────────────────────────────────────────────
 
       return res.json({ success: true, employee_id: empId });
