@@ -156,7 +156,10 @@
           </div>
           <div class="field">
             <label>Temporary Password</label>
-            <input type="text" id="newPassword" placeholder="Min 8 characters" autocomplete="new-password"/>
+            <div style="position:relative;">
+              <input type="password" id="newPassword" placeholder="Min 8 characters" autocomplete="new-password" style="width:100%; padding-right:40px;"/>
+              <button type="button" onclick="(function(){const i=document.getElementById('newPassword');i.type=i.type==='password'?'text':'password';})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:11px;padding:0;">Show</button>
+            </div>
           </div>
           <button class="btn btn-navy" id="addAdminBtn" style="font-size:12px; padding:9px 22px; align-self:flex-end;" onclick="addAdmin()">
             Add Admin

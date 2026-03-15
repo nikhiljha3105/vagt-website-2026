@@ -6,7 +6,6 @@
   <title>Client Portal | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
   <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://*.googleapis.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none';"/>
   <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
   <meta http-equiv="Cache-Control" content="no-store"/>
@@ -150,6 +149,10 @@
         <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
         Invoices
       </a>
+      <a href="client-complaints.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Complaints
+      </a>
     </nav>
 
     <div class="sidebar-footer">
@@ -292,7 +295,7 @@
   auth.onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = 'portal.html'; return; }
 
-    const token = await user.getIdTokenResult();
+    const token = await user.getIdTokenResult(true); // force refresh — pick up latest claims
     if (token.claims.role !== 'client') { window.location.href = 'portal.html'; return; }
 
     currentUid = user.uid;
@@ -325,20 +328,38 @@
   // ── Deployment summary ─────────────────────────────────────────────────────
   async function loadSummary(uid) {
     try {
+      const todayIST = (function() {
+        const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+        return new Date(Date.now() + IST_OFFSET_MS).toISOString().slice(0, 10);
+      })();
+
       const sitesSnap = await db.collection('sites').where('client_uid', '==', uid).get();
-      const sites = sitesSnap.docs.map(d => d.data());
-      const guards = sites.reduce((a, s) => a + (s.guards_deployed || 0), 0);
-      const covered = sites.filter(s => s.coverage_status !== 'none').length;
+      const sites     = sitesSnap.docs.map(d => d.data());
+      const siteIds   = sitesSnap.docs.map(d => d.id);
+
+      // Live guard count — guards currently checked in (no check_out) at this client's sites
+      let liveGuards = 0;
+      if (siteIds.length > 0) {
+        const attendSnap = await db.collection('attendance_logs')
+          .where('date', '==', todayIST)
+          .where('site_id', 'in', siteIds.slice(0, 10)) // Firestore 'in' limit: 10
+          .get();
+        liveGuards = attendSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
+      }
 
       const [ticketsSnap, incidentSnap] = await Promise.all([
         db.collection('complaints').where('client_uid', '==', uid).where('status', 'in', ['open', 'in_progress']).get(),
         db.collection('incidents').where('site_client_uid', '==', uid).get(),
       ]);
 
-      setText('statGuards', guards);
-      setText('statSites', covered);
+      setText('statGuards', liveGuards);
+      setText('statSites', sites.length);
       setText('statIncidents', incidentSnap.size);
       setText('statTickets', ticketsSnap.size);
+
+      // Label clarity — mark stat as live
+      const guardsLabel = document.querySelector('[data-stat="guards"] .stat-label');
+      if (guardsLabel) guardsLabel.textContent = 'On Duty Now';
     } catch (e) { console.error('Summary:', e); }
   }
 

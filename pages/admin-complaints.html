@@ -219,9 +219,11 @@
     auth.signOut().then(function () { window.location.href = 'portal.html'; });
   });
 
+  async function getToken() { return auth.currentUser.getIdToken(); }
+
   auth.onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = 'portal.html'; return; }
-    const token = await user.getIdTokenResult();
+    const token = await user.getIdTokenResult(true);
     if (token.claims.role !== 'admin') { window.location.href = 'portal.html'; return; }
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('portalLayout').style.display = '';
@@ -303,12 +305,19 @@
     const newStatus = document.getElementById('sel-' + id)?.value;
     const note      = document.getElementById('note-' + id)?.value || null;
     if (!newStatus) return;
+    const btn = document.querySelector(`[onclick="updateStatus('${id}')"]`);
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
     try {
-      await db.collection('complaints').doc(id).update({
-        status: newStatus,
-        admin_note: note || null,
-        updated_at: new Date(),
+      const token = await getToken();
+      const resp  = await fetch('/api/admin/complaints/' + id + '/status', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, admin_note: note }),
       });
+      if (!resp.ok) {
+        const d = await resp.json().catch(() => ({}));
+        throw new Error(d.message || 'Server error');
+      }
       // Update in-memory
       const idx = allComplaints.findIndex(c => c.id === id);
       if (idx >= 0) { allComplaints[idx].status = newStatus; allComplaints[idx].admin_note = note; }
@@ -323,7 +332,6 @@
             b.textContent = newStatus.replace('_', ' ');
           }
         });
-        // Update note block
         let noteEl = card.querySelector('.ticket-note');
         if (note) {
           if (!noteEl) {
@@ -335,6 +343,7 @@
         } else if (noteEl) { noteEl.remove(); }
       }
     } catch (e) { alert('Update failed: ' + e.message); }
+    finally { if (btn) { btn.disabled = false; btn.textContent = 'Update'; } }
   };
 
 })();

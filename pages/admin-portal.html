@@ -432,7 +432,12 @@
   window.approveLeave = async function (id) {
     if (!confirm('Approve this leave request?')) return;
     try {
-      await db.collection('leave_requests').doc(id).update({ status: 'approved', reviewed_at: new Date() });
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/admin/leaves/' + id + '/approve', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      if (!resp.ok) { const d = await resp.json().catch(()=>({})); throw new Error(d.message || 'Failed'); }
       document.getElementById('lv-' + id)?.remove();
       setText('statLeaves', Math.max(0, parseInt(document.getElementById('statLeaves').textContent || '0', 10) - 1));
     } catch (e) { alert('Failed: ' + e.message); }
@@ -440,7 +445,12 @@
   window.rejectLeave = async function (id) {
     if (!confirm('Reject this leave request?')) return;
     try {
-      await db.collection('leave_requests').doc(id).update({ status: 'rejected', reviewed_at: new Date() });
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/admin/leaves/' + id + '/reject', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+      });
+      if (!resp.ok) { const d = await resp.json().catch(()=>({})); throw new Error(d.message || 'Failed'); }
       document.getElementById('lv-' + id)?.remove();
       setText('statLeaves', Math.max(0, parseInt(document.getElementById('statLeaves').textContent || '0', 10) - 1));
     } catch (e) { alert('Failed: ' + e.message); }

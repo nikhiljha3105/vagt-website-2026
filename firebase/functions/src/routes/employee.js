@@ -698,15 +698,13 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-// Returns today's date as 'YYYY-MM-DD' using the Cloud Function server's timezone (UTC).
-// ⚠️ KNOWN ISSUE: Cloud Functions run in UTC. IST is UTC+5:30. This means a guard
-// checking in at 11:30 PM IST (= 6:00 PM UTC) will get date X, but a guard checking
-// in at 12:30 AM IST (= 7:00 PM UTC the SAME UTC day) will also get date X instead
-// of date X+1. For most day shifts this doesn't matter. Night shift guards crossing
-// midnight IST may see incorrect date on their check-in. Fix: convert to IST here.
+// Returns today's date as 'YYYY-MM-DD' in IST (UTC+5:30).
+// Cloud Functions run in UTC — without this conversion night-shift guards
+// crossing midnight IST would have their check-in logged on the wrong date.
 function todayStr() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // UTC+5:30
+  const ist = new Date(Date.now() + IST_OFFSET_MS);
+  return ist.toISOString().slice(0, 10); // 'YYYY-MM-DD'
 }
 
 // Writes a line to the activity_log collection so the admin dashboard can
