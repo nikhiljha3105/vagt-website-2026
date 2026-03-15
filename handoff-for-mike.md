@@ -19,6 +19,39 @@ Documents already saved to `client-briefs/` in the repo:
 
 ---
 
+## 📬 MESSAGE FROM NIKHIL — 2026-03-15
+
+> "Back in 30 mins, picking up from where we stopped."
+
+### Public Website Feedback (via Nikhil, reviewed with AI)
+
+**Immediate fixes:**
+
+| # | Issue | Detail |
+|---|-------|--------|
+| 1 | **Wrong logo** | Use `VAGT_Security_Services_Front__1_.jpg` exactly. VAGT text also needs to be bigger. |
+| 2 | **Sidebar labels** (MAIN, SERVICES, COMPANY) | Too low-contrast/small — increase contrast and font size |
+| 3 | **Est. date** | Shows wrong year — fix it |
+| 4 | **'g' in VAGT hero** | The security guard silhouette shaped as the 'g' is the core brand idea — preserve it |
+| 5 | **Hero text** | "G4S trained" → replace with **"armed forces trained"** |
+
+**Strategic direction (bigger picture):**
+
+- Site currently reads as a **manpower supplier** — needs to read as an **Integrated Security & Risk Management Provider**
+- Content: duplicates, grammar issues, not corporate enough — needs full rewrite
+- Missing trust signals: PSARA licence, ISO certs, guard headcount, client sectors — enterprise clients will bounce
+- Design: needs service cards, guard/operations imagery, clear CTAs
+- Careers page: just an email address — needs recruitment pipeline, training info, growth paths
+- Security hardening: Cloudflare WAF, HTTP headers (HSTS, CSP, X-Frame-Options), obfuscated emails, CMS 2FA
+- SEO: dedicated pages for Industrial Security, Corporate Guarding, Airport Security, Security Services Bangalore
+
+**Proposed phases:**
+1. **Phase 1** — Quick wins: grammar, homepage, icons, certs
+2. **Phase 2** — Credibility: leadership, scale, careers
+3. **Phase 3** — Security hardening: Cloudflare, headers, CMS
+
+---
+
 ## ⚠️ READ THIS FIRST
 
 Active branch: `claude/review-website-git-dPWyR`
