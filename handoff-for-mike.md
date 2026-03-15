@@ -30,6 +30,33 @@ Firebase Hosting rollback: Console → Hosting → Release history → Rollback 
 
 ---
 
+## Session 2 — 2026-03-15 (evening)
+
+### What was built
+- `pages/register.html` — guard self-registration (name/phone/email → OTP → success)
+- `pages/admin-registrations.html` — admin pending approvals with Approve/Reject buttons
+- `pages/portal.html` — "New guard? Create your account →" link added
+- `firebase/functions/src/routes/admin.js` — approval now sends Firebase password-reset email automatically (free, no SMS needed)
+- `firebase/functions/src/routes/auth.js` — collects `name` field at registration
+- All 10 admin pages — "New Registrations" nav link added to sidebar
+- `assets/css/main.css` — sidebar text brightness fixed (logo sub, nav links, group labels all much more readable)
+- `firebase.json` — region `asia-south1` added to hosting rewrite
+
+### Critical fix applied
+**Cloud Function IAM** was blocking ALL API calls with 403/401 — the function wasn't publicly invocable. Fixed by granting `allUsers` the `Cloud Functions Invoker` role in GCP Console. This was the root cause of every API call failing silently.
+
+### Deploy needed
+After running `firebase deploy --only hosting,functions`, the full platform is functional for the first time:
+- Guard registration flow works end-to-end
+- Admin approve/reject works
+- Leave approvals via API work
+- Complaint status updates via API work
+
+### OTP note
+SMS is not wired yet. To test registration: after a guard submits, check Firestore → `pending_registrations` → find the doc → read the `otp` field. Tell the guard the code manually. When MSG91 is ready, swap in the sendSms() call in auth.js — nothing else changes.
+
+---
+
 ## Current Status — 2026-03-15
 
 ### ✅ Working end-to-end
