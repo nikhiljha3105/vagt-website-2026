@@ -3,6 +3,22 @@
 
 ---
 
+## Google Drive — VAGT Data Folder
+
+**VAGT Data folder:** https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
+(Created 2026-03-15. Drop all VAGT-related documents here — Claude will scan, categorise, and commit them to the repo automatically.)
+
+Documents already saved to `client-briefs/` in the repo:
+- `tarun-realtors-security-assessment-2025-12.md` — Security audit report for M/s Tarun Realtors (Dec 2025)
+- `vagt-brochure-2025.pdf/.docx` — Company brochure
+- `vagt-client-list-2025.docx` — Client roster
+- `vagt-rota-2026.xlsx` — Guard rotation schedule
+- `vagt-security-audit-checklist-2025.pages` — Audit checklist template
+- `vagt-security-consultant-questionnaire.xlsx` — Client onboarding questionnaire
+- `vagt-lora-project-flyer-2026-03.pdf` — LoRa student project recruitment flyer
+
+---
+
 ## ⚠️ READ THIS FIRST
 
 Active branch: `claude/review-website-git-dPWyR`
