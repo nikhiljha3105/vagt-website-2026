@@ -78,18 +78,18 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 }
 .logo-sub {
   font-size: 9px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.62);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-top: 3px;
 }
 .pronunciation {
   font-size: 10px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.42);
   line-height: 1.6;
   letter-spacing: 0.2px;
 }
-.pronunciation em { font-style: normal; color: rgba(245,196,0,0.48); }
+.pronunciation em { font-style: normal; color: rgba(245,196,0,0.75); }
 
 /* Portal logins */
 .sidebar-portals {
@@ -101,7 +101,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   padding: 9px 10px;
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255,255,255,0.28);
+  color: rgba(255,255,255,0.52);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   text-align: center;
@@ -120,7 +120,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .nav-group-label {
   font-size: 9px;
   font-weight: 700;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.38);
   text-transform: uppercase;
   letter-spacing: 2px;
   padding: 10px 22px 4px;
@@ -132,7 +132,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   padding: 10px 22px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.75);
   transition: background 0.15s, color 0.15s;
   position: relative;
 }
@@ -166,13 +166,13 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .sidebar-footer-label {
   font-size: 9px;
   font-weight: 600;
-  color: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.35);
   text-transform: uppercase;
   letter-spacing: 1.5px;
   margin-bottom: 6px;
 }
-.sidebar-footer p { font-size: 11px; color: rgba(255,255,255,0.28); line-height: 1.9; }
-.sidebar-footer a { color: rgba(255,255,255,0.32); transition: color 0.2s; }
+.sidebar-footer p { font-size: 11px; color: rgba(255,255,255,0.48); line-height: 1.9; }
+.sidebar-footer a { color: rgba(255,255,255,0.52); transition: color 0.2s; }
 .sidebar-footer a:hover { color: var(--amber); }
 
 /* ── MAIN ── */
