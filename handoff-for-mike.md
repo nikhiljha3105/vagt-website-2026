@@ -1,5 +1,26 @@
 # VAGT Website — Handoff for Mike
-**Last updated:** 2026-03-13
+**Last updated:** 2026-03-15
+
+---
+
+## 🕐 SESSION STATUS — 2026-03-15
+
+**Nikhil hit the Claude Desktop rate limit.** It has now reset.
+
+> **"I will start work in 30 mins from where we had stopped."** — Nikhil
+
+### Where we stopped (this session, 2026-03-15)
+
+All 5 disabled admin pages were rebuilt and pushed in this session:
+- `admin-payroll.html` — functional, month nav, run payroll, ₹ totals
+- `admin-reports.html` — analytics with period selector, API-backed
+- `admin-schedule.html` — shift list, assign shift modal, delete shifts
+- `admin-clients.html` — clients + sites tabbed view, expandable rows
+- `admin-sites.html` — all-sites view with coverage filter
+
+Nikhil's Mac also pushed 10 more commits on top (sidebar "Manage Admins" nav item added to all pages, admin-portal.html improvements, new `admin-admins.html` page, Firestore indexes, etc.).
+
+**Next action when Nikhil returns:** He will tell you what to work on next. Read the TODO list below and be ready to pick up.
 
 ---
 
