@@ -460,14 +460,16 @@
     this.textContent = 'Submitting…';
 
     try {
-      await db.collection('complaints').add({
-        client_uid: currentUid,
-        type, priority, subject, description: desc,
-        status: 'open',
-        ticket_id: 'TKT-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000),
-        created_at: firebase.firestore.FieldValue.serverTimestamp(),
-        admin_note: null,
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/complaints', {
+        method:  'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ type, priority, subject, description: desc }),
       });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.message || 'Server error');
+      }
       hideEl('newTicketForm');
       showEl('newTicketBtn');
       document.getElementById('ticketSubject').value = '';

@@ -359,25 +359,16 @@
     btn.disabled = true; btn.textContent = 'Submitting…';
 
     try {
-      // Get client's site for context
-      const clientSnap = await db.collection('clients').doc(currentUid).get();
-      const clientData = clientSnap.exists ? clientSnap.data() : {};
-      const siteId     = clientData.site_id   || null;
-      const siteName   = clientData.site_name || null;
-
-      await db.collection('complaints').add({
-        client_uid:   currentUid,
-        client_name:  clientData.name || '',
-        site_id:      siteId,
-        site_name:    siteName,
-        subject,
-        description,
-        priority,
-        status:       'open',
-        admin_note:   null,
-        created_at:   firebase.firestore.FieldValue.serverTimestamp(),
-        updated_at:   firebase.firestore.FieldValue.serverTimestamp(),
+      const token = await auth.currentUser.getIdToken();
+      const resp  = await fetch('/api/complaints', {
+        method:  'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ type: 'complaint', subject, description, priority }),
       });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.message || 'Server error');
+      }
 
       msgEl.className = 'form-msg success';
       msgEl.textContent = '✅ Complaint submitted. Our team will respond within 24 hours.';

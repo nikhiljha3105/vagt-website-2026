@@ -62,18 +62,19 @@ const auth = admin.auth();        // Firebase Authentication handle
 const app = express();
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-// Only allow requests from our own domain (and localhost when developing).
-// If you get "CORS error" in the browser, check that the request is coming from
-// one of these origins.  DO NOT add '*' — that would allow any website to call
-// our backend.
+// Only allow requests from our own domains.
+// If you get "CORS error" in the browser, the request origin is not in this list.
+// DO NOT add '*' — that would allow any website to call our backend.
 const allowedOrigins = [
+  'https://vagtservices.com',
+  'https://www.vagtservices.com',
   'https://vagtsecurityservices.com',
   'https://www.vagtsecurityservices.com',
+  'https://vagt---services.web.app',  // Firebase Hosting default URL
+  'https://vagt---services.firebaseapp.com',
+  'http://localhost:5000',           // local firebase serve
+  'http://127.0.0.1:5000',
 ];
-if (process.env.NODE_ENV !== 'production') {
-  // Allow local dev server — remove this block before going to production
-  allowedOrigins.push('http://localhost:5000', 'http://127.0.0.1:5000');
-}
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 // Cap request body at 1 MB — prevents memory exhaustion from oversized payloads.
 // No legitimate request in this app sends more than a few KB.
@@ -157,19 +158,23 @@ function requireAdmin(req, res, next) {
 // an admin-protected endpoint.  This endpoint is protected by a passphrase
 // instead of a Firebase token and self-disables once the claim is already set.
 //
-// USAGE (call once from a browser or curl after deploying):
-//   POST https://vagtsecurityservices.com/api/setup/first-admin
-//   Body: { "passphrase": "VAGT-SETUP-2026" }
+// USAGE (call once from curl after deploying):
+//   POST https://vagtservices.com/api/setup/first-admin
+//   Body: { "passphrase": "<value of SETUP_PASSPHRASE env var>" }
+//
+// Set the passphrase before deploying:
+//   firebase functions:config:set setup.passphrase="your-secret-here"
+// Then add to firebase/functions/.env: SETUP_PASSPHRASE=your-secret-here
 //
 // It is safe to leave this in — it does nothing if the claim is already set.
-const SETUP_PASSPHRASE = 'VAGT-SETUP-2026';
-const FIRST_ADMIN_EMAIL = 'admin@vagtsecurityservices.com';
+const SETUP_PASSPHRASE  = process.env.SETUP_PASSPHRASE || null;
+const FIRST_ADMIN_EMAIL = process.env.FIRST_ADMIN_EMAIL || 'hello@vagtservices.com';
 
 // Route registered at both paths: via Firebase Hosting the full /api/setup/... path
 // is preserved; via direct Cloud Function URL only /setup/... is seen by Express.
 app.post(['/api/setup/first-admin', '/setup/first-admin'], async (req, res) => {
   const { passphrase } = req.body || {};
-  if (passphrase !== SETUP_PASSPHRASE) {
+  if (!SETUP_PASSPHRASE || passphrase !== SETUP_PASSPHRASE) {
     return res.status(403).json({ message: 'Wrong passphrase.' });
   }
   try {
@@ -278,6 +283,40 @@ exports.scheduledFirestoreBackup = functions
     });
 
     console.info(`Firestore backup started → ${outputUri}  (operation: ${operation.name})`);
+    return null;
+  });
+
+// ── Scheduled: flag missed check-outs from the previous day ──────────────────
+// Runs at 06:00 IST (00:30 UTC) every morning.
+// Finds any attendance log from yesterday (IST) that has a check_in but no
+// check_out — meaning the guard forgot to tap out or their device died.
+// Marks the doc with missed_checkout: true so admin can review and correct it.
+// Does NOT write a fake check_out time — that would corrupt attendance records.
+exports.flagMissedCheckouts = functions
+  .region('asia-south1')
+  .pubsub.schedule('30 0 * * *')   // 00:30 UTC = 06:00 IST
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const yesterday = new Date(Date.now() + IST_OFFSET_MS - 86400000);
+    const dateStr = yesterday.toISOString().slice(0, 10); // YYYY-MM-DD in IST
+
+    const snap = await db.collection('attendance_logs')
+      .where('date', '==', dateStr)
+      .where('check_out', '==', null)
+      .get();
+
+    if (snap.empty) {
+      console.info(`flagMissedCheckouts: no missed check-outs for ${dateStr}`);
+      return null;
+    }
+
+    const batch = db.batch();
+    snap.docs.forEach(doc => {
+      batch.update(doc.ref, { missed_checkout: true });
+    });
+    await batch.commit();
+    console.info(`flagMissedCheckouts: flagged ${snap.size} record(s) for ${dateStr}`);
     return null;
   });
 

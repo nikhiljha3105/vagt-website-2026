@@ -275,6 +275,13 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
     if (!['casual', 'sick', 'earned'].includes(leave_type)) {
       return res.status(400).json({ message: 'leave_type must be casual, sick, or earned.' });
     }
+    const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRe.test(from_date) || !dateRe.test(to_date)) {
+      return res.status(400).json({ message: 'from_date and to_date must be in YYYY-MM-DD format.' });
+    }
+    if (from_date > to_date) {
+      return res.status(400).json({ message: 'from_date cannot be after to_date.' });
+    }
 
     try {
       const ref = await db.collection('leave_requests').add({
@@ -642,6 +649,12 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
     }
     if (!['low', 'medium', 'high', 'critical'].includes(severity)) {
       return res.status(400).json({ message: 'severity must be low, medium, high, or critical.' });
+    }
+    if (occurred_at && isNaN(new Date(occurred_at).getTime())) {
+      return res.status(400).json({ message: 'occurred_at must be a valid ISO date string.' });
+    }
+    if (occurred_at && new Date(occurred_at) > new Date()) {
+      return res.status(400).json({ message: 'occurred_at cannot be in the future.' });
     }
 
     try {
