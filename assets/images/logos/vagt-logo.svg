@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 226">
+
+  <!-- Yellow background -->
+  <rect width="200" height="226" rx="20" fill="#F5C400"/>
+
+  <!-- Cap crown — flat-top security officer cap -->
+  <rect x="44" y="10" width="84" height="33" rx="6" fill="#2D2D2D"/>
+  <!-- Cap band / badge holder detail -->
+  <rect x="44" y="37" width="84" height="6"  rx="0" fill="#222222"/>
+
+  <!-- Cap brim — extends right, slightly tapered -->
+  <path d="M34,43 L148,43 L143,55 L39,55 Z" fill="#2D2D2D"/>
+
+  <!-- Head -->
+  <circle cx="86" cy="76" r="24" fill="#2D2D2D"/>
+
+  <!-- Neck -->
+  <rect x="79" y="98" width="14" height="7" fill="#2D2D2D"/>
+
+  <!-- Shoulders / upper body -->
+  <path d="M24,172 L40,104 Q86,94 132,104 L148,172 Z" fill="#2D2D2D"/>
+
+  <!-- VAGT text — "VA" charcoal, "GT" red, large and bold -->
+  <text font-family="'Arial Black','Arial','Helvetica Neue',sans-serif"
+        font-weight="900" font-size="62" y="220">
+    <tspan x="10"  fill="#2D2D2D">VA</tspan><tspan fill="#CC0000">GT</tspan>
+  </text>
+
+</svg>
