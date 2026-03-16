@@ -1,5 +1,5 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-15
+**Last updated:** 2026-03-16
 
 ---
 
@@ -49,6 +49,49 @@ Documents already saved to `client-briefs/` in the repo:
 1. **Phase 1** — Quick wins: grammar, homepage, icons, certs
 2. **Phase 2** — Credibility: leadership, scale, careers
 3. **Phase 3** — Security hardening: Cloudflare, headers, CMS
+
+---
+
+## Session 3 — 2026-03-16 (overnight/morning)
+
+### What was built / fixed
+- `firebase/functions/seed-demo-data.js` — expanded to **113 documents** across 13 collections (3 companies, 3 sites, 10 employees, 24 attendance logs, 7 leave requests, 7 complaints, 5 incidents, 12 guest logs, 6 patrol checkpoints, 10 patrol logs, 5 payslips, 4 invoices, 20 activity entries). All with realistic Bangalore data.
+- **Duplicate prevention fix** — all seed `.add()` calls replaced with `.doc(deterministicId).set()`. Re-running the seed no longer creates duplicates. Fixes Suresh Babu leave showing twice.
+- **Guard Performance analytics** — `/api/admin/reports` now returns `guard_performance` (was empty `[]`). Per-guard: shifts total, shifts present, attendance rate %, incidents filed. Ranked by attendance rate.
+- **admin-reports.html** — new Guard Performance ranking card at the bottom. Color-coded bars (green ≥90%, amber ≥70%, red below 70%).
+- All previously reported bugs were already fixed by overnight agents: IST timezone, API direct-write, password field.
+
+### Confirmed already fixed (no work needed)
+- `admin-admins.html` password field — already `type="password"` with Show toggle ✅
+- `admin-complaints.html` — already calls API, not direct Firestore ✅
+- `admin-portal.html` leave approve/reject — already calls API ✅
+- `employee.js` `todayStr()` — already IST-corrected ✅
+
+### Deploy steps when you're ready
+```bash
+# 1. Pull latest
+cd ~/Claude/"VAGT New Website Design" && git pull
+
+# 2. Deploy everything
+firebase deploy --only hosting,functions,firestore:indexes --project vagt---services
+
+# 3. Seed test data (one-time, from firebase/functions/ directory)
+cd firebase/functions
+node seed-demo-data.js ~/Downloads/<service-account-key>.json
+
+# To wipe and re-seed cleanly (deterministic IDs mean it's safe to re-run):
+node seed-demo-data.js ~/Downloads/<key>.json --wipe
+node seed-demo-data.js ~/Downloads/<key>.json
+```
+
+### Test credentials (after seeding)
+| Portal | Email | Password |
+|--------|-------|----------|
+| Admin | hello@vagtservices.com | Vagt@2026Admin (change this) |
+| Employee | guard001@vagttest.com | TestGuard@001 |
+| Client | client001@vagttest.com | TestClient@001 |
+
+OTP for guard registration: check Firestore → `pending_registrations` → doc → `otp` field
 
 ---
 
