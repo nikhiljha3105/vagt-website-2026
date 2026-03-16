@@ -614,6 +614,28 @@ async function wipeAll() {
 async function seedAll() {
   console.log('Seeding VAGT demo data…\n');
 
+  // ── Resolve real Firebase Auth UIDs for test accounts ─────────────────────
+  // create-test-users.js must be run before seed-demo-data.js.
+  // This maps seed placeholder IDs → real Auth UIDs so that portal queries
+  // (which filter by the logged-in user's UID) return actual data.
+  const uidMap = {};
+  const testAccounts = [
+    { seedId: 'seed-emp-ravi',         email: 'guard001@vagttest.com' },
+    { seedId: 'seed-emp-suresh',       email: 'guard002@vagttest.com' },
+    { seedId: 'seed-client-dsmax-001', email: 'client001@vagttest.com' },
+  ];
+  for (const { seedId, email } of testAccounts) {
+    try {
+      const u = await admin.auth().getUserByEmail(email);
+      uidMap[seedId] = u.uid;
+      console.log(`  🔗 ${seedId} → ${u.uid} (${email})`);
+    } catch {
+      console.log(`  ⚠️  ${email} not found — run create-test-users.js first`);
+    }
+  }
+  // Returns real UID if mapped, otherwise keeps the seed placeholder
+  const r = (id) => (id && uidMap[id]) ? uidMap[id] : id;
+
   // Companies
   for (const co of COMPANIES) {
     const { id, ...data } = co;
@@ -628,50 +650,79 @@ async function seedAll() {
     console.log('  ✅ site:', site.name);
   }
 
-  // Employees
+  // Employees — use real Auth UID as doc ID for test accounts so the portal
+  // finds the right document when querying by firebase.auth().currentUser.uid
   for (const emp of EMPLOYEES) {
     const { id, ...data } = emp;
-    await db.collection('employees').doc(id).set({ ...data, _seed: true });
-    console.log('  ✅ employee:', emp.name, `(${emp.employee_id})`);
+    const docId = r(id);
+    await db.collection('employees').doc(docId).set({
+      ...data,
+      uid: docId,
+      _seed: true,
+    });
+    console.log('  ✅ employee:', emp.name, `(${emp.employee_id})`, docId !== id ? `→ real UID` : '');
   }
 
-  // Attendance — deterministic ID: seed-att-{employee_id}-{date} prevents duplicates on re-run
+  // Attendance — real employee_uid for test guards
   for (let i = 0; i < ATTENDANCE.length; i++) {
     const log = ATTENDANCE[i];
     const docId = `seed-att-${log.employee_id}-${log.date || i}`;
-    await db.collection('attendance_logs').doc(docId).set({ ...log, _seed: true });
+    await db.collection('attendance_logs').doc(docId).set({
+      ...log,
+      employee_uid: r(log.employee_uid),
+      _seed: true,
+    });
   }
   console.log(`  ✅ attendance logs: ${ATTENDANCE.length}`);
 
-  // Leave requests — deterministic ID: seed-lr-{employee_id}-{from_date}
+  // Leave requests — real employee_uid for test guards
   for (let i = 0; i < LEAVE_REQUESTS.length; i++) {
     const lr = LEAVE_REQUESTS[i];
     const docId = `seed-lr-${lr.employee_id}-${lr.from_date || i}`;
-    await db.collection('leave_requests').doc(docId).set({ ...lr, _seed: true });
+    await db.collection('leave_requests').doc(docId).set({
+      ...lr,
+      employee_uid: r(lr.employee_uid),
+      _seed: true,
+    });
   }
   console.log(`  ✅ leave requests: ${LEAVE_REQUESTS.length}`);
 
-  // Complaints — deterministic ID: seed-cmp-{client_uid}-{i}
+  // Complaints — real client_uid for test client
   for (let i = 0; i < COMPLAINTS.length; i++) {
     const c = COMPLAINTS[i];
     const docId = `seed-cmp-${c.client_uid || 'unknown'}-${i + 1}`;
-    await db.collection('complaints').doc(docId).set({ ...c, _seed: true });
+    await db.collection('complaints').doc(docId).set({
+      ...c,
+      client_uid: r(c.client_uid),
+      _seed: true,
+    });
   }
   console.log(`  ✅ complaints: ${COMPLAINTS.length}`);
 
-  // Incidents — deterministic ID: seed-inc-{type}-{i}
+  // Incidents — real employee_uid where present
   for (let i = 0; i < INCIDENTS.length; i++) {
     const inc = INCIDENTS[i];
     const docId = `seed-inc-${(inc.type || 'other').replace(/[^a-z0-9]/g, '_')}-${i + 1}`;
-    await db.collection('incidents').doc(docId).set({ ...inc, _seed: true });
+    await db.collection('incidents').doc(docId).set({
+      ...inc,
+      ...(inc.employee_uid && { employee_uid: r(inc.employee_uid) }),
+      ...(inc.guard_uid    && { guard_uid:    r(inc.guard_uid)    }),
+      ...(inc.reported_by  && { reported_by:  r(inc.reported_by)  }),
+      _seed: true,
+    });
   }
   console.log(`  ✅ incidents: ${INCIDENTS.length}`);
 
-  // Guest logs — deterministic ID: seed-guest-{site_id}-{i}
+  // Guest logs — real guard_uid and client_uid
   for (let i = 0; i < GUESTS.length; i++) {
     const g = GUESTS[i];
     const docId = `seed-guest-${g.site_id || 'unknown'}-${i + 1}`;
-    await db.collection('guest_logs').doc(docId).set({ ...g, _seed: true });
+    await db.collection('guest_logs').doc(docId).set({
+      ...g,
+      guard_uid:  r(g.guard_uid),
+      client_uid: r(g.client_uid),
+      _seed: true,
+    });
   }
   console.log(`  ✅ guest logs: ${GUESTS.length}`);
 
@@ -682,31 +733,44 @@ async function seedAll() {
   }
   console.log(`  ✅ patrol checkpoints: ${PATROL_CHECKPOINTS.length}`);
 
-  // Patrol logs — deterministic ID: seed-pl-{checkpoint_id}-{i}
+  // Patrol logs — real guard_uid where present
   for (let i = 0; i < PATROL_LOGS.length; i++) {
     const pl = PATROL_LOGS[i];
     const docId = `seed-pl-${pl.checkpoint_id || 'unknown'}-${i + 1}`;
-    await db.collection('patrol_logs').doc(docId).set({ ...pl, _seed: true });
+    await db.collection('patrol_logs').doc(docId).set({
+      ...pl,
+      ...(pl.guard_uid    && { guard_uid:    r(pl.guard_uid)    }),
+      ...(pl.employee_uid && { employee_uid: r(pl.employee_uid) }),
+      _seed: true,
+    });
   }
   console.log(`  ✅ patrol logs: ${PATROL_LOGS.length}`);
 
-  // Payslips — deterministic ID: seed-pay-{employee_id}-{month}
+  // Payslips — real employee_uid for test guards
   for (let i = 0; i < PAYSLIPS.length; i++) {
     const ps = PAYSLIPS[i];
     const docId = `seed-pay-${ps.employee_id}-${(ps.month || i).replace('/', '-')}`;
-    await db.collection('payslips').doc(docId).set({ ...ps, _seed: true });
+    await db.collection('payslips').doc(docId).set({
+      ...ps,
+      employee_uid: r(ps.employee_uid),
+      _seed: true,
+    });
   }
   console.log(`  ✅ payslips: ${PAYSLIPS.length}`);
 
-  // Invoices — deterministic ID: seed-inv-{invoice_number}
+  // Invoices — real client_uid for test client
   for (let i = 0; i < INVOICES.length; i++) {
     const inv = INVOICES[i];
     const docId = `seed-inv-${(inv.invoice_number || i).replace(/[^a-zA-Z0-9-]/g, '-')}`;
-    await db.collection('invoices').doc(docId).set({ ...inv, _seed: true });
+    await db.collection('invoices').doc(docId).set({
+      ...inv,
+      client_uid: r(inv.client_uid),
+      _seed: true,
+    });
   }
   console.log(`  ✅ invoices: ${INVOICES.length}`);
 
-  // Activity log — deterministic ID: seed-act-{i} prevents accumulation on re-runs
+  // Activity log — deterministic ID: seed-act-{i}
   for (let i = 0; i < ACTIVITY.length; i++) {
     const a = ACTIVITY[i];
     await db.collection('activity_log').doc(`seed-act-${i + 1}`).set({ ...a, _seed: true });
