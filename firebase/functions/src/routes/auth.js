@@ -166,7 +166,7 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
   // Guard enters their employee ID (e.g. VAGT-0001) or email to start reset.
   // Returns a reset_token that is needed in the next step.
   router.post('/forgot-password', authLimiter, async (req, res) => {
-    const { identifier } = req.body || {};
+    const { identifier, device_trust_token } = req.body || {};
     if (!identifier) return res.status(400).json({ message: 'identifier is required.' });
 
     try {
@@ -184,18 +184,57 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         userRecord = await auth.getUser(snap.docs[0].id);
       }
 
+      // ── Device trust check — skip SMS if this device was verified before ──
+      // The guard's browser sends their stored device_trust_token with this request.
+      // If it's valid and matches this user, we skip the OTP SMS entirely and return
+      // a reset token directly. This is the primary cost-saving mechanism.
+      if (device_trust_token) {
+        try {
+          const trustSnap = await db.collection('device_trust_tokens').doc(device_trust_token).get();
+          if (trustSnap.exists) {
+            const trust = trustSnap.data();
+            const notExpired = trust.expires_at && new Date() < trust.expires_at.toDate();
+            const matchesUser = trust.uid === userRecord.uid;
+            if (notExpired && matchesUser) {
+              // Device recognised — issue reset token with no OTP required
+              const resetToken = secureToken('rst');
+              await db.collection('password_reset_tokens').doc(resetToken).set({
+                uid:                userRecord.uid,
+                otp:                null,       // no OTP needed — device was trusted
+                trusted_device:     true,
+                expires_at:         new Date(Date.now() + 15 * 60 * 1000),
+                used:               false,
+                created_at:         new Date(),
+                otp_sent_at:        null,
+                otp_send_count:     0,
+              });
+              // Update device last_used_at
+              await trustSnap.ref.update({ last_used_at: new Date() });
+              console.log(`[DeviceTrust] Trusted device for uid ${userRecord.uid} — skipping OTP`);
+              return res.json({ reset_token: resetToken, trusted_device: true, message: 'Device recognised. No OTP required.' });
+            }
+          }
+        } catch (trustErr) {
+          console.warn('[DeviceTrust] Token check failed (non-fatal):', trustErr.message);
+        }
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       // Generate a 6-digit OTP and a unique token to tie the OTP to this reset attempt.
       // The token (not the OTP) is what gets passed between steps — the OTP is the secret.
       const otp        = secureOtp();
       const resetToken = secureToken('rst');
       const expiresAt  = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes from now
+      const now        = new Date();
 
       await db.collection('password_reset_tokens').doc(resetToken).set({
-        uid:        userRecord.uid,
+        uid:            userRecord.uid,
         otp,
-        expires_at: expiresAt,
-        used:       false,
-        created_at: new Date(),
+        expires_at:     expiresAt,
+        used:           false,
+        created_at:     now,
+        otp_sent_at:    now,
+        otp_send_count: 1,
       });
 
       // Look up phone from Firestore employee record (Firebase Auth may not have phoneNumber set)
@@ -227,8 +266,8 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
   // via SMS + their new password.
   router.post('/reset-password', authLimiter, async (req, res) => {
     const { reset_token, otp, new_password } = req.body || {};
-    if (!reset_token || !otp || !new_password) {
-      return res.status(400).json({ message: 'reset_token, otp, and new_password are required.' });
+    if (!reset_token || !new_password) {
+      return res.status(400).json({ message: 'reset_token and new_password are required.' });
     }
     if (new_password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters.' });
@@ -238,20 +277,35 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       const docRef = db.collection('password_reset_tokens').doc(reset_token);
       const snap   = await docRef.get();
 
-      if (!snap.exists)              return res.status(400).json({ message: 'Invalid reset token.' });
-      if (snap.data().used)          return res.status(400).json({ message: 'This reset link has already been used.' });
+      if (!snap.exists)     return res.status(400).json({ message: 'Invalid reset token.' });
+      if (snap.data().used) return res.status(400).json({ message: 'This reset link has already been used.' });
       if (new Date() > snap.data().expires_at.toDate()) {
         return res.status(400).json({ message: 'Reset token has expired. Please request a new one.' });
       }
-      if (snap.data().otp !== otp)   return res.status(400).json({ message: 'Incorrect OTP.' });
+
+      const d = snap.data();
+      // If trusted_device=true, OTP was skipped — don't require it.
+      // Otherwise validate the OTP that was sent via SMS.
+      if (!d.trusted_device) {
+        if (!otp) return res.status(400).json({ message: 'otp is required.' });
+        if (d.otp !== otp) return res.status(400).json({ message: 'Incorrect OTP.' });
+      }
 
       // All checks passed — update the password in Firebase Auth
-      await auth.updateUser(snap.data().uid, { password: new_password });
+      await auth.updateUser(d.uid, { password: new_password });
 
       // Mark token as used so it can't be replayed
       await docRef.update({ used: true });
 
-      return res.json({ success: true });
+      // Issue (or refresh) a device trust token so this device skips OTP next time
+      const deviceToken = secureToken('dev');
+      await db.collection('device_trust_tokens').doc(deviceToken).set({
+        uid:        d.uid,
+        created_at: new Date(),
+        expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      });
+
+      return res.json({ success: true, device_trust_token: deviceToken });
     } catch (err) {
       console.error('reset-password error:', err);
       return res.status(500).json({ message: 'Failed to reset password.' });
@@ -269,20 +323,43 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       const docRef = db.collection('password_reset_tokens').doc(reset_token);
       const snap   = await docRef.get();
       if (!snap.exists)      return res.status(400).json({ message: 'Invalid reset token.' });
-      if (snap.data().used)  return res.status(400).json({ message: 'Token already used.' });
+
+      const d = snap.data();
+      if (d.used)            return res.status(400).json({ message: 'Token already used.' });
+      if (d.trusted_device)  return res.status(400).json({ message: 'No OTP needed for trusted device.' });
+
+      // ── Rate limit: 60s cooldown, max 3 sends ────────────────────────────
+      const OTP_COOLDOWN_S = 60;
+      const OTP_MAX_SENDS  = 3;
+      if (d.otp_sent_at) {
+        const secsSince = (Date.now() - d.otp_sent_at.toDate().getTime()) / 1000;
+        if (secsSince < OTP_COOLDOWN_S) {
+          const waitSecs = Math.ceil(OTP_COOLDOWN_S - secsSince);
+          return res.status(429).json({ message: `Please wait ${waitSecs} seconds before requesting another OTP.`, wait_seconds: waitSecs });
+        }
+      }
+      if ((d.otp_send_count || 0) >= OTP_MAX_SENDS) {
+        return res.status(429).json({ message: 'Maximum OTP attempts reached. Please start over.' });
+      }
+      // ─────────────────────────────────────────────────────────────────────
 
       const newOtp    = secureOtp();
       const newExpiry = new Date(Date.now() + 15 * 60 * 1000);
+      const now       = new Date();
 
-      await docRef.update({ otp: newOtp, expires_at: newExpiry });
+      await docRef.update({
+        otp:            newOtp,
+        expires_at:     newExpiry,
+        otp_sent_at:    now,
+        otp_send_count: (d.otp_send_count || 1) + 1,
+      });
 
       // Look up the employee's phone from Firestore to resend the OTP
       try {
-        const uid = snap.data().uid;
-        const empSnap = await db.collection('employees').doc(uid).get();
+        const empSnap = await db.collection('employees').doc(d.uid).get();
         const phone   = (empSnap.exists && empSnap.data().phone) || null;
         if (phone) await sendOtp(phone, newOtp, 'password-reset-resend');
-        else console.warn(`[SMS] No phone on file for uid ${uid} — OTP resend skipped.`);
+        else console.warn(`[SMS] No phone on file for uid ${d.uid} — OTP resend skipped.`);
       } catch (smsErr) {
         console.warn('[SMS] Resend lookup failed (non-fatal):', smsErr.message);
       }
@@ -322,14 +399,18 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
       // Store registration intent — NOT the password
+      // otp_sent_at + otp_send_count are used to enforce resend rate limits.
+      const now = new Date();
       await db.collection('pending_registrations').doc(regToken).set({
         phone,
         email,
-        name:       (name || '').trim().slice(0, 100) || null,
+        name:           (name || '').trim().slice(0, 100) || null,
         otp,
-        expires_at: expiresAt,
-        verified:   false,
-        created_at: new Date(),
+        expires_at:     expiresAt,
+        verified:       false,
+        created_at:     now,
+        otp_sent_at:    now,
+        otp_send_count: 1,
       });
 
       // Send OTP via 2Factor.in. Non-fatal — registration still succeeds if SMS fails.
@@ -390,7 +471,17 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         actor:       data.phone,
       });
 
-      return res.json({ success: true });
+      // Issue a device trust token — stored in the guard's browser and sent with
+      // future password reset requests so they can skip the SMS OTP from this device.
+      const deviceToken = secureToken('dev');
+      await db.collection('device_trust_tokens').doc(deviceToken).set({
+        phone:      data.phone,
+        uid:        userRecord.uid,
+        created_at: new Date(),
+        expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
+      });
+
+      return res.json({ success: true, device_trust_token: deviceToken });
     } catch (err) {
       console.error('employee/verify-otp error:', err);
       return res.status(500).json({ message: 'Verification failed.' });
@@ -409,14 +500,36 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       if (!snap.exists)          return res.status(400).json({ message: 'Invalid registration token.' });
       if (snap.data().verified)  return res.status(400).json({ message: 'Already verified.' });
 
+      const d = snap.data();
+
+      // ── Rate limit: 60s cooldown between resends ─────────────────────────
+      const OTP_COOLDOWN_S = 60;
+      const OTP_MAX_SENDS  = 3;
+      if (d.otp_sent_at) {
+        const secsSince = (Date.now() - d.otp_sent_at.toDate().getTime()) / 1000;
+        if (secsSince < OTP_COOLDOWN_S) {
+          const waitSecs = Math.ceil(OTP_COOLDOWN_S - secsSince);
+          return res.status(429).json({ message: `Please wait ${waitSecs} seconds before requesting another OTP.`, wait_seconds: waitSecs });
+        }
+      }
+      if ((d.otp_send_count || 0) >= OTP_MAX_SENDS) {
+        return res.status(429).json({ message: 'Maximum OTP attempts reached. Please start a new registration.' });
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       const newOtp    = secureOtp();
       const newExpiry = new Date(Date.now() + 15 * 60 * 1000);
+      const now       = new Date();
 
-      await docRef.update({ otp: newOtp, expires_at: newExpiry });
+      await docRef.update({
+        otp:            newOtp,
+        expires_at:     newExpiry,
+        otp_sent_at:    now,
+        otp_send_count: (d.otp_send_count || 1) + 1,
+      });
 
       // Resend OTP to the same phone stored in the pending registration
-      const regPhone = snap.data().phone;
-      if (regPhone) await sendOtp(regPhone, newOtp, 'registration-resend');
+      if (d.phone) await sendOtp(d.phone, newOtp, 'registration-resend');
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {

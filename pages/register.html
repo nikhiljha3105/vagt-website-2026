@@ -237,6 +237,11 @@
         return;
       }
 
+      // Store device trust token — lets this device skip OTP on future password resets
+      if (data.device_trust_token) {
+        try { localStorage.setItem('vagt_device_token', data.device_trust_token); } catch { /* ignore */ }
+      }
+
       // Success
       const email = document.getElementById('regEmail').value.trim();
       document.getElementById('confirmedEmail').textContent = email;
@@ -261,16 +266,33 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
+    let waitSecs = 60; // default cooldown; server may override
     try {
-      await fetch(`${API}/employee/resend-otp`, {
+      const resp = await fetch(`${API}/employee/resend-otp`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ registration_token: regToken }),
       });
-    } catch { /* non-fatal */ }
+      const data = await resp.json().catch(() => ({}));
 
-    // 30-second cooldown before allowing another resend
-    let secs = 30;
+      if (resp.status === 429) {
+        // Server enforced rate limit — use server's wait time
+        waitSecs = data.wait_seconds || 60;
+        showErr('otpError', data.message || 'Please wait before requesting another code.');
+      } else if (!resp.ok) {
+        showErr('otpError', data.message || 'Could not resend. Please try again.');
+        // On hard errors (max reached), disable permanently
+        if (data.message && data.message.includes('Maximum')) {
+          btn.textContent = 'Max attempts reached';
+          resendCooldown = true;
+          return;
+        }
+      }
+    } catch { /* network error — still apply cooldown */ }
+
+    // Countdown using server-prescribed wait time
+    let secs = waitSecs;
+    btn.textContent = `Resend code (${secs}s)`;
     const timer = setInterval(() => {
       secs--;
       btn.textContent = `Resend code (${secs}s)`;
