@@ -253,6 +253,18 @@
              + '<div class="data-row-value">' + (l.days_taken||0) + ' <span class="data-row-sub">/ ' + (l.days_available||0) + ' available</span></div></div>';
       }).join('') : '<div style="font-size:13px;color:var(--text-muted);">No leave data.</div>';
 
+      // Guard performance
+      const gp = d.guard_performance || [];
+      const gpRows = gp.length ? gp.map(function (g) {
+        const w = Math.min(100, g.attendance_rate || 0);
+        const cls = w >= 90 ? 'bar-green' : w >= 70 ? 'bar-amber' : 'bar-red';
+        return '<div class="data-row">'
+             + '<div class="data-row-label">' + esc(g.name) + ' <span class="data-row-sub">' + g.shifts_present + '/' + g.shifts_total + ' shifts</span></div>'
+             + '<div class="bar-wrap"><div class="bar-fill ' + cls + '" style="width:' + w + '%"></div></div>'
+             + '<div class="data-row-value">' + g.attendance_rate + '%</div>'
+             + '</div>';
+      }).join('') : '<div style="font-size:13px;color:var(--text-muted);">No guard data for this period.</div>';
+
       setHTML('reportsContent',
         '<div class="reports-grid">'
         + '<div class="report-card"><div class="report-card-title">Attendance by Site</div>' + attRows + '</div>'
@@ -261,6 +273,9 @@
         + '<div class="reports-grid">'
         + '<div class="report-card"><div class="report-card-title">SLA Compliance — Complaint Resolution</div>' + slaRows + '</div>'
         + '<div class="report-card"><div class="report-card-title">Leave Utilisation</div>' + lvRows + '</div>'
+        + '</div>'
+        + '<div class="reports-grid" style="grid-template-columns:1fr;">'
+        + '<div class="report-card"><div class="report-card-title">Guard Performance — Attendance Ranking</div>' + gpRows + '</div>'
         + '</div>'
       );
     } catch (e) {

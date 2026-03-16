@@ -970,7 +970,34 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         },
         incidents_by_type: incidentsByType,
         leave_utilisation: leaveUtilisation,
-        guard_performance: [], // TODO: per-guard attendance rate, incidents filed, leave taken
+        guard_performance: (() => {
+          // Roll up attendance by employee for the period
+          const byEmp = {};
+          attendanceSnap.docs.forEach(doc => {
+            const d = doc.data();
+            const uid = d.employee_uid || d.employee_id || 'unknown';
+            if (!byEmp[uid]) byEmp[uid] = { name: d.employee_name || uid, total: 0, present: 0, incidents: 0 };
+            byEmp[uid].total++;
+            if (d.check_in) byEmp[uid].present++;
+          });
+          // Count incidents per employee (field name varies: guard_uid or employee_uid)
+          incidentsSnap.docs.forEach(doc => {
+            const d = doc.data();
+            const uid = d.guard_uid || d.employee_uid || d.reported_by;
+            if (uid && byEmp[uid]) byEmp[uid].incidents++;
+          });
+          return Object.entries(byEmp)
+            .map(([uid, v]) => ({
+              employee_uid:    uid,
+              name:            v.name,
+              shifts_total:    v.total,
+              shifts_present:  v.present,
+              attendance_rate: v.total > 0 ? Math.round((v.present / v.total) * 1000) / 10 : 0,
+              incidents_filed: v.incidents,
+            }))
+            .sort((a, b) => b.attendance_rate - a.attendance_rate)
+            .slice(0, 10);
+        })(),
       });
     } catch (err) {
       console.error('admin/reports error:', err);
