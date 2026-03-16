@@ -635,64 +635,81 @@ async function seedAll() {
     console.log('  ✅ employee:', emp.name, `(${emp.employee_id})`);
   }
 
-  // Attendance
-  for (const log of ATTENDANCE) {
-    await db.collection('attendance_logs').add({ ...log, _seed: true });
+  // Attendance — deterministic ID: seed-att-{employee_id}-{date} prevents duplicates on re-run
+  for (let i = 0; i < ATTENDANCE.length; i++) {
+    const log = ATTENDANCE[i];
+    const docId = `seed-att-${log.employee_id}-${log.date || i}`;
+    await db.collection('attendance_logs').doc(docId).set({ ...log, _seed: true });
   }
   console.log(`  ✅ attendance logs: ${ATTENDANCE.length}`);
 
-  // Leave requests
-  for (const lr of LEAVE_REQUESTS) {
-    await db.collection('leave_requests').add({ ...lr, _seed: true });
+  // Leave requests — deterministic ID: seed-lr-{employee_id}-{from_date}
+  for (let i = 0; i < LEAVE_REQUESTS.length; i++) {
+    const lr = LEAVE_REQUESTS[i];
+    const docId = `seed-lr-${lr.employee_id}-${lr.from_date || i}`;
+    await db.collection('leave_requests').doc(docId).set({ ...lr, _seed: true });
   }
   console.log(`  ✅ leave requests: ${LEAVE_REQUESTS.length}`);
 
-  // Complaints
-  for (const c of COMPLAINTS) {
-    await db.collection('complaints').add({ ...c, _seed: true });
+  // Complaints — deterministic ID: seed-cmp-{client_uid}-{i}
+  for (let i = 0; i < COMPLAINTS.length; i++) {
+    const c = COMPLAINTS[i];
+    const docId = `seed-cmp-${c.client_uid || 'unknown'}-${i + 1}`;
+    await db.collection('complaints').doc(docId).set({ ...c, _seed: true });
   }
   console.log(`  ✅ complaints: ${COMPLAINTS.length}`);
 
-  // Incidents
-  for (const inc of INCIDENTS) {
-    await db.collection('incidents').add({ ...inc, _seed: true });
+  // Incidents — deterministic ID: seed-inc-{type}-{i}
+  for (let i = 0; i < INCIDENTS.length; i++) {
+    const inc = INCIDENTS[i];
+    const docId = `seed-inc-${(inc.type || 'other').replace(/[^a-z0-9]/g, '_')}-${i + 1}`;
+    await db.collection('incidents').doc(docId).set({ ...inc, _seed: true });
   }
   console.log(`  ✅ incidents: ${INCIDENTS.length}`);
 
-  // Guest logs
-  for (const g of GUESTS) {
-    await db.collection('guest_logs').add({ ...g, _seed: true });
+  // Guest logs — deterministic ID: seed-guest-{site_id}-{i}
+  for (let i = 0; i < GUESTS.length; i++) {
+    const g = GUESTS[i];
+    const docId = `seed-guest-${g.site_id || 'unknown'}-${i + 1}`;
+    await db.collection('guest_logs').doc(docId).set({ ...g, _seed: true });
   }
   console.log(`  ✅ guest logs: ${GUESTS.length}`);
 
-  // Patrol checkpoints
+  // Patrol checkpoints — already use explicit IDs
   for (const cp of PATROL_CHECKPOINTS) {
     const { id, ...data } = cp;
     await db.collection('patrol_checkpoints').doc(id).set({ ...data, _seed: true });
   }
   console.log(`  ✅ patrol checkpoints: ${PATROL_CHECKPOINTS.length}`);
 
-  // Patrol logs
-  for (const pl of PATROL_LOGS) {
-    await db.collection('patrol_logs').add({ ...pl, _seed: true });
+  // Patrol logs — deterministic ID: seed-pl-{checkpoint_id}-{i}
+  for (let i = 0; i < PATROL_LOGS.length; i++) {
+    const pl = PATROL_LOGS[i];
+    const docId = `seed-pl-${pl.checkpoint_id || 'unknown'}-${i + 1}`;
+    await db.collection('patrol_logs').doc(docId).set({ ...pl, _seed: true });
   }
   console.log(`  ✅ patrol logs: ${PATROL_LOGS.length}`);
 
-  // Payslips
-  for (const ps of PAYSLIPS) {
-    await db.collection('payslips').add({ ...ps, _seed: true });
+  // Payslips — deterministic ID: seed-pay-{employee_id}-{month}
+  for (let i = 0; i < PAYSLIPS.length; i++) {
+    const ps = PAYSLIPS[i];
+    const docId = `seed-pay-${ps.employee_id}-${(ps.month || i).replace('/', '-')}`;
+    await db.collection('payslips').doc(docId).set({ ...ps, _seed: true });
   }
   console.log(`  ✅ payslips: ${PAYSLIPS.length}`);
 
-  // Invoices
-  for (const inv of INVOICES) {
-    await db.collection('invoices').add({ ...inv, _seed: true });
+  // Invoices — deterministic ID: seed-inv-{invoice_number}
+  for (let i = 0; i < INVOICES.length; i++) {
+    const inv = INVOICES[i];
+    const docId = `seed-inv-${(inv.invoice_number || i).replace(/[^a-zA-Z0-9-]/g, '-')}`;
+    await db.collection('invoices').doc(docId).set({ ...inv, _seed: true });
   }
   console.log(`  ✅ invoices: ${INVOICES.length}`);
 
-  // Activity log
-  for (const a of ACTIVITY) {
-    await db.collection('activity_log').add({ ...a, _seed: true });
+  // Activity log — deterministic ID: seed-act-{i} prevents accumulation on re-runs
+  for (let i = 0; i < ACTIVITY.length; i++) {
+    const a = ACTIVITY[i];
+    await db.collection('activity_log').doc(`seed-act-${i + 1}`).set({ ...a, _seed: true });
   }
   console.log(`  ✅ activity log: ${ACTIVITY.length}`);
 
