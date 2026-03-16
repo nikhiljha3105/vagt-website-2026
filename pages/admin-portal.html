@@ -159,7 +159,12 @@
         <div class="stat-cell">
           <div class="stat-value" id="statCheckedIn">—</div>
           <div class="stat-label">Checked in today</div>
-          <div class="stat-sub" id="statOnDuty"></div>
+          <div id="statCheckInContainer" style="display:none;">
+            <div class="stat-sub" id="statOnDuty"></div>
+            <div class="checkin-progress">
+              <div class="checkin-progress-bar" id="checkInProgressBar" style="width: 0%"></div>
+            </div>
+          </div>
         </div>
         <a href="admin-complaints.html" class="stat-cell stat-cell-link">
           <div class="stat-value" id="statTickets">—</div>
@@ -284,11 +289,19 @@
       const checkedIn = attendSnap.docs.filter(d => d.data().check_in && !d.data().check_out).length;
       const onDuty    = attendSnap.size;
       const urgent    = ticketsSnap.docs.filter(d => d.data().priority === 'urgent').length;
+      const checkInPercent = onDuty > 0 ? Math.round((checkedIn / onDuty) * 100) : 0;
 
       setText('statEmployees', empSnap.size);
       setText('statPending', pendingSnap.size > 0 ? pendingSnap.size + ' pending approval' : '');
       setText('statCheckedIn', checkedIn);
-      setText('statOnDuty', onDuty > 0 ? 'of ' + onDuty + ' on duty' : '');
+
+      // Update checked-in progress
+      if (onDuty > 0) {
+        document.getElementById('statCheckInContainer').style.display = '';
+        setText('statOnDuty', 'of ' + onDuty + ' on duty (' + checkInPercent + '%)');
+        document.getElementById('checkInProgressBar').style.width = checkInPercent + '%';
+      }
+
       setText('statTickets', ticketsSnap.size);
       setText('statUrgent', urgent > 0 ? urgent + ' urgent' : '');
       setText('statLeaves', leavesSnap.size);
@@ -300,7 +313,7 @@
     try {
       const snap = await db.collection('activity_log').orderBy('time', 'desc').limit(12).get();
       if (snap.empty) {
-        setHTML('activityBlock', '<div class="portal-empty-state" style="padding:20px 0;"><svg viewBox="0 0 24 24" width="28" height="28"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>No activity yet.</div>');
+        setHTML('activityBlock', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div class="portal-empty-state-title">No activity yet</div><div class="portal-empty-state-desc">Activity logs will appear here as guards check in and events occur.</div></div>');
         return;
       }
       const html = snap.docs.map(doc => {

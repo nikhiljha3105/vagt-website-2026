@@ -24,6 +24,19 @@
   --border:      #E4E2DB;
   --sidebar-w:   260px;
   --font:        'Inter', sans-serif;
+  --green-soft:  rgba(0,150,80,0.08);
+  --green:       #009650;
+}
+
+/* === ANIMATIONS === */
+@keyframes fadeInContent {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* === RESET === */
@@ -538,6 +551,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   padding: 60px 56px 48px;
   position: relative;
   overflow: hidden;
+  animation: fadeInContent 0.6s ease-out;
 }
 .page-header::after {
   content: '';
@@ -549,7 +563,11 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   border-radius: 50%;
   pointer-events: none;
 }
-.page-header .section-label { margin-bottom: 12px; }
+.page-header .section-label {
+  margin-bottom: 12px;
+  padding-left: 12px;
+  border-left: 3px solid var(--amber);
+}
 .page-header h1 {
   font-size: clamp(26px, 3.5vw, 42px);
   font-weight: 800;
@@ -1405,9 +1423,15 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .admin-table td {
   padding: 11px 14px; border-bottom: 1px solid var(--border);
   color: var(--text-mid); vertical-align: middle;
+  transition: background-color 0.15s ease;
 }
 .admin-table tr:last-child td { border-bottom: none; }
-.admin-table tbody tr:hover td { background: var(--warm-grey); }
+.admin-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+.admin-table tbody tr:hover td {
+  background: var(--warm-grey);
+}
 .admin-table .col-id   { font-weight: 700; color: var(--navy); font-family: monospace; font-size: 12px; }
 .admin-table .col-name { font-weight: 700; color: var(--navy); }
 .admin-table .col-actions { white-space: nowrap; }
@@ -1806,3 +1830,164 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 }
 .btn-cta-primary:hover { opacity: 0.88; }
 @media (max-width: 900px) { .page-cta-strip { padding: 32px 24px; } }
+
+/* ─── ADMIN DASHBOARD ENHANCEMENTS ─── */
+
+/* Enhanced stat cells with better visual weight */
+.stat-cell {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.stat-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.stat-cell:hover::before {
+  background: var(--amber);
+}
+
+.stat-cell:hover {
+  background: rgba(13,31,60,0.02);
+}
+
+.stat-cell-link:hover {
+  background: rgba(13,31,60,0.04) !important;
+}
+
+/* Stat value with trend indicator support */
+.stat-value-with-trend {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.stat-trend {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.stat-trend.up {
+  color: #005c30;
+  background: rgba(0,150,80,0.12);
+}
+
+.stat-trend.down {
+  color: #7a0000;
+  background: rgba(196,30,30,0.10);
+}
+
+/* Progress bar for checked in status */
+.checkin-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+
+.checkin-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--navy) 0%, var(--navy-400) 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Empty state improvements */
+.portal-empty-state {
+  text-align: center;
+  padding: 32px 20px;
+  background: var(--warm-white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+}
+
+.portal-empty-state svg {
+  opacity: 0.3;
+  margin-bottom: 12px;
+}
+
+.portal-empty-state-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.portal-empty-state-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Enhanced pending item cards */
+.pending-item {
+  padding: 14px 0;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid var(--border);
+}
+
+.pending-item:hover {
+  background: var(--warm-white);
+  padding-left: 8px;
+  padding-right: -8px;
+}
+
+.pending-item:last-child {
+  border-bottom: none;
+}
+
+.pending-avatar {
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.pending-item:hover .pending-avatar {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  background: rgba(13,31,60,0.12);
+}
+
+/* Activity feed improvements */
+.activity-item {
+  padding: 12px 0;
+  transition: background 0.15s ease;
+}
+
+.activity-item:hover {
+  background: var(--warm-white);
+  padding-left: 8px;
+  padding-right: -8px;
+}
+
+.activity-dot {
+  transition: all 0.2s ease;
+}
+
+.activity-item:hover .activity-dot {
+  width: 10px;
+  height: 10px;
+  box-shadow: 0 0 8px rgba(245,196,0,0.4);
+}
+
+/* Page content fade-in animation */
+.page-content {
+  animation: fadeInContent 0.5s ease-out 0.1s both;
+}
+
+/* Dash row with stagger animation */
+.dash-row > div {
+  animation: slideInUp 0.5s ease-out;
+}
+
+.dash-row > div:nth-child(1) { animation-delay: 0.15s; }
+.dash-row > div:nth-child(2) { animation-delay: 0.25s; }

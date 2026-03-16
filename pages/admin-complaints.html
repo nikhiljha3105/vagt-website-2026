@@ -24,7 +24,17 @@
     .filter-bar select, .filter-bar input[type="search"] { font-size:12px; padding:8px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); outline:none; min-width:130px; }
     .filter-bar input[type="search"] { min-width:200px; }
 
-    .ticket-card { background:var(--white); border:1px solid var(--border); padding:20px 22px; margin-bottom:10px; }
+    .ticket-card {
+      background:var(--white); border:1px solid var(--border); padding:20px 22px; margin-bottom:10px;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    .ticket-card:hover {
+      border-color: var(--amber);
+      box-shadow: 0 2px 8px rgba(13,31,60,0.08);
+      border-left-color: var(--amber);
+    }
+    .ticket-card.urgent { border-left-color: #c41e1e; }
     .ticket-header { display:flex; align-items:flex-start; gap:14px; margin-bottom:10px; }
     .ticket-id-col { min-width:0; flex:1; }
     .ticket-ref  { font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px; }
@@ -35,10 +45,10 @@
     .badge-open        { background:rgba(196,30,30,0.10); color:#7a0000; }
     .badge-in_progress { background:rgba(245,196,0,0.20); color:#5a4200; }
     .badge-resolved    { background:rgba(0,150,80,0.12); color:#005c30; }
-    .badge-low     { background:rgba(0,0,0,0.05);       color:var(--text-muted); }
-    .badge-medium  { background:rgba(0,80,200,0.08);    color:#003080; }
-    .badge-high    { background:rgba(196,30,30,0.10);   color:#7a0000; }
-    .badge-urgent  { background:rgba(196,30,30,0.20);   color:#5a0000; }
+    .badge-low     { background:rgba(0,0,0,0.05);       color:var(--text-muted); font-weight:600; }
+    .badge-medium  { background:rgba(0,80,200,0.10);    color:#003080; font-weight:700; }
+    .badge-high    { background:rgba(196,30,30,0.12);   color:#7a0000; font-weight:700; }
+    .badge-urgent  { background:rgba(196,30,30,0.18);   color:#5a0000; font-weight:800; box-shadow: 0 0 8px rgba(196,30,30,0.15); }
     .ticket-body  { font-size:13px; color:var(--text-mid); line-height:1.6; margin-bottom:12px; }
     .ticket-note  { background:var(--amber-soft); border:1px solid rgba(245,196,0,0.3); padding:10px 14px; font-size:12px; color:#5a4200; margin-bottom:14px; }
     .ticket-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
@@ -52,10 +62,14 @@
     .cmp-stat-cell  { flex:1; padding:16px 20px; border-right:1px solid var(--border); }
     .cmp-stat-cell:last-child { border-right:none; }
     .cmp-stat-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); margin-bottom:5px; }
-    .cmp-stat-value { font-size:26px; font-weight:900; color:var(--navy); line-height:1; }
+    .cmp-stat-value { font-size:26px; font-weight:900; color:var(--navy); line-height:1; transition: all 0.2s ease; }
     .cmp-stat-value.red   { color:#7a0000; }
     .cmp-stat-value.amber { color:#5a4200; }
     .cmp-stat-value.green { color:#005c30; }
+    .cmp-stat-cell { transition: all 0.2s ease; position: relative; }
+    .cmp-stat-cell::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: transparent; transition: background 0.2s ease; }
+    .cmp-stat-cell:hover { background: rgba(13,31,60,0.02); }
+    .cmp-stat-cell:hover::before { background: var(--amber); }
   </style>
 </head>
 <body>

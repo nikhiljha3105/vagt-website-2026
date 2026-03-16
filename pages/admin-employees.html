@@ -24,10 +24,14 @@
     .emp-stat-cell  { flex:1; padding:16px 20px; border-right:1px solid var(--border); }
     .emp-stat-cell:last-child { border-right:none; }
     .emp-stat-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); margin-bottom:5px; }
-    .emp-stat-value { font-size:26px; font-weight:900; color:var(--navy); line-height:1; }
+    .emp-stat-value { font-size:26px; font-weight:900; color:var(--navy); line-height:1; transition: all 0.2s ease; }
     .emp-stat-value.green  { color:#005c30; }
     .emp-stat-value.amber  { color:#5a4200; }
     .emp-stat-value.muted  { color:var(--text-muted); }
+    .emp-stat-cell { transition: all 0.2s ease; position: relative; }
+    .emp-stat-cell::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: transparent; transition: background 0.2s ease; }
+    .emp-stat-cell:hover { background: rgba(13,31,60,0.02); }
+    .emp-stat-cell:hover::before { background: var(--amber); }
 
     .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; align-items:flex-end; }
     .filter-bar label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); display:block; margin-bottom:5px; }
@@ -36,14 +40,22 @@
 
     .emp-table { width:100%; border-collapse:collapse; }
     .emp-table th { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-faint); text-align:left; padding:0 12px 10px 0; border-bottom:1px solid var(--border); }
-    .emp-table td { padding:13px 12px 13px 0; border-bottom:1px solid var(--border); font-size:13px; color:var(--text); vertical-align:middle; }
+    .emp-table td { padding:13px 12px 13px 0; border-bottom:1px solid var(--border); font-size:13px; color:var(--text); vertical-align:middle; transition: background-color 0.15s ease; }
     .emp-table tr:last-child td { border-bottom:none; }
+    .emp-table tbody tr { transition: background-color 0.15s ease; }
+    .emp-table tbody tr:hover td { background: var(--warm-grey); }
 
     .emp-avatar {
-      width:32px; height:32px; border-radius:50%; background:rgba(13,31,60,0.08);
+      width:36px; height:36px; border-radius:50%; background:rgba(13,31,60,0.10);
       display:inline-flex; align-items:center; justify-content:center;
-      font-size:11px; font-weight:800; color:var(--navy); text-transform:uppercase;
-      margin-right:8px; flex-shrink:0; vertical-align:middle;
+      font-size:12px; font-weight:800; color:var(--navy); text-transform:uppercase;
+      margin-right:10px; flex-shrink:0; vertical-align:middle;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .emp-table tbody tr:hover .emp-avatar {
+      background: rgba(13,31,60,0.15);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
     }
     .emp-name { font-weight:600; color:var(--navy); }
     .emp-id   { font-size:11px; color:var(--text-muted); }
