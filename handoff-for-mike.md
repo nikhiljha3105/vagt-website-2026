@@ -52,6 +52,21 @@ Documents already saved to `client-briefs/` in the repo:
 
 ---
 
+## 🔧 PENDING — Firebase Deploy (2026-03-16)
+
+Firebase CLI is **not installed** on the server. All code changes from this session are committed and pushed to the branch but **not yet live**.
+
+To deploy when back at your machine:
+```bash
+npm install -g firebase-tools   # if not already installed
+firebase login
+firebase deploy --only hosting --project vagt---services
+```
+
+All public website changes (homepage reposition, trust strip, sidebar labels, VAGT wordmark size) will go live after this deploy.
+
+---
+
 ## ⚠️ READ THIS FIRST
 
 Active branch: `claude/review-website-git-dPWyR`
