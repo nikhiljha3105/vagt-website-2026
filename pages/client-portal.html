@@ -356,10 +356,6 @@
       setText('statSites', sites.length);
       setText('statIncidents', incidentSnap.size);
       setText('statTickets', ticketsSnap.size);
-
-      // Label clarity — mark stat as live
-      const guardsLabel = document.querySelector('[data-stat="guards"] .stat-label');
-      if (guardsLabel) guardsLabel.textContent = 'On Duty Now';
     } catch (e) { console.error('Summary:', e); }
   }
 

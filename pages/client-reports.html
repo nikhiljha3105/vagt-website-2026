@@ -140,7 +140,7 @@
           <label>Type</label>
           <select id="filterType">
             <option value="">All types</option>
-            <option value="daily_log">Daily Log</option>
+            <option value="daily">Daily Log</option>
             <option value="incident">Incident</option>
             <option value="inspection">Inspection</option>
           </select>
@@ -193,7 +193,7 @@
 
   auth.onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = 'portal.html'; return; }
-    const token = await user.getIdTokenResult();
+    const token = await user.getIdTokenResult(true);
     if (token.claims.role !== 'client') { window.location.href = 'portal.html'; return; }
     currentUid = user.uid;
     document.getElementById('authOverlay').style.display = 'none';

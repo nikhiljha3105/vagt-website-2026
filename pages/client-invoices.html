@@ -162,7 +162,7 @@
 
   auth.onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = 'portal.html'; return; }
-    const token = await user.getIdTokenResult();
+    const token = await user.getIdTokenResult(true);
     if (token.claims.role !== 'client') { window.location.href = 'portal.html'; return; }
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('portalLayout').style.display = '';
@@ -223,7 +223,7 @@
           <td>${esc(d.period_label || '—')}</td>
           <td>${esc(d.issued_date || '—')}</td>
           <td>${esc(d.due_date || '—')}</td>
-          <td><span class="inv-badge badge-${esc(d.status)}">${esc(d.status)}</span></td>
+          <td><span class="inv-badge badge-${esc(d.status)}">${esc({paid:'Paid',unpaid:'Unpaid',overdue:'Overdue',cancelled:'Cancelled'}[d.status] || d.status)}</span></td>
           <td class="inv-amount-cell">${fmt(d.amount)}</td>
           <td>${pdf}</td>
         </tr>`;

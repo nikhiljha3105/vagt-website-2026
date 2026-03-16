@@ -168,7 +168,8 @@
   }
 
   async function apiFetch(path) {
-    const res = await fetch(path, { headers: { 'Authorization': 'Bearer ' + idToken } });
+    const token = await firebase.auth().currentUser.getIdToken();
+    const res = await fetch(path, { headers: { 'Authorization': 'Bearer ' + token } });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Request failed');
     return data;
@@ -253,10 +254,10 @@
   auth.onAuthStateChanged(async function (user) {
     if (!user) { window.location.href = 'portal.html'; return; }
 
-    const tokenResult = await user.getIdTokenResult();
+    const tokenResult = await user.getIdTokenResult(true);
     if (tokenResult.claims.role !== 'client') { window.location.href = 'portal.html'; return; }
 
-    idToken = await user.getIdToken();
+    idToken = await user.getIdToken(); // kept for backwards compat — apiFetch now refreshes on each call
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('portalLayout').style.display = '';
     if (window.innerWidth < 900) document.getElementById('navToggle').style.display = '';
