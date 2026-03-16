@@ -20,7 +20,7 @@
  *   Step 1 — Guard opens register page, enters phone + email + password
  *            → POST /api/auth/employee/register
  *            → OTP generated (6 digits, 15 min TTL) stored in pending_registrations
- *            → ⚠️  TODO: OTP sent via SMS (currently STUBBED — no SMS goes out)
+ *            → OTP sent via 2Factor.in SMS
  *            → Returns: { registration_token: "reg_..." }
  *
  *   Step 2 — Guard enters OTP from SMS
@@ -33,14 +33,14 @@
  *            → POST /api/admin/registrations/:id/approve  (see admin.js)
  *            → Firebase Auth account ENABLED
  *            → Employee Firestore doc created with VAGT-XXXX ID
- *            → ⚠️  TODO: Password reset link sent via SMS (currently commented out)
+ *            → Firebase password reset email sent automatically (free, no SMS needed)
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * PASSWORD RESET FLOW:
  *
  *   Guard enters employee ID or email
  *     → OTP generated, stored in password_reset_tokens
- *     → ⚠️  TODO: OTP sent via SMS
+ *     → OTP sent via 2Factor.in SMS
  *   Guard enters OTP + new password
  *     → OTP verified, password updated in Firebase Auth
  *     → Reset token marked used (can't reuse)
@@ -54,34 +54,32 @@
  *     → Returns a Firebase Custom Token the frontend exchanges for a session
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * SMS INTEGRATION (the big TODO):
+ * SMS PROVIDER: 2Factor.in
  *
- *   All four places that need SMS are marked: // TODO: Send OTP via SMS
- *   When you're ready to wire MSG91:
- *     1. Get your MSG91 API key and sender ID
- *     2. Add them to Firebase environment config:
- *        firebase functions:config:set msg91.key="YOUR_KEY" msg91.sender="VAGTSC"
- *     3. Install the client: cd firebase/functions && npm install axios
- *     4. Replace each TODO block with:
+ *   Set up (one-time):
+ *     1. Sign up at https://2factor.in — free, instant
+ *     2. Copy your API key from the 2Factor dashboard
+ *     3. Set Firebase Functions config:
+ *          firebase functions:config:set twofactor.key="YOUR_2FACTOR_API_KEY"
+ *     4. Deploy functions:
+ *          firebase deploy --only functions --project vagt---services
  *
- *        const axios = require('axios');
- *        await axios.get('https://api.msg91.com/api/v5/otp', {
- *          params: {
- *            authkey: functions.config().msg91.key,
- *            mobile:  '91' + phoneNumber,   // India prefix
- *            message: `Your VAGT OTP is ${otp}. Valid for 15 minutes.`,
- *            sender:  functions.config().msg91.sender,
- *            otp:     otp,
- *          }
- *        });
+ *   How it works:
+ *     - 2Factor.in uses their own DLT-registered entity — no DLT setup needed from you
+ *     - OTP SMS arrives from a short code (e.g. VM-VAGTSV) within seconds
+ *     - Free tier: plenty for testing; paid plans start at ₹0.25/SMS
+ *
+ *   If SMS fails (non-fatal):
+ *     - Registration still succeeds — OTP is in Firestore
+ *     - Check: Firestore Console → pending_registrations → doc → 'otp' field
+ *     - To test without SMS: read the OTP from Firestore and enter it manually
  *
  * DEBUG TIPS:
  *   - "Invalid registration token" → the reg_... token expired or was already used
  *   - "Already verified" → guard tried to verify the same OTP twice (harmless)
  *   - "An account with this email already exists" → guard already registered;
  *     they should use forgot-password instead
- *   - OTP always wrong → check that the OTP was stored correctly in Firestore
- *     (Firestore Console → pending_registrations → find the doc → check 'otp' field)
+ *   - OTP always wrong → check Firestore Console → pending_registrations → doc → 'otp'
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -95,6 +93,56 @@ const crypto  = require('crypto');
 // suitable for security-sensitive values because it is predictable.
 function secureOtp() {
   return String(crypto.randomInt(100000, 1000000));
+}
+
+// ── SMS via 2Factor.in ────────────────────────────────────────────────────────
+// Sends a 6-digit OTP to an Indian mobile number using 2Factor.in's OTP API.
+// Non-fatal: if SMS delivery fails, the OTP is still in Firestore so you can
+// test manually. Guard experience degrades gracefully rather than failing hard.
+//
+// API key is in process.env.TWOFACTOR_API_KEY (matches .env file pattern used throughout).
+// Local: add TWOFACTOR_API_KEY=<key> to firebase/functions/.env
+// Production: Firebase Console → Functions → api → Edit → Environment variables → Add
+//
+// 2Factor.in OTP API endpoint:
+//   GET https://2factor.in/API/V1/{API_KEY}/SMS/{PHONE_NUMBER}/{OTP}
+// On success: { "Status": "Success", "Details": "Session ID" }
+// On failure: { "Status": "Error",   "Details": "reason" }
+// ─────────────────────────────────────────────────────────────────────────────
+async function sendOtp(phone, otp, context = '') {
+  // API key from environment variable — set in .env for local, Firebase console for prod.
+  // To set in production: Firebase Console → Functions → [your function] → Edit → Env vars
+  // Or via CLI: firebase functions:config:set is legacy; use .env file approach instead.
+  const apiKey = process.env.TWOFACTOR_API_KEY;
+
+  if (!apiKey || apiKey === 'YOUR_2FACTOR_API_KEY') {
+    console.warn(`[SMS] No 2Factor API key configured — OTP for ${phone} (${context}) not sent. Check Firestore to test.`);
+    return { sent: false, reason: 'no_api_key' };
+  }
+
+  // Normalise phone: strip leading 0, +91, spaces, dashes. API expects 10-digit number.
+  const cleaned = phone.replace(/[\s\-+]/g, '').replace(/^0?91/, '').replace(/^0/, '');
+  if (!/^[6-9]\d{9}$/.test(cleaned)) {
+    console.warn(`[SMS] Invalid Indian mobile: ${phone} — OTP not sent.`);
+    return { sent: false, reason: 'invalid_phone' };
+  }
+
+  const url = `https://2factor.in/API/V1/${apiKey}/SMS/${cleaned}/${otp}/AUTOGEN`;
+
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.Status === 'Success') {
+      console.log(`[SMS] OTP sent to ${cleaned} (${context}) — session: ${data.Details}`);
+      return { sent: true, session: data.Details };
+    } else {
+      console.warn(`[SMS] 2Factor error for ${cleaned}: ${data.Details}`);
+      return { sent: false, reason: data.Details };
+    }
+  } catch (err) {
+    console.warn(`[SMS] fetch failed for ${cleaned}: ${err.message}`);
+    return { sent: false, reason: err.message };
+  }
 }
 
 // Generates a secure random token string (e.g. for reset_token, reg_token).
@@ -150,12 +198,20 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         created_at: new Date(),
       });
 
-      // ── TODO: Send OTP via SMS ──────────────────────────────────────────
-      // Replace this comment with your MSG91/Twilio call.
-      // The phone number is in userRecord.phoneNumber (if set) or look it up
-      // from db.collection('employees').doc(userRecord.uid).get() → data().phone
-      // See SMS INTEGRATION section at the top of this file for exact code.
-      // ───────────────────────────────────────────────────────────────────
+      // Look up phone from Firestore employee record (Firebase Auth may not have phoneNumber set)
+      let phone = userRecord.phoneNumber || null;
+      if (!phone) {
+        try {
+          const empSnap = await db.collection('employees').doc(userRecord.uid).get();
+          if (empSnap.exists) phone = empSnap.data().phone || null;
+        } catch { /* non-fatal */ }
+      }
+
+      if (phone) {
+        await sendOtp(phone, otp, 'password-reset');
+      } else {
+        console.warn(`[SMS] No phone on file for uid ${userRecord.uid} — OTP not sent via SMS.`);
+      }
 
       // We return the reset_token to the frontend so it can pass it to the next step.
       // The OTP itself is NOT returned — it should only arrive via SMS.
@@ -220,9 +276,16 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
 
-      // ── TODO: Resend OTP via SMS ────────────────────────────────────────
-      // Same as forgot-password above — send newOtp to the guard's phone.
-      // ───────────────────────────────────────────────────────────────────
+      // Look up the employee's phone from Firestore to resend the OTP
+      try {
+        const uid = snap.data().uid;
+        const empSnap = await db.collection('employees').doc(uid).get();
+        const phone   = (empSnap.exists && empSnap.data().phone) || null;
+        if (phone) await sendOtp(phone, newOtp, 'password-reset-resend');
+        else console.warn(`[SMS] No phone on file for uid ${uid} — OTP resend skipped.`);
+      } catch (smsErr) {
+        console.warn('[SMS] Resend lookup failed (non-fatal):', smsErr.message);
+      }
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {
@@ -269,11 +332,8 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         created_at: new Date(),
       });
 
-      // ── TODO: Send OTP to phone via SMS ────────────────────────────────
-      // Send 'otp' to 'phone' via MSG91.
-      // See SMS INTEGRATION section at the top of this file for exact code.
-      // Until this is wired, the OTP is ONLY in Firestore — check there to test.
-      // ───────────────────────────────────────────────────────────────────
+      // Send OTP via 2Factor.in. Non-fatal — registration still succeeds if SMS fails.
+      await sendOtp(phone, otp, 'registration');
 
       // Return the token (not the OTP) — frontend needs it for the verify step
       return res.json({ registration_token: regToken });
@@ -354,9 +414,9 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
 
       await docRef.update({ otp: newOtp, expires_at: newExpiry });
 
-      // ── TODO: Resend OTP to phone via SMS ──────────────────────────────
-      // Send newOtp to snap.data().phone via MSG91.
-      // ───────────────────────────────────────────────────────────────────
+      // Resend OTP to the same phone stored in the pending registration
+      const regPhone = snap.data().phone;
+      if (regPhone) await sendOtp(regPhone, newOtp, 'registration-resend');
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {
