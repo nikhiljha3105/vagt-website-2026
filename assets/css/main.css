@@ -70,7 +70,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .logo-svg { width: 42px; height: 42px; flex-shrink: 0; }
 .logo-text-block { display: flex; flex-direction: column; }
 .logo-wordmark {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 900;
   letter-spacing: 3px;
   line-height: 1;
@@ -857,13 +857,13 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 
 /* ── REAL LOGO IMAGE IN SIDEBAR ── */
 .logo-img-wrap {
-  width: 44px; height: 44px; border-radius: 8px;
+  width: 48px; height: 48px; border-radius: 8px;
   background: var(--amber); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
 .logo-img {
-  width: 38px; height: auto; object-fit: contain;
+  width: 42px; height: auto; object-fit: contain;
 }
 
 /* ══════════════════════════════════════════════
