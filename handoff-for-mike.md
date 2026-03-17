@@ -8,6 +8,9 @@
 **VAGT Data folder:** https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
 (Created 2026-03-15. Drop all VAGT-related documents here — Claude will scan, categorise, and commit them to the repo automatically.)
 
+### ⏳ TODO — 2026-03-17
+- [ ] **Scan the VAGT Google Drive folder** for any new documents added since last session. Download, save to `client-briefs/` or `assets/docs/`, and commit to the repo. Link: https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
+
 Documents already saved to `client-briefs/` in the repo:
 - `tarun-realtors-security-assessment-2025-12.md` — Security audit report for M/s Tarun Realtors (Dec 2025)
 - `vagt-brochure-2025.pdf/.docx` — Company brochure
