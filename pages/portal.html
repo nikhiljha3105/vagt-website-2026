@@ -127,23 +127,78 @@
 <!-- Firebase v10 compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-config.js"></script>
 <script>
 (function () {
   'use strict';
 
   // ── Init ──────────────────────────────────────────────────────────────────
-  let auth;
+  let auth, db;
   try {
     const app = firebase.apps.length === 0
       ? firebase.initializeApp(FIREBASE_CONFIG)
       : firebase.app();
     auth = app.auth();
+    db   = app.firestore();
   } catch (e) {
     document.getElementById('loginError').textContent = 'Portal is not configured. Contact your VAGT administrator.';
     document.getElementById('loginError').style.display = '';
     return;
   }
+
+  // ── Device recognition ────────────────────────────────────────────────────
+  const LS_EMAIL = 'vagt_last_email';
+  const LS_NAME  = 'vagt_last_name';
+  const LS_DEVID = 'vagt_device_id';
+
+  function getOrCreateDeviceId() {
+    try {
+      let id = localStorage.getItem(LS_DEVID);
+      if (!id) {
+        id = 'dev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+        localStorage.setItem(LS_DEVID, id);
+      }
+      return id;
+    } catch { return 'unknown'; }
+  }
+
+  function saveDeviceProfile(email, name) {
+    try {
+      localStorage.setItem(LS_EMAIL, email);
+      if (name) localStorage.setItem(LS_NAME, name);
+    } catch { /* private browsing */ }
+  }
+
+  window.clearDevice = function () {
+    try { localStorage.removeItem(LS_EMAIL); localStorage.removeItem(LS_NAME); } catch {}
+    const banner = document.getElementById('returnBanner');
+    if (banner) banner.remove();
+    const emailEl = document.getElementById('loginEmail');
+    emailEl.value = ''; emailEl.readOnly = false; emailEl.focus();
+  };
+
+  // If device is recognised: pre-fill email, focus password, show welcome banner
+  (function applyReturnVisit() {
+    try {
+      const email = localStorage.getItem(LS_EMAIL);
+      if (!email) return;
+      const name    = localStorage.getItem(LS_NAME) || email.split('@')[0];
+      const emailEl = document.getElementById('loginEmail');
+      emailEl.value    = email;
+      emailEl.readOnly = true;
+      emailEl.style.color       = 'var(--text-muted)';
+      emailEl.style.background  = 'var(--surface, #f6f6f6)';
+
+      const banner = document.createElement('div');
+      banner.id = 'returnBanner';
+      banner.style.cssText = 'background:#eef2ff; border:1px solid #c7d4f0; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:13px; display:flex; align-items:center; justify-content:space-between; gap:8px;';
+      banner.innerHTML = '<span>Welcome back, <strong>' + name + '</strong></span>'
+        + '<button onclick="clearDevice()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--text-muted);text-decoration:underline;white-space:nowrap;">Not you?</button>';
+      document.getElementById('loginForm').insertBefore(banner, document.getElementById('loginForm').firstChild);
+      setTimeout(function () { document.getElementById('loginPass').focus(); }, 80);
+    } catch {}
+  })();
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   function show(id)       { document.getElementById(id).style.display = ''; }
@@ -248,6 +303,22 @@
     try {
       const cred  = await auth.signInWithEmailAndPassword(email, pass);
       const token = await cred.user.getIdTokenResult();
+
+      // Save device profile — next visit shows "Welcome back" with email pre-filled
+      const displayName = cred.user.displayName || '';
+      saveDeviceProfile(email, displayName);
+
+      // Log sign-in event with device info (best-effort, non-blocking)
+      db.collection('sign_in_events').add({
+        uid:          cred.user.uid,
+        email:        email,
+        device_id:    getOrCreateDeviceId(),
+        device_info:  navigator.userAgent.slice(0, 300),
+        method:       'email_password',
+        role:         token.claims.role || 'employee',
+        signed_in_at: firebase.firestore.FieldValue.serverTimestamp(),
+      }).catch(function () { /* non-fatal */ });
+
       redirectByRole(token.claims.role);
     } catch (err) {
       showErr(friendlyError(err.code));

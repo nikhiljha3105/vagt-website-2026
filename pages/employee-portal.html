@@ -368,6 +368,8 @@
       setText('sidebarName', d.name || '—');
       setText('sidebarId',   d.employee_id || '—');
       setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+      // Keep device profile name up to date so portal.html shows correct name on return
+      try { if (d.name) localStorage.setItem('vagt_last_name', d.name); } catch {}
       // Leave balance
       const lb = d.leave_balance || {};
       setText('leaveCasual', lb.casual  != null ? lb.casual  : '—');

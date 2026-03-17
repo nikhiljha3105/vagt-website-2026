@@ -322,6 +322,8 @@
       setText('pageSubtitle', d.company_name ? 'Deployment overview for ' + d.company_name + '.' : 'Here\'s your security overview.');
       setText('sidebarName', d.name || '—');
       setText('sidebarCompany', d.company_name || '—');
+      // Keep device profile name up to date so portal.html shows correct name on return
+      try { if (d.name) localStorage.setItem('vagt_last_name', d.name); } catch {}
     } catch (e) { console.error('Profile:', e); }
   }
 
