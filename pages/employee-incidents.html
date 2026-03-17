@@ -58,6 +58,23 @@
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .incident-meta { font-size: 11px; color: var(--text-faint); display: flex; gap: 12px; flex-wrap: wrap; }
+    .severity-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 600px) { .severity-opts { grid-template-columns: 1fr; } }
+    .sev-option { display: none; }
+    .sev-label {
+      display: flex; flex-direction: column; padding: 10px 14px;
+      border: 2px solid var(--border); cursor: pointer; border-radius: 4px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .sev-label strong { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 2px; }
+    .sev-label span   { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+    .sev-option:checked + .sev-label { border-color: var(--navy); background: rgba(13,31,60,0.04); }
+    .sev-option[value="High"]:checked   + .sev-label { border-color: #d97706; background: rgba(217,119,6,0.05); }
+    .sev-option[value="Critical"]:checked + .sev-label { border-color: #c41e1e; background: rgba(196,30,30,0.05); }
+    .sev-pill-low      { background: #e8f5e9; color: #2e7d32; }
+    .sev-pill-medium   { background: #fff8e1; color: #f57f17; }
+    .sev-pill-high     { background: #fff3e0; color: #e65100; }
+    .sev-pill-critical { background: #fce4ec; color: #b71c1c; }
   </style>
 </head>
 <body>
@@ -188,6 +205,44 @@
               </select>
             </div>
           </div>
+
+          <!-- Severity — full width row -->
+          <div class="form-group" style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:10px;">
+              How serious is this? <span style="color:var(--amber)">*</span>
+            </label>
+            <div class="severity-opts" id="severityGroup">
+              <div>
+                <input class="sev-option" type="radio" name="severity" id="sevLow" value="Low"/>
+                <label class="sev-label" for="sevLow">
+                  <strong>Low</strong>
+                  <span>No immediate danger. Situation is under control.</span>
+                </label>
+              </div>
+              <div>
+                <input class="sev-option" type="radio" name="severity" id="sevMedium" value="Medium"/>
+                <label class="sev-label" for="sevMedium">
+                  <strong>Medium</strong>
+                  <span>Needs attention soon. Not an emergency right now.</span>
+                </label>
+              </div>
+              <div>
+                <input class="sev-option" type="radio" name="severity" id="sevHigh" value="High"/>
+                <label class="sev-label" for="sevHigh">
+                  <strong>High</strong>
+                  <span>Urgent. Supervisor needs to know immediately.</span>
+                </label>
+              </div>
+              <div>
+                <input class="sev-option" type="radio" name="severity" id="sevCritical" value="Critical"/>
+                <label class="sev-label" for="sevCritical">
+                  <strong>Critical</strong>
+                  <span>Emergency. Police or ambulance called / needed now.</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="btn btn-navy" id="submitIncBtn">Submit Report</button>
         </form>
       </div>
@@ -239,6 +294,18 @@
     closed:       'Closed',
   };
 
+  function severityPillClass(sev) {
+    const map = { low:'sev-pill-low', medium:'sev-pill-medium', high:'sev-pill-high', critical:'sev-pill-critical' };
+    return map[(sev||'').toLowerCase()] || 'sev-pill-low';
+  }
+
+  // Generates INC-2026-A4F2 style reference — unique enough for field use
+  function generateRef() {
+    const year = new Date().getFullYear();
+    const rand = Math.random().toString(16).slice(2, 6).toUpperCase();
+    return 'INC-' + year + '-' + rand;
+  }
+
   // Set today's date as default
   document.getElementById('incDate').value = (function () {
     const d = new Date();
@@ -247,6 +314,7 @@
 
   // ── Submit incident ────────────────────────────────────────────────────────
   let currentUid = null;
+  let currentProfile = {};
 
   document.getElementById('incidentForm').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -255,20 +323,22 @@
     const btn = document.getElementById('submitIncBtn');
     hide('incidentError'); hide('incidentSuccess');
 
-    const type   = document.getElementById('incType').value;
-    const site   = document.getElementById('incSite').value.trim();
-    const what   = document.getElementById('incWhat').value.trim();
-    const who    = document.getElementById('incWho').value.trim();
-    const action = document.getElementById('incAction').value;
-    const date   = document.getElementById('incDate').value;
-    const time   = document.getElementById('incTime').value;
+    const type     = document.getElementById('incType').value;
+    const site     = document.getElementById('incSite').value.trim();
+    const what     = document.getElementById('incWhat').value.trim();
+    const who      = document.getElementById('incWho').value.trim();
+    const action   = document.getElementById('incAction').value;
+    const date     = document.getElementById('incDate').value;
+    const time     = document.getElementById('incTime').value;
+    const sevEl    = document.querySelector('input[name="severity"]:checked');
+    const severity = sevEl ? sevEl.value : '';
 
-    if (!type || !site || !what || !action || !date) {
-      showMsg('incidentError', 'Please fill in all required fields.');
+    if (!type || !site || !what || !action || !date || !severity) {
+      showMsg('incidentError', 'Please fill in all required fields, including how serious this is.');
       return;
     }
 
-    // Combine structured fields into a single description for the backend
+    const ref  = generateRef();
     const desc = 'What happened: ' + what +
       (who ? '\nWho was involved: ' + who : '') +
       '\nAction taken: ' + action;
@@ -278,19 +348,29 @@
 
     try {
       await db.collection('incidents').add({
-        employee_uid: currentUid,
-        type:         type,
-        site:         site,
-        description:  desc,
-        incident_date: date,
-        incident_time: time || null,
-        status:        'submitted',
-        submitted_at:  firebase.firestore.FieldValue.serverTimestamp(),
+        employee_uid:     currentUid,
+        employee_name:    currentProfile.name    || '',
+        employee_id:      currentProfile.employee_id || '',
+        site_id:          currentProfile.site_id  || '',
+        site_name:        currentProfile.site_name || site,
+        type:             type,
+        severity:         severity,
+        site:             site,
+        description:      desc,
+        persons_involved: who || '',
+        action_taken:     action,
+        incident_date:    date,
+        incident_time:    time || null,
+        reference_number: ref,
+        status:           'submitted',
+        submitted_at:     firebase.firestore.FieldValue.serverTimestamp(),
       });
 
-      showMsg('incidentSuccess', 'Report submitted. Your supervisor has been notified.');
+      showMsg('incidentSuccess', 'Report submitted — your reference number is ' + ref + '. Share this with your supervisor when following up.');
       document.getElementById('incidentForm').reset();
-      document.getElementById('incDate').value = date; // keep date default
+      document.getElementById('incDate').value = date;
+      // Uncheck severity buttons
+      document.querySelectorAll('input[name="severity"]').forEach(function(r){ r.checked = false; });
       loadIncidents(currentUid);
     } catch (err) {
       showMsg('incidentError', 'Could not submit report. Check your internet and try again.');
@@ -313,20 +393,36 @@
         return;
       }
 
-      const html = snap.docs.map(function (doc, i) {
+      const SEV_LABELS = { low: 'Low', medium: 'Medium', high: 'High', critical: 'Critical' };
+      const html = snap.docs.map(function (doc) {
         const d = doc.data();
         const pillCls = statusPillClass(d.status);
-        const refNum  = 'INC-' + String(i + 1).padStart(3, '0');
+        const refNum  = d.reference_number || doc.id.slice(0, 12).toUpperCase();
+
+        // Severity pill
+        const sev = (d.severity || '').toLowerCase();
+        const sevPillCls = sev ? 'sev-pill-' + sev : '';
+        const sevPill = sev
+          ? `<span class="sev-pill ${sevPillCls}" style="font-size:10px; padding:2px 8px; border-radius:99px; font-weight:700;">${SEV_LABELS[sev] || sev}</span>`
+          : '';
+
+        // Clean up description — strip the prefix labels for display
+        let desc = d.description || '';
+        desc = desc.replace(/^What happened:\s*/i, '');
+        // Trim at the first newline for the card summary; full text on expand
+        const descShort = desc.split('\n')[0];
+
         return `
           <div class="incident-item">
             <div class="incident-id">${refNum}</div>
             <div class="incident-body">
               <div class="incident-type">${d.type || 'Incident'}</div>
-              <div class="incident-desc">${d.description || ''}</div>
+              <div class="incident-desc">${descShort}</div>
               <div class="incident-meta">
-                <span>${d.site || '—'}</span>
+                <span>${d.site_name || d.site || '—'}</span>
                 <span>${d.incident_date || '—'}</span>
                 <span>Filed: ${fmtTimestamp(d.submitted_at)}</span>
+                ${sevPill}
                 <span class="complaint-status-pill ${pillCls}">${STATUS_LABELS[(d.status||'').toLowerCase()] || d.status || 'Submitted'}</span>
               </div>
             </div>
