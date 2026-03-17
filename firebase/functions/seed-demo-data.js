@@ -471,36 +471,92 @@ const INCIDENTS = [
     employee_uid: 'seed-emp-ravi', employee_id: 'VAGT-0001', employee_name: 'Ravi Kumar',
     site_id: SITE_PRESTIGE, site_name: 'Prestige Tech Park',
     type: 'unauthorized_entry', severity: 'medium',
+    reference_number: 'INC-2026-D4E1',
     description: 'Unknown person attempted to enter through the side gate at 10:15 PM claiming to be a vendor. Could not produce ID or delivery order. Turned away and gate locked. Management notified.',
-    status: 'reported', submitted_at: ts(2, 22, 20),
+    persons_involved: 'Unknown male, claimed to be vendor', action_taken: 'Turned away. Gate locked. Supervisor notified.',
+    status: 'reported', incident_date: istDate(2), submitted_at: ts(2, 22, 20),
   },
   {
     employee_uid: 'seed-emp-venkat', employee_id: 'VAGT-0004', employee_name: 'Venkatesh Reddy',
     site_id: SITE_BRIGADE, site_name: 'Brigade Gateway',
     type: 'altercation', severity: 'low',
+    reference_number: 'INC-2026-8B2F',
     description: 'Minor verbal argument between two delivery drivers at the loading bay entrance over queue position. Resolved peacefully. Both parties left without further incident.',
-    status: 'resolved', submitted_at: ts(11, 11, 35), resolved_at: ts(10, 9, 0),
+    persons_involved: 'Two delivery drivers (Swiggy and Zepto)', action_taken: 'Intervened and separated both parties. Situation de-escalated. Both drivers left without further issue.',
+    status: 'resolved', incident_date: istDate(11), submitted_at: ts(11, 11, 35), resolved_at: ts(10, 9, 0),
   },
   {
     employee_uid: 'seed-emp-deepak', employee_id: 'VAGT-0008', employee_name: 'Deepak Singh',
     site_id: SITE_MANYATA, site_name: 'Manyata Tech Park — Block D',
     type: 'suspicious_activity', severity: 'high',
+    reference_number: 'INC-2026-F9A3',
     description: 'Observed unidentified vehicle (white Maruti Eeco, KA-03 series) circling the perimeter 3 times between 1:30 AM and 2:00 AM. Number plate partially obscured. Reported to police control room. Vehicle did not return.',
-    status: 'escalated', submitted_at: ts(5, 2, 15),
+    persons_involved: 'Unknown occupants of white Maruti Eeco', action_taken: 'Police control room alerted. Partial plate noted: KA-03-??-????. Supervisor called. Perimeter checked — no breach found.',
+    status: 'escalated', incident_date: istDate(5), submitted_at: ts(5, 2, 15),
   },
   {
     employee_uid: 'seed-emp-meena', employee_id: 'VAGT-0003', employee_name: 'Meena Devi',
     site_id: SITE_PRESTIGE, site_name: 'Prestige Tech Park',
     type: 'medical', severity: 'medium',
+    reference_number: 'INC-2026-1C6D',
     description: 'Visitor (elderly male, approximately 65 years) felt dizzy near the reception. First aid administered. Family called. Visitor stable and escorted to car. Ambulance not required.',
-    status: 'resolved', submitted_at: ts(9, 14, 45), resolved_at: ts(9, 16, 0),
+    persons_involved: 'Visitor: Mr. Krishnamurthy (approx. 65 yrs)', action_taken: 'First aid kit used. Family contacted. Visitor rested in lobby for 20 minutes, then escorted to car by family member.',
+    status: 'resolved', incident_date: istDate(9), submitted_at: ts(9, 14, 45), resolved_at: ts(9, 16, 0),
   },
   {
     employee_uid: 'seed-emp-irfan', employee_id: 'VAGT-0006', employee_name: 'Mohammad Irfan',
     site_id: SITE_BRIGADE, site_name: 'Brigade Gateway',
     type: 'theft_attempt', severity: 'high',
+    reference_number: 'INC-2026-AF3B',
     description: 'Contract worker found attempting to remove a laptop from the 3rd floor office area at 11:45 PM. Intercepted at parking exit. Item returned. Police called. FIR filed. Worker detained for questioning.',
-    status: 'escalated', submitted_at: ts(14, 23, 50),
+    persons_involved: 'Contract worker (ID not provided)', action_taken: 'Police called. FIR No. 0445/2026 filed. Worker handed over to police.',
+    status: 'escalated', incident_date: istDate(14), submitted_at: ts(14, 23, 50),
+  },
+  // Additional 5 incidents to reach 10 total
+  {
+    employee_uid: 'seed-emp-priya', employee_id: 'VAGT-0005', employee_name: 'Priya Lakshmi',
+    site_id: SITE_BRIGADE, site_name: 'Brigade Gateway',
+    type: 'fire_alarm', severity: 'critical',
+    reference_number: 'INC-2026-C7D1',
+    description: 'Fire alarm triggered on 2nd floor at 3:15 PM. Building evacuated as per SOP. Fire brigade arrived within 8 minutes. Cause: overheated electrical panel in server room. No injuries. Building cleared after 45 minutes.',
+    persons_involved: 'All 2nd floor occupants (~80 persons)', action_taken: 'Evacuation completed. Fire brigade called. Area cordoned off. Management and facilities team notified immediately.',
+    status: 'resolved', incident_date: istDate(3), submitted_at: ts(3, 15, 20), resolved_at: ts(3, 18, 0),
+  },
+  {
+    employee_uid: 'seed-emp-ramesh', employee_id: 'VAGT-0007', employee_name: 'Ramesh Gowda',
+    site_id: SITE_MANYATA, site_name: 'Manyata Tech Park — Block D',
+    type: 'vehicle_damage', severity: 'medium',
+    reference_number: 'INC-2026-E2A9',
+    description: 'Visitor vehicle (Honda City, KA-01-AB-7823) found with a broken rear windshield in P3 parking at 5:40 PM. Driver Suresh (9741xxxxxx) reported damage on exit. CCTV reviewed — adjacent vehicle door swung open in wind at 2:15 PM. Adjacent vehicle owner contacted.',
+    persons_involved: 'Suresh Kumar (visitor), adjacent vehicle owner Rahul Verma (KA-05-MK-2234)', action_taken: 'CCTV footage saved. Both parties exchanged contact details. Written statement taken from guard on duty.',
+    status: 'reported', incident_date: istDate(6), submitted_at: ts(6, 17, 45),
+  },
+  {
+    employee_uid: 'seed-emp-kavitha', employee_id: 'VAGT-0009', employee_name: 'Kavitha Nair',
+    site_id: SITE_MANYATA, site_name: 'Manyata Tech Park — Block D',
+    type: 'lost_property', severity: 'low',
+    reference_number: 'INC-2026-B5F0',
+    description: 'Visitor Ananya Menon (Infosys) reported losing her laptop bag near the cafeteria at approximately 12:30 PM. Bag contained laptop, charger, and documents. Lost and found register checked — not submitted by anyone. CCTV review requested.',
+    persons_involved: 'Ananya Menon (visitor, Infosys), VAGT-0009 on duty', action_taken: 'Written complaint recorded. CCTV reviewed — bag seen being picked up by unknown male in blue shirt at 12:42 PM. Footage forwarded to client security team.',
+    status: 'escalated', incident_date: istDate(8), submitted_at: ts(8, 13, 5),
+  },
+  {
+    employee_uid: 'seed-emp-venkat', employee_id: 'VAGT-0004', employee_name: 'Venkatesh Reddy',
+    site_id: SITE_BRIGADE, site_name: 'Brigade Gateway',
+    type: 'unauthorized_entry', severity: 'medium',
+    reference_number: 'INC-2026-92DC',
+    description: 'Two individuals entered through the emergency exit door on the north side at 7:20 PM, bypassing the main entry checkpoint. They claimed to be visiting a tenant on the 4th floor. No valid ID produced. Escorted out and door secured. Tenant confirmed no visit was expected.',
+    persons_involved: 'Two unknown males, approximate age 25–30', action_taken: 'Individuals escorted out. Emergency door alarm re-enabled. Incident logged. Client security manager notified by phone.',
+    status: 'reported', incident_date: istDate(16), submitted_at: ts(16, 19, 30),
+  },
+  {
+    employee_uid: 'seed-emp-meena', employee_id: 'VAGT-0003', employee_name: 'Meena Devi',
+    site_id: SITE_PRESTIGE, site_name: 'Prestige Tech Park',
+    type: 'suspicious_activity', severity: 'low',
+    reference_number: 'INC-2026-3E7C',
+    description: 'Individual observed loitering near the server room access door on basement level for approximately 20 minutes between 11:10 PM and 11:30 PM. Person claimed to be lost while looking for the parking exit. Accompanied to exit and watched until departure.',
+    persons_involved: 'Unknown male, approximately 40 years, wearing grey shirt', action_taken: 'Person escorted to exit. Incident noted in duty register. Supervisor informed during next check-in call.',
+    status: 'resolved', incident_date: istDate(19), submitted_at: ts(19, 23, 35), resolved_at: ts(18, 9, 0),
   },
 ];
 
@@ -620,9 +676,19 @@ async function seedAll() {
   // (which filter by the logged-in user's UID) return actual data.
   const uidMap = {};
   const testAccounts = [
-    { seedId: 'seed-emp-ravi',         email: 'guard001@vagttest.com' },
-    { seedId: 'seed-emp-suresh',       email: 'guard002@vagttest.com' },
-    { seedId: 'seed-client-dsmax-001', email: 'client001@vagttest.com' },
+    { seedId: 'seed-emp-ravi',          email: 'guard001@vagttest.com' },
+    { seedId: 'seed-emp-suresh',        email: 'guard002@vagttest.com' },
+    { seedId: 'seed-emp-meena',         email: 'guard003@vagttest.com' },
+    { seedId: 'seed-emp-venkat',        email: 'guard004@vagttest.com' },
+    { seedId: 'seed-emp-priya',         email: 'guard005@vagttest.com' },
+    { seedId: 'seed-emp-irfan',         email: 'guard006@vagttest.com' },
+    { seedId: 'seed-emp-ramesh',        email: 'guard007@vagttest.com' },
+    { seedId: 'seed-emp-deepak',        email: 'guard008@vagttest.com' },
+    { seedId: 'seed-emp-kavitha',       email: 'guard009@vagttest.com' },
+    { seedId: 'seed-emp-arjun',         email: 'guard010@vagttest.com' },
+    { seedId: 'seed-client-dsmax-001',  email: 'client001@vagttest.com' },
+    { seedId: 'seed-client-brigade-001',email: 'client002@vagttest.com' },
+    { seedId: 'seed-client-prestige-001',email:'client003@vagttest.com' },
   ];
   for (const { seedId, email } of testAccounts) {
     try {
@@ -643,10 +709,19 @@ async function seedAll() {
     console.log('  ✅ company:', co.name);
   }
 
-  // Sites
+  // Sites — add client_uid (real Auth UID) so client portal live-guard query works
+  const siteClientMap = {
+    [SITE_PRESTIGE]: 'seed-client-dsmax-001',
+    [SITE_BRIGADE]:  'seed-client-brigade-001',
+    [SITE_MANYATA]:  'seed-client-prestige-001',
+  };
   for (const site of SITES) {
     const { id, ...data } = site;
-    await db.collection('sites').doc(id).set({ ...data, _seed: true });
+    await db.collection('sites').doc(id).set({
+      ...data,
+      client_uid: r(siteClientMap[id] || ''),
+      _seed: true,
+    });
     console.log('  ✅ site:', site.name);
   }
 
