@@ -351,7 +351,7 @@
 
       const [ticketsSnap, incidentSnap] = await Promise.all([
         db.collection('complaints').where('client_uid', '==', uid).where('status', 'in', ['open', 'in_progress']).get(),
-        db.collection('incidents').where('site_client_uid', '==', uid).get(),
+        db.collection('incidents').where('client_uid', '==', uid).get(),
       ]);
 
       setText('statGuards', liveGuards);

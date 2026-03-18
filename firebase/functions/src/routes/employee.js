@@ -664,9 +664,13 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
       const empName = empSnap.exists ? empSnap.data().name : null;
 
       let siteName = null;
+      let clientUid = null;
       if (site_id) {
         const siteSnap = await db.collection('sites').doc(site_id).get();
-        siteName = siteSnap.exists ? siteSnap.data().name : null;
+        if (siteSnap.exists) {
+          siteName  = siteSnap.data().name || null;
+          clientUid = siteSnap.data().client_uid || null;
+        }
       }
 
       // Generate a short, human-readable reference number
@@ -681,6 +685,7 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
         severity,
         site_id: site_id || null,
         site_name: siteName,
+        client_uid: clientUid,   // denormalized from site — lets client portal query by client
         occurred_at: occurred_at ? new Date(occurred_at) : now,  // use provided time or right now
         description,
         persons_involved: persons_involved || null,

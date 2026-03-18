@@ -774,15 +774,17 @@ async function seedAll() {
   }
   console.log(`  ✅ complaints: ${COMPLAINTS.length}`);
 
-  // Incidents — real employee_uid where present
+  // Incidents — real employee_uid where present; inject client_uid from siteClientMap
   for (let i = 0; i < INCIDENTS.length; i++) {
     const inc = INCIDENTS[i];
     const docId = `seed-inc-${(inc.type || 'other').replace(/[^a-z0-9]/g, '_')}-${i + 1}`;
+    const clientSeedId = siteClientMap[inc.site_id] || null;
     await db.collection('incidents').doc(docId).set({
       ...inc,
       ...(inc.employee_uid && { employee_uid: r(inc.employee_uid) }),
       ...(inc.guard_uid    && { guard_uid:    r(inc.guard_uid)    }),
       ...(inc.reported_by  && { reported_by:  r(inc.reported_by)  }),
+      ...(clientSeedId     && { client_uid:   r(clientSeedId)     }),
       _seed: true,
     });
   }
