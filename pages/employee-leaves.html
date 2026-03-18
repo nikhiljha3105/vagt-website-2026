@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apply for Leave | VAGT Employee Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .emp-sidebar-profile { padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    #authOverlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 9999; font-size: 13px; color: var(--text-muted); }
+    .dash-content { padding: 40px 56px; max-width: 760px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 20px; } }
+    .dash-section-title { font-size: 9px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* Balance tiles */
+    .balance-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px;
+    }
+    .balance-tile {
+      background: var(--white); border: 1px solid var(--border);
+      padding: 18px 20px; text-align: center;
+    }
+    .balance-tile-value { font-size: 36px; font-weight: 900; color: var(--navy); line-height: 1; }
+    .balance-tile-value.zero { color: var(--text-faint); }
+    .balance-tile-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .balance-tile-sublabel { font-size: 10px; color: var(--text-faint); margin-top: 2px; }
+
+    /* Leave type selector */
+    .leave-type-group {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;
+    }
+    .leave-type-option { position: relative; }
+    .leave-type-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+    .leave-type-label {
+      display: block; padding: 14px 12px; text-align: center;
+      border: 2px solid var(--border); cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .leave-type-label .lt-name  { font-size: 13px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 2px; }
+    .leave-type-label .lt-bal   { font-size: 11px; color: var(--text-muted); }
+    .leave-type-label .lt-zero  { color: #e65100; font-weight: 700; }
+    .leave-type-option input:checked + .leave-type-label {
+      border-color: var(--navy); background: rgba(13,31,60,0.04);
+    }
+    .leave-type-option input:checked + .leave-type-label .lt-name { color: var(--navy); }
+
+    /* Date row */
+    .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) { .date-row { grid-template-columns: 1fr; } }
+
+    /* Days count pill */
+    #daysPill {
+      display: inline-block; font-size: 12px; font-weight: 700;
+      padding: 3px 12px; margin-top: 10px;
+      background: var(--amber-soft); color: var(--navy);
+    }
+    #daysPill.over { background: #fce4ec; color: #b71c1c; }
+
+    /* History */
+    .leave-history-item {
+      background: var(--white); border: 1px solid var(--border);
+      padding: 16px 20px; margin-bottom: 10px;
+    }
+    .leave-history-item:last-child { margin-bottom: 0; }
+    .leave-history-top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 6px;
+    }
+    .leave-history-dates { font-size: 14px; font-weight: 700; color: var(--navy); }
+    .leave-history-type  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .leave-history-reason{ font-size: 12.5px; color: var(--text); margin-top: 6px; line-height: 1.5; }
+    .leave-history-reject{ font-size: 12px; color: #b71c1c; margin-top: 6px; }
+    .leave-status-pill { font-size: 10px; font-weight: 700; padding: 3px 10px; white-space: nowrap; }
+    .lsp-pending  { background: #fff8e1; color: #f57f17; }
+    .lsp-approved { background: #e8f5e9; color: #2e7d32; }
+    .lsp-rejected { background: #fce4ec; color: #b71c1c; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VAGT</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Employee portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+      </a>
+      <a href="employee-leaves.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Apply for Leave
+      </a>
+      <a href="employee-guests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Guest Log
+      </a>
+      <a href="employee-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="employee-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incident Reports
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="main-content">
+    <div class="dash-content">
+
+      <!-- Leave balance -->
+      <div class="dash-section-title">Your Leave Balance</div>
+      <div class="balance-strip">
+        <div class="balance-tile">
+          <div class="balance-tile-value" id="balCasual">—</div>
+          <div class="balance-tile-label">Casual Leave</div>
+          <div class="balance-tile-sublabel">Days remaining</div>
+        </div>
+        <div class="balance-tile">
+          <div class="balance-tile-value" id="balSick">—</div>
+          <div class="balance-tile-label">Sick Leave</div>
+          <div class="balance-tile-sublabel">Days remaining</div>
+        </div>
+        <div class="balance-tile">
+          <div class="balance-tile-value" id="balEarned">—</div>
+          <div class="balance-tile-label">Earned Leave</div>
+          <div class="balance-tile-sublabel">Days remaining</div>
+        </div>
+      </div>
+
+      <!-- Apply form -->
+      <div class="portal-card" style="margin-bottom:32px;">
+        <div class="portal-card-header">
+          <div class="portal-card-title">Apply for Leave</div>
+        </div>
+        <div class="portal-card-body">
+          <div id="leaveError"   class="portal-error"       style="display:none;margin-bottom:16px;" role="alert"></div>
+          <div id="leaveSuccess" class="portal-success-msg" style="display:none;margin-bottom:16px;" role="status"></div>
+
+          <form id="leaveForm" novalidate>
+            <!-- Leave type -->
+            <div class="form-group" style="margin-bottom:20px;">
+              <label style="display:block; font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px;">
+                Type of Leave
+              </label>
+              <div class="leave-type-group">
+                <div class="leave-type-option">
+                  <input type="radio" name="leaveType" id="ltCasual" value="casual"/>
+                  <label class="leave-type-label" for="ltCasual">
+                    <span class="lt-name">Casual</span>
+                    <span class="lt-bal" id="ltCasualBal">— days left</span>
+                  </label>
+                </div>
+                <div class="leave-type-option">
+                  <input type="radio" name="leaveType" id="ltSick" value="sick"/>
+                  <label class="leave-type-label" for="ltSick">
+                    <span class="lt-name">Sick</span>
+                    <span class="lt-bal" id="ltSickBal">— days left</span>
+                  </label>
+                </div>
+                <div class="leave-type-option">
+                  <input type="radio" name="leaveType" id="ltEarned" value="earned"/>
+                  <label class="leave-type-label" for="ltEarned">
+                    <span class="lt-name">Earned</span>
+                    <span class="lt-bal" id="ltEarnedBal">— days left</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dates -->
+            <div class="date-row" style="margin-bottom:8px;">
+              <div class="form-group">
+                <label for="leaveFrom">From date</label>
+                <input type="date" id="leaveFrom" required/>
+              </div>
+              <div class="form-group">
+                <label for="leaveTo">To date</label>
+                <input type="date" id="leaveTo" required/>
+              </div>
+            </div>
+            <div id="daysPill" style="display:none;">— days</div>
+
+            <!-- Reason -->
+            <div class="form-group" style="margin-top:20px; margin-bottom:24px;">
+              <label for="leaveReason">Reason <span style="font-weight:400; color:var(--text-faint);">(be brief and clear)</span></label>
+              <textarea id="leaveReason" rows="3" placeholder="e.g. High fever — doctor advised rest for 2 days." required style="resize:vertical;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-navy" id="leaveBtn" style="min-width:160px; justify-content:center;">
+              Submit Request
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Leave history -->
+      <div class="dash-section-title">My Leave History</div>
+      <div id="leaveHistory">
+        <div style="font-size:13px; color:var(--text-muted);">Loading…</div>
+      </div>
+
+    </div>
+  </main>
+</div><!-- /layout -->
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const API = '/api';
+  let auth, currentUid, balance = { casual: 0, sick: 0, earned: 0 };
+
+  try {
+    const app = firebase.apps.length === 0 ? firebase.initializeApp(FIREBASE_CONFIG) : firebase.app();
+    auth = app.auth();
+  } catch (e) { return; }
+
+  function show(id) { document.getElementById(id).style.display = ''; }
+  function hide(id) { document.getElementById(id).style.display = 'none'; }
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+
+  function showErr(msg) { setText('leaveError', msg); show('leaveError'); hide('leaveSuccess'); }
+  function showOk(msg)  { setText('leaveSuccess', msg); show('leaveSuccess'); hide('leaveError'); }
+
+  // ── Days calculator ──────────────────────────────────────────────────────
+  function calcDays(from, to) {
+    if (!from || !to) return 0;
+    const a = new Date(from), b = new Date(to);
+    if (isNaN(a) || isNaN(b) || b < a) return 0;
+    return Math.round((b - a) / 86400000) + 1;
+  }
+
+  function updateDaysPill() {
+    const from = document.getElementById('leaveFrom').value;
+    const to   = document.getElementById('leaveTo').value;
+    const days = calcDays(from, to);
+    const pill = document.getElementById('daysPill');
+    const typeEl = document.querySelector('input[name="leaveType"]:checked');
+    const type = typeEl ? typeEl.value : null;
+    if (days > 0) {
+      pill.style.display = 'inline-block';
+      const avail = balance[type] || 0;
+      const over = type && days > avail;
+      pill.textContent = days + (days === 1 ? ' day' : ' days') + (over ? ' — only ' + avail + ' day' + (avail === 1 ? '' : 's') + ' available' : '');
+      pill.className = over ? 'over' : '';
+    } else {
+      pill.style.display = 'none';
+    }
+  }
+
+  document.getElementById('leaveFrom').addEventListener('change', updateDaysPill);
+  document.getElementById('leaveTo').addEventListener('change', updateDaysPill);
+  document.querySelectorAll('input[name="leaveType"]').forEach(function (r) {
+    r.addEventListener('change', updateDaysPill);
+  });
+
+  // ── Load balance from API ────────────────────────────────────────────────
+  async function loadBalance(token) {
+    try {
+      const res  = await fetch(API + '/leave/balance', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      if (!res.ok) return;
+      const types = data.leave_types || [];
+      types.forEach(function (t) { balance[t.type] = t.balance; });
+
+      function balText(n) { return n + ' day' + (n === 1 ? '' : 's') + ' left'; }
+      setText('balCasual', balance.casual);
+      setText('balSick',   balance.sick);
+      setText('balEarned', balance.earned);
+      document.getElementById('balCasual').className = 'balance-tile-value' + (balance.casual === 0 ? ' zero' : '');
+      document.getElementById('balSick').className   = 'balance-tile-value' + (balance.sick   === 0 ? ' zero' : '');
+      document.getElementById('balEarned').className = 'balance-tile-value' + (balance.earned === 0 ? ' zero' : '');
+
+      setText('ltCasualBal', balText(balance.casual));
+      setText('ltSickBal',   balText(balance.sick));
+      setText('ltEarnedBal', balText(balance.earned));
+
+      // Mark zero-balance types
+      ['casual','sick','earned'].forEach(function (t) {
+        const el = document.getElementById('lt' + t.charAt(0).toUpperCase() + t.slice(1) + 'Bal');
+        if (el) el.className = 'lt-bal' + (balance[t] === 0 ? ' lt-zero' : '');
+      });
+    } catch (e) { /* non-fatal */ }
+  }
+
+  // ── Load history ─────────────────────────────────────────────────────────
+  async function loadHistory(token) {
+    try {
+      const res  = await fetch(API + '/leave/history', { headers: { Authorization: 'Bearer ' + token } });
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data.requests) || data.requests.length === 0) {
+        setHTML('leaveHistory', '<div class="portal-empty-state"><svg viewBox="0 0 24 24" width="32" height="32"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>No leave requests yet. Use the form above to apply.</div>');
+        return;
+      }
+
+      const TYPE_LABELS = { casual: 'Casual Leave', sick: 'Sick Leave', earned: 'Earned Leave' };
+      const STATUS_LABELS = { pending: 'Pending', approved: 'Approved', rejected: 'Rejected' };
+      const STATUS_CLS    = { pending: 'lsp-pending', approved: 'lsp-approved', rejected: 'lsp-rejected' };
+
+      function fmtDate(s) {
+        if (!s) return '—';
+        const d = new Date(s);
+        return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+
+      const html = data.requests.map(function (r) {
+        const days   = calcDays(r.from_date, r.to_date);
+        const status = (r.status || 'pending').toLowerCase();
+        const cls    = STATUS_CLS[status] || 'lsp-pending';
+        const label  = STATUS_LABELS[status] || r.status;
+        const sameDay = r.from_date === r.to_date;
+        const dateStr = sameDay
+          ? fmtDate(r.from_date)
+          : fmtDate(r.from_date) + ' – ' + fmtDate(r.to_date);
+
+        return '<div class="leave-history-item">'
+          + '<div class="leave-history-top">'
+          + '<div>'
+          + '<div class="leave-history-dates">' + dateStr + (days > 1 ? ' (' + days + ' days)' : '') + '</div>'
+          + '<div class="leave-history-type">' + (TYPE_LABELS[r.leave_type] || r.leave_type) + '</div>'
+          + '</div>'
+          + '<span class="leave-status-pill ' + cls + '">' + label + '</span>'
+          + '</div>'
+          + '<div class="leave-history-reason">' + (r.reason || '') + '</div>'
+          + (status === 'rejected' && r.reject_reason
+            ? '<div class="leave-history-reject">Reason for rejection: ' + r.reject_reason + '</div>'
+            : '')
+          + '</div>';
+      }).join('');
+
+      setHTML('leaveHistory', html);
+    } catch (e) {
+      setHTML('leaveHistory', '<div style="font-size:13px; color:var(--text-muted);">Could not load history. Please refresh.</div>');
+    }
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  document.getElementById('leaveForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hide('leaveError'); hide('leaveSuccess');
+
+    const typeEl = document.querySelector('input[name="leaveType"]:checked');
+    const type   = typeEl ? typeEl.value : '';
+    const from   = document.getElementById('leaveFrom').value;
+    const to     = document.getElementById('leaveTo').value;
+    const reason = document.getElementById('leaveReason').value.trim();
+    const btn    = document.getElementById('leaveBtn');
+
+    if (!type)   return showErr('Please select a leave type.');
+    if (!from)   return showErr('Please select a start date.');
+    if (!to)     return showErr('Please select an end date.');
+    if (!reason) return showErr('Please give a reason — even one sentence is fine.');
+
+    const days  = calcDays(from, to);
+    const avail = balance[type] || 0;
+
+    if (days <= 0) return showErr('End date must be on or after the start date.');
+    if (days > avail) {
+      return showErr('You only have ' + avail + ' ' + type + ' day' + (avail === 1 ? '' : 's') + ' left. Reduce the number of days or choose a different leave type.');
+    }
+
+    btn.disabled = true; btn.textContent = 'Submitting…';
+
+    try {
+      const token = await auth.currentUser.getIdToken();
+      const res   = await fetch(API + '/leave/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ leave_type: type, from_date: from, to_date: to, reason }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showErr(data.message || 'Could not submit request. Try again.');
+      } else {
+        showOk('Leave request submitted. Your manager will review it shortly.');
+        document.getElementById('leaveForm').reset();
+        document.getElementById('daysPill').style.display = 'none';
+        // Refresh balance and history
+        const freshToken = await auth.currentUser.getIdToken(true);
+        await Promise.all([loadBalance(freshToken), loadHistory(freshToken)]);
+      }
+    } catch (err) {
+      showErr('Network error. Check your connection and try again.');
+    }
+
+    btn.disabled = false; btn.textContent = 'Submit Request';
+  });
+
+  // ── Set today as min date for from/to ────────────────────────────────────
+  (function () {
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById('leaveFrom').min = today;
+    document.getElementById('leaveTo').min   = today;
+    document.getElementById('leaveFrom').addEventListener('change', function () {
+      document.getElementById('leaveTo').min = this.value || today;
+      if (document.getElementById('leaveTo').value < this.value) {
+        document.getElementById('leaveTo').value = this.value;
+      }
+    });
+  })();
+
+  // ── Nav / auth ────────────────────────────────────────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.querySelectorAll('.nav-link').forEach(function (a) {
+    a.addEventListener('click', function () { document.getElementById('sidebar').classList.remove('open'); });
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role && token.claims.role !== 'employee') { window.location.href = 'portal.html'; return; }
+
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    if (window.innerWidth < 900) document.getElementById('navToggle').style.display = '';
+
+    currentUid = user.uid;
+    const idToken = await user.getIdToken();
+
+    // Sidebar profile
+    try {
+      const app = firebase.apps[0];
+      const db  = app.firestore ? app.firestore() : null;
+      if (db) {
+        const snap = await db.collection('employees').doc(user.uid).get();
+        if (snap.exists) {
+          const d = snap.data();
+          setText('sidebarName', d.name || '—');
+          setText('sidebarId',   d.employee_id || '—');
+          setText('sidebarSite', d.site_name ? 'Site: ' + d.site_name : 'No site assigned');
+          try { if (d.name) localStorage.setItem('vagt_last_name', d.name); } catch {}
+        }
+      }
+    } catch (e) { /* non-fatal */ }
+
+    await Promise.all([loadBalance(idToken), loadHistory(idToken)]);
+  });
+
+})();
+</script>
+<!-- Firestore for sidebar profile -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+</body>
+</html>
