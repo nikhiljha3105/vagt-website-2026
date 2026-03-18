@@ -8,8 +8,14 @@
 **VAGT Data folder:** https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
 (Created 2026-03-15. Drop all VAGT-related documents here — Claude will scan, categorise, and commit them to the repo automatically.)
 
-### ⏳ TODO — 2026-03-17
+### ⏳ TODO — 2026-03-18 (Mike — please complete all of these)
 - [ ] **Scan the VAGT Google Drive folder** for any new documents added since last session. Download, save to `client-briefs/` or `assets/docs/`, and commit to the repo. Link: https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
+- [ ] **Deploy to Firebase** — `firebase deploy --only hosting,functions,firestore:indexes --project vagt---services` from your machine
+- [ ] **Seed test data** — `node seed-demo-data.js ~/Downloads/<service-account-key>.json` from `firebase/functions/`
+- [ ] **Connect vagtservices.com** — Firebase Console → Hosting → Add custom domain
+- [ ] **Wire SMS via MSG91** — provide API key + DLT sender ID so OTP delivery can be enabled
+- [ ] **Admin patrol log UI** — page needs to be built (API already exists at `/api/admin/patrol`)
+- [ ] **Delete old admin account** — `admin@vagtsecurityservices.com` still in Firebase Auth with no claim — remove it
 
 Documents already saved to `client-briefs/` in the repo:
 - `tarun-realtors-security-assessment-2025-12.md` — Security audit report for M/s Tarun Realtors (Dec 2025)
