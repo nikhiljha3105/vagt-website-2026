@@ -1,5 +1,5 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-16
+**Last updated:** 2026-03-18
 
 ---
 
@@ -7,6 +7,33 @@
 
 **VAGT Data folder:** https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
 (Created 2026-03-15. Drop all VAGT-related documents here — Claude will scan, categorise, and commit them to the repo automatically.)
+
+---
+
+## 💡 Ideas from TaxHacker — 2026-03-18
+
+Reviewed the open-source [TaxHacker](https://github.com/vas3k/TaxHacker) project (self-hosted AI accounting app). Completely different product, but a few patterns are directly applicable to VAGT without changing the stack or derailing current work. Listed in order of effort vs. impact:
+
+### ✅ Do now (small, high value)
+
+**1. Audit money storage for float bugs**
+TaxHacker stores all amounts as integers (paise, not rupees). Check `payslips`, `invoices`, and payroll calculations in `admin.js` and `employee.js` — if any amount is stored or computed as a JS float (`12500.5`, `amount * rate`), it will silently accumulate errors. Fix: multiply by 100 before storing, divide on display, or use `Math.round()` consistently. One afternoon to audit.
+
+**2. Payslip generation needs a loading state**
+Right now, clicking "Generate Payslip" gives no feedback while the PDF builds. TaxHacker tracks async jobs with a simple `progress` document in the DB. VAGT equivalent: write a `{ status: "generating", startedAt }` field to the payslip Firestore doc when the job starts, update to `{ status: "done" }` on completion. Frontend polls it. Guards stop thinking the button is broken.
+
+### ⏳ Do next sprint (medium, high impact)
+
+**3. CSV export on every admin list view**
+Admin currently has no way to export anything — attendance, payroll, guest logs, patrol coverage, incidents. Enterprise clients will ask for this within weeks of going live. TaxHacker treats export as core, not an afterthought. For VAGT: add a single "Export CSV" button to each admin list page that calls the existing API with `?format=csv`. Backend change is ~10 lines per route.
+
+### 🗓️ Park for later (bigger, don't touch yet)
+
+**4. AI on incident reports** — Guards write unstructured incident text. AI could extract `incident_type`, `severity`, `persons_involved` into structured fields automatically. Real value, but needs an LLM API key and careful UX design for low-literacy users. Don't start until current backlog is clear.
+
+**5. Per-client configurable report fields** — Different clients want different things in patrol/guest reports. TaxHacker solves this with user-defined fields + per-field AI prompts. Worth revisiting once you have 5+ clients with different needs.
+
+---
 
 ### ⏳ TODO — 2026-03-18 (Mike — please complete all of these)
 - [ ] **Scan the VAGT Google Drive folder** for any new documents added since last session. Download, save to `client-briefs/` or `assets/docs/`, and commit to the repo. Link: https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
