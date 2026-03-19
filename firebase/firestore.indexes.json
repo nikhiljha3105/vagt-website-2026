@@ -1,69 +1,39 @@
 {
   "indexes": [
-    {
-      "collectionGroup": "leave_requests",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status",     "order": "ASCENDING" },
-        { "fieldPath": "applied_at", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "leave_requests",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "employee_id", "order": "ASCENDING" },
-        { "fieldPath": "applied_at",  "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "attendance_logs",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "employee_id", "order": "ASCENDING" },
-        { "fieldPath": "date",        "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "incidents",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "site_id",    "order": "ASCENDING" },
-        { "fieldPath": "created_at", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "patrol_logs",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "site_id",    "order": "ASCENDING" },
-        { "fieldPath": "created_at", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "guest_logs",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "site_id",  "order": "ASCENDING" },
-        { "fieldPath": "check_in", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "activity_log",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "admin_id",   "order": "ASCENDING" },
-        { "fieldPath": "created_at", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "pending_registrations",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "verified",    "order": "ASCENDING" },
-        { "fieldPath": "verified_at", "order": "DESCENDING" }
-      ]
-    }
+    { "collectionGroup": "leave_requests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "applied_at", "order": "ASCENDING" }] },
+    { "collectionGroup": "leave_requests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "employee_id", "order": "ASCENDING" }, { "fieldPath": "applied_at", "order": "DESCENDING" }] },
+    { "collectionGroup": "leave_requests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "applied_at", "order": "DESCENDING" }] },
+
+    { "collectionGroup": "attendance_logs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "employee_id", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] },
+    { "collectionGroup": "attendance_logs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "date", "order": "ASCENDING" }, { "fieldPath": "site_id", "order": "ASCENDING" }] },
+
+    { "collectionGroup": "incidents", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "employee_uid", "order": "ASCENDING" }, { "fieldPath": "submitted_at", "order": "DESCENDING" }] },
+    { "collectionGroup": "incidents", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_id", "order": "ASCENDING" }, { "fieldPath": "submitted_at", "order": "DESCENDING" }] },
+    { "collectionGroup": "incidents", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "client_uid", "order": "ASCENDING" }, { "fieldPath": "submitted_at", "order": "DESCENDING" }] },
+
+    { "collectionGroup": "complaints", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "client_uid", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }] },
+    { "collectionGroup": "complaints", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "client_uid", "order": "ASCENDING" }, { "fieldPath": "created_at", "order": "DESCENDING" }] },
+    { "collectionGroup": "complaints", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "created_at", "order": "DESCENDING" }] },
+    { "collectionGroup": "complaints", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "priority", "order": "ASCENDING" }, { "fieldPath": "created_at", "order": "DESCENDING" }] },
+
+    { "collectionGroup": "employees", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "name", "order": "ASCENDING" }] },
+    { "collectionGroup": "employees", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_ids", "arrayConfig": "CONTAINS" }, { "fieldPath": "status", "order": "ASCENDING" }] },
+
+    { "collectionGroup": "patrol_logs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_id", "order": "ASCENDING" }, { "fieldPath": "scanned_at", "order": "ASCENDING" }] },
+
+    { "collectionGroup": "patrol_checkpoints", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "active", "order": "ASCENDING" }, { "fieldPath": "site_id", "order": "ASCENDING" }, { "fieldPath": "label", "order": "ASCENDING" }] },
+
+    { "collectionGroup": "guest_logs", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_id", "order": "ASCENDING" }, { "fieldPath": "entry_time", "order": "ASCENDING" }] },
+
+    { "collectionGroup": "daily_reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_client_uid", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] },
+    { "collectionGroup": "daily_reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_client_uid", "order": "ASCENDING" }, { "fieldPath": "site_id", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] },
+    { "collectionGroup": "daily_reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "site_client_uid", "order": "ASCENDING" }, { "fieldPath": "report_type", "order": "ASCENDING" }, { "fieldPath": "date", "order": "DESCENDING" }] },
+
+    { "collectionGroup": "sign_in_events", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "uid", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+
+    { "collectionGroup": "activity_log", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "admin_id", "order": "ASCENDING" }, { "fieldPath": "created_at", "order": "DESCENDING" }] },
+
+    { "collectionGroup": "pending_registrations", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "verified", "order": "ASCENDING" }, { "fieldPath": "verified_at", "order": "DESCENDING" }] }
   ],
   "fieldOverrides": []
 }
