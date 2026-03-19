@@ -1,5 +1,5 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-18
+**Last updated:** 2026-03-19
 
 ---
 
@@ -7,6 +7,39 @@
 
 **VAGT Data folder:** https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
 (Created 2026-03-15. Drop all VAGT-related documents here — Claude will scan, categorise, and commit them to the repo automatically.)
+
+---
+
+## Session 4 — 2026-03-19
+
+### What was built / fixed
+
+**Deployed this session:**
+- `firebase deploy --only hosting,functions,firestore:indexes` completed ✅
+- 3 old stale Firestore indexes deleted (replaced by new ones with correct field names)
+- DNS CNAME for vagtservices.com pointed at `vagt---services.web.app` (TTL 30 min)
+
+**Bug fixes:**
+- `employee-leaves.html` — content was rendering under the left nav blue sidebar. Root cause: `<main class="main-content">` should have been `<main class="main">`. One-character fix. ✅
+- `admin-patrol.html` — Beat Patrol page showed "no endpoint found" for all API calls. Root cause: `const API = '/api/admin'` but the patrol router is mounted at `/api/patrol`. Fixed by changing API base and all four path strings (`/patrol/logs` → `/admin/logs`, etc.). ✅
+
+**Unified login (new feature):**
+- `pages/portal.html` — rebranded from "VAGT Staff Portal" to "VAGT Portal". "New guard?" → "New here? Create your account →". "User not found" Firebase error now shows an inline link to register.html. ✅
+- `pages/register.html` — complete redesign. Now has a role selector at the top: **Security Guard** vs **Client**. Guard flow unchanged. Client flow adds: society/company name (required) + flat/unit number (optional). Routes to separate API endpoints based on role selection. ✅
+- `firebase/functions/src/routes/auth.js` — added three new endpoints: `POST /api/auth/client/register`, `POST /api/auth/client/verify-otp`, `POST /api/auth/client/resend-otp`. Same OTP flow as employee registration. Stores `role: 'client'`, `society_name`, `unit_number` in `pending_registrations`. ✅
+- `firebase/functions/src/routes/admin.js` — approval route now branches by `reg.role`. If `'client'`, creates a doc in `clients` collection with society_name/unit_number and grants `role: 'client'` claim. If `'employee'`, same as before. ✅
+- `pages/admin-registrations.html` — registration cards now show a **Guard** or **Client** role badge. Client cards show society name + unit number in the metadata row. Success toast handles both employee IDs and client approval messages. ✅
+- `index.html` — "Staff Login" button renamed to "Login". ✅
+
+**Login auto-detection flow (summary):**
+1. Go to vagtservices.com → click Login → `portal.html`
+2. Enter email + password. Firebase Auth returns role claim on success.
+3. `redirectByRole()` sends: admin → admin-portal, employee → employee-portal, client → client-portal.
+4. Wrong email? Error shows "No account found. Create an account →" — links to register.html.
+5. New user clicks "New here?" → register.html → picks Guard or Client → fills form → OTP → waits for admin approval.
+
+**Deploy needed:**
+All changes committed and pushed. Run: `firebase deploy --only hosting,functions --project vagt---services`
 
 ---
 

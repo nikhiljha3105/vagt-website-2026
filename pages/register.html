@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Join VAGT | New Guard Registration</title>
+  <title>Create Account | VAGT Security Services</title>
   <meta name="robots" content="noindex, nofollow"/>
   <link rel="stylesheet" href="../assets/css/main.css"/>
 </head>
@@ -18,9 +18,9 @@
       <div class="portal-login-icon">
         <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
       </div>
-      <div class="portal-role-badge" id="stepBadge">New Guard Account</div>
+      <div class="portal-role-badge" id="stepBadge">New Account</div>
       <h2 id="stepTitle">Create your VAGT account</h2>
-      <p id="stepSub">Fill in your details below. Your account will be active once your manager approves it.</p>
+      <p id="stepSub">Fill in your details below. Your account will be active once approved.</p>
     </div>
 
     <div class="portal-login-body">
@@ -30,6 +30,25 @@
         <div id="regError" class="portal-error" style="display:none;" role="alert"></div>
 
         <form id="regForm" novalidate>
+
+          <!-- Role selector -->
+          <div style="margin-bottom:18px;">
+            <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); margin-bottom:8px;">I am a</label>
+            <div class="role-selector">
+              <label class="role-option role-option-active">
+                <input type="radio" name="regRole" value="employee" checked/>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Security Guard</span>
+              </label>
+              <label class="role-option">
+                <input type="radio" name="regRole" value="client"/>
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Client</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Common fields -->
           <div class="form-group" style="margin-bottom:14px;">
             <label for="regName">Your full name</label>
             <input type="text" id="regName" autocomplete="name" required
@@ -40,7 +59,7 @@
             <input type="tel" id="regPhone" autocomplete="tel" required
                    placeholder="10-digit number (e.g. 9876543210)" maxlength="10"
                    inputmode="numeric" pattern="[6-9][0-9]{9}"/>
-            <span class="form-hint">This is how your manager will reach you.</span>
+            <span class="form-hint">We'll send a verification code to this number.</span>
           </div>
           <div class="form-group" style="margin-bottom:14px;">
             <label for="regEmail">Email address</label>
@@ -48,6 +67,24 @@
                    placeholder="yourname@example.com"/>
             <span class="form-hint">Used to log in. Must be yours — not shared.</span>
           </div>
+
+          <!-- Client-only fields -->
+          <div id="clientFields" style="display:none;">
+            <div style="border-top:1px solid var(--border); margin:14px 0; padding-top:14px;">
+              <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); margin-bottom:10px;">Property Details</label>
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label for="regSociety">Society / Company name</label>
+              <input type="text" id="regSociety" placeholder="e.g. DS Max Sky Shubham, Prestige Lakeside Habitat" maxlength="200"/>
+              <span class="form-hint">The property or building where VAGT provides security.</span>
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label for="regUnit">Flat / Door / Unit number</label>
+              <input type="text" id="regUnit" placeholder="e.g. A-402, Tower 3 - 1205" maxlength="50"/>
+              <span class="form-hint">Helps us link you to the correct site.</span>
+            </div>
+          </div>
+
           <div class="form-group" style="margin-bottom:24px;">
             <label for="regPass">
               Choose a password
@@ -90,7 +127,7 @@
         </form>
 
         <p style="font-size:11px; color:var(--text-muted); margin-top:20px; text-align:center; line-height:1.6;">
-          Did not receive the code? Contact your VAGT supervisor and ask them to check the pending registration.
+          Did not receive the code? Contact VAGT support and ask them to check the pending registration.
           <br/>You can also try with a different phone number by
           <button type="button" class="portal-forgot-link" onclick="goBack()">going back</button>.
         </p>
@@ -101,7 +138,7 @@
         <div style="font-size:48px; margin-bottom:16px;">✅</div>
         <h3 style="margin:0 0 8px; color:var(--navy);">Phone verified!</h3>
         <p style="color:var(--text-muted); font-size:14px; line-height:1.6; margin-bottom:24px;">
-          Your registration has been submitted to your manager for approval.
+          Your registration has been submitted for approval.
           Once approved, you will receive an email at <strong id="confirmedEmail"></strong>
           with a link to set your password and log in.
         </p>
@@ -128,6 +165,23 @@
     float: right; font-weight: normal; padding: 0;
   }
   .pw-toggle:hover { color: var(--navy); }
+
+  /* Role selector */
+  .role-selector {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .role-option {
+    display: flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 12px 14px; border: 2px solid var(--border);
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+  }
+  .role-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+  .role-option svg { flex-shrink: 0; }
+  .role-option-active {
+    border-color: var(--navy); background: rgba(13,31,60,0.04); color: var(--navy);
+  }
+  .role-option-active svg { stroke: var(--navy); }
 </style>
 
 <script>
@@ -136,6 +190,7 @@
 
   const API = '/api/auth';
   let regToken = null;
+  let selectedRole = 'employee';
 
   // ── Helpers ─────────────────────────────────────────────────────────────
   function show(id)       { document.getElementById(id).style.display = ''; }
@@ -149,12 +204,31 @@
     });
   }
 
+  // ── Role toggle ─────────────────────────────────────────────────────────
+  document.querySelectorAll('input[name="regRole"]').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      selectedRole = this.value;
+      // Update active styling
+      document.querySelectorAll('.role-option').forEach(function (opt) {
+        opt.classList.remove('role-option-active');
+      });
+      this.closest('.role-option').classList.add('role-option-active');
+
+      // Show/hide client fields
+      if (selectedRole === 'client') {
+        show('clientFields');
+      } else {
+        hide('clientFields');
+      }
+    });
+  });
+
   // ── Password show/hide toggle ────────────────────────────────────────────
   document.getElementById('togglePass').addEventListener('click', function () {
     const inp = document.getElementById('regPass');
-    const show = inp.type === 'password';
-    inp.type = show ? 'text' : 'password';
-    this.textContent = show ? 'Hide' : 'Show';
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    this.textContent = isHidden ? 'Hide' : 'Show';
   });
 
   // ── OTP: digits only ────────────────────────────────────────────────────
@@ -173,7 +247,7 @@
     const pass  = document.getElementById('regPass').value;
     const btn   = document.getElementById('regBtn');
 
-    // Client-side validation
+    // Common validation
     if (!name) return showErr('regError', 'Please enter your full name.');
     if (!/^[6-9][0-9]{9}$/.test(phone))
       return showErr('regError', 'Please enter a valid 10-digit Indian mobile number.');
@@ -182,14 +256,28 @@
     if (pass.length < 8)
       return showErr('regError', 'Password must be at least 8 characters.');
 
+    // Client-specific validation
+    if (selectedRole === 'client') {
+      const society = document.getElementById('regSociety').value.trim();
+      if (!society) return showErr('regError', 'Please enter your society or company name.');
+    }
+
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
+    // Build payload
+    const payload = { name, phone, email, password: pass, role: selectedRole };
+    if (selectedRole === 'client') {
+      payload.society_name = document.getElementById('regSociety').value.trim();
+      payload.unit_number  = document.getElementById('regUnit').value.trim() || null;
+    }
+
     try {
-      const resp = await fetch(`${API}/employee/register`, {
+      const endpoint = selectedRole === 'client' ? '/client/register' : '/employee/register';
+      const resp = await fetch(API + endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ name, phone, email, password: pass }),
+        body:    JSON.stringify(payload),
       });
       const data = await resp.json();
 
@@ -227,7 +315,8 @@
     btn.textContent = 'Verifying…';
 
     try {
-      const resp = await fetch(`${API}/employee/verify-otp`, {
+      const endpoint = selectedRole === 'client' ? '/client/verify-otp' : '/employee/verify-otp';
+      const resp = await fetch(API + endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ registration_token: regToken, otp }),
@@ -240,7 +329,7 @@
         return;
       }
 
-      // Store device trust token — lets this device skip OTP on future password resets
+      // Store device trust token
       if (data.device_trust_token) {
         try { localStorage.setItem('vagt_device_token', data.device_trust_token); } catch { /* ignore */ }
       }
@@ -269,9 +358,10 @@
     btn.disabled = true;
     btn.textContent = 'Sending…';
 
-    let waitSecs = 60; // default cooldown; server may override
+    let waitSecs = 60;
     try {
-      const resp = await fetch(`${API}/employee/resend-otp`, {
+      const endpoint = selectedRole === 'client' ? '/client/resend-otp' : '/employee/resend-otp';
+      const resp = await fetch(API + endpoint, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ registration_token: regToken }),
@@ -279,12 +369,10 @@
       const data = await resp.json().catch(() => ({}));
 
       if (resp.status === 429) {
-        // Server enforced rate limit — use server's wait time
         waitSecs = data.wait_seconds || 60;
         showErr('otpError', data.message || 'Please wait before requesting another code.');
       } else if (!resp.ok) {
         showErr('otpError', data.message || 'Could not resend. Please try again.');
-        // On hard errors (max reached), disable permanently
         if (data.message && data.message.includes('Maximum')) {
           btn.textContent = 'Max attempts reached';
           resendCooldown = true;
@@ -293,7 +381,6 @@
       }
     } catch { /* network error — still apply cooldown */ }
 
-    // Countdown using server-prescribed wait time
     let secs = waitSecs;
     btn.textContent = `Resend code (${secs}s)`;
     const timer = setInterval(() => {
@@ -311,9 +398,9 @@
   // ── Go back to step 1 ─────────────────────────────────────────────────────
   window.goBack = function () {
     regToken = null;
-    setText('stepBadge', 'New Guard Account');
+    setText('stepBadge', 'New Account');
     setText('stepTitle', 'Create your VAGT account');
-    setText('stepSub', 'Fill in your details below. Your account will be active once your manager approves it.');
+    setText('stepSub', 'Fill in your details below. Your account will be active once approved.');
     document.getElementById('regBtn').disabled = false;
     document.getElementById('regBtn').textContent = 'Continue →';
     hide('regError');

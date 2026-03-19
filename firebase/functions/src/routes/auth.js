@@ -617,5 +617,156 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
     }
   });
 
+  // ── POST /api/auth/client/register ────────────────────────────────────────
+  // Step 1 of client self-registration.
+  // Client fills in name, phone, email, password, society name, unit number.
+  // Same OTP flow as employee registration — admin approves before access is granted.
+  router.post('/client/register', authLimiter, async (req, res) => {
+    const { phone, email, password, name, society_name, unit_number } = req.body || {};
+    if (!phone || !email || !password || !name || !society_name) {
+      return res.status(400).json({ message: 'name, phone, email, password, and society_name are required.' });
+    }
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+    }
+
+    try {
+      // Reject if email already has an account
+      try {
+        await auth.getUserByEmail(email);
+        return res.status(409).json({ message: 'An account with this email already exists.' });
+      } catch {
+        // Expected — proceed
+      }
+
+      const otp      = secureOtp();
+      const regToken = secureToken('reg');
+      const now      = new Date();
+
+      await db.collection('pending_registrations').doc(regToken).set({
+        role:           'client',
+        phone,
+        email,
+        name:           name.trim().slice(0, 100),
+        society_name:   society_name.trim().slice(0, 200),
+        unit_number:    (unit_number || '').trim().slice(0, 50) || null,
+        otp,
+        expires_at:     new Date(Date.now() + 15 * 60 * 1000),
+        verified:       false,
+        created_at:     now,
+        otp_sent_at:    now,
+        otp_send_count: 1,
+      });
+
+      await sendOtp(phone, otp, 'client-registration');
+
+      return res.json({ registration_token: regToken });
+    } catch (err) {
+      console.error('client/register error:', err);
+      return res.status(500).json({ message: 'Registration failed.' });
+    }
+  });
+
+  // ── POST /api/auth/client/verify-otp ──────────────────────────────────────
+  // Step 2 — client enters OTP from SMS.
+  // Creates a DISABLED Firebase Auth account. Admin approves → account enabled.
+  router.post('/client/verify-otp', authLimiter, async (req, res) => {
+    const { registration_token, otp } = req.body || {};
+    if (!registration_token || !otp) {
+      return res.status(400).json({ message: 'registration_token and otp are required.' });
+    }
+
+    try {
+      const docRef = db.collection('pending_registrations').doc(registration_token);
+      const snap   = await docRef.get();
+      if (!snap.exists)      return res.status(400).json({ message: 'Invalid registration token.' });
+
+      const data = snap.data();
+      if (data.verified)     return res.status(400).json({ message: 'Already verified.' });
+      if (data.role !== 'client') return res.status(400).json({ message: 'Wrong registration type.' });
+      if (new Date() > data.expires_at.toDate()) {
+        return res.status(400).json({ message: 'OTP expired. Please request a new one.' });
+      }
+      if (data.otp !== otp)  return res.status(400).json({ message: 'Incorrect OTP.' });
+
+      const tempPassword = crypto.randomBytes(24).toString('base64url');
+      const userRecord   = await auth.createUser({
+        email:       data.email,
+        password:    tempPassword,
+        displayName: data.name,
+        disabled:    true,
+      });
+
+      await docRef.update({
+        verified:     true,
+        verified_at:  new Date(),
+        firebase_uid: userRecord.uid,
+      });
+
+      await db.collection('activity_log').add({
+        type:        'registration',
+        description: `New client registration request from ${data.name} (${data.society_name})`,
+        time:        new Date(),
+        actor:       data.phone,
+      });
+
+      const deviceToken = secureToken('dev');
+      await db.collection('device_trust_tokens').doc(deviceToken).set({
+        phone:      data.phone,
+        uid:        userRecord.uid,
+        created_at: new Date(),
+        expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+      });
+
+      return res.json({ success: true, device_trust_token: deviceToken });
+    } catch (err) {
+      console.error('client/verify-otp error:', err);
+      return res.status(500).json({ message: 'Verification failed.' });
+    }
+  });
+
+  // ── POST /api/auth/client/resend-otp ──────────────────────────────────────
+  router.post('/client/resend-otp', authLimiter, async (req, res) => {
+    const { registration_token } = req.body || {};
+    if (!registration_token) return res.status(400).json({ message: 'registration_token is required.' });
+
+    try {
+      const docRef = db.collection('pending_registrations').doc(registration_token);
+      const snap   = await docRef.get();
+      if (!snap.exists)         return res.status(400).json({ message: 'Invalid registration token.' });
+      if (snap.data().verified) return res.status(400).json({ message: 'Already verified.' });
+
+      const d = snap.data();
+      const OTP_COOLDOWN_S = 60;
+      const OTP_MAX_SENDS  = 3;
+      if (d.otp_sent_at) {
+        const secsSince = (Date.now() - d.otp_sent_at.toDate().getTime()) / 1000;
+        if (secsSince < OTP_COOLDOWN_S) {
+          const waitSecs = Math.ceil(OTP_COOLDOWN_S - secsSince);
+          return res.status(429).json({ message: `Please wait ${waitSecs} seconds before requesting another OTP.`, wait_seconds: waitSecs });
+        }
+      }
+      if ((d.otp_send_count || 0) >= OTP_MAX_SENDS) {
+        return res.status(429).json({ message: 'Maximum OTP attempts reached. Please start a new registration.' });
+      }
+
+      const newOtp = secureOtp();
+      const now    = new Date();
+      await docRef.update({
+        otp:            newOtp,
+        expires_at:     new Date(Date.now() + 15 * 60 * 1000),
+        otp_sent_at:    now,
+        otp_send_count: (d.otp_send_count || 1) + 1,
+      });
+
+      if (d.phone) await sendOtp(d.phone, newOtp, 'client-registration-resend');
+
+      return res.json({ message: 'OTP resent.' });
+    } catch (err) {
+      console.error('client/resend-otp error:', err);
+      return res.status(500).json({ message: 'Failed to resend OTP.' });
+    }
+  });
+
   return { router };
 };

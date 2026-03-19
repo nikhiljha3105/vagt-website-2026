@@ -286,7 +286,7 @@
   firebase.initializeApp(FIREBASE_CONFIG);
   const auth = firebase.auth();
 
-  const API = '/api/admin';
+  const API = '/api/patrol';
   let idToken = null;
 
   function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
@@ -324,7 +324,7 @@
     setHTML('patrolLogWrap', '<div style="font-size:13px; color:var(--text-muted);">Loading…</div>');
 
     try {
-      let path = '/patrol/logs?date=' + encodeURIComponent(date);
+      let path = '/admin/logs?date=' + encodeURIComponent(date);
       // Guard filter is by name (client-side filter after fetch)
       const items = await apiFetch(path);
 
@@ -378,7 +378,7 @@
     btn.textContent = 'Adding…'; btn.disabled = true;
 
     try {
-      const data = await apiFetch('/patrol/checkpoints', {
+      const data = await apiFetch('/admin/checkpoints', {
         method: 'POST',
         body: JSON.stringify({ label, nfc_tag_id: tagId, site_name: siteName || null, site_id: siteId || null }),
       });
@@ -398,7 +398,7 @@
   // ── Load checkpoints ───────────────────────────────────────────────────────
   async function loadCheckpoints() {
     try {
-      const items = await apiFetch('/patrol/checkpoints');
+      const items = await apiFetch('/admin/checkpoints');
 
       if (!items.length) {
         setHTML('cpTableWrap', '<div style="font-size:13px; color:var(--text-muted);">No checkpoints yet. Add your first one above.</div>');
@@ -455,7 +455,7 @@
       if (!cp || !confirm('Deactivate "' + (cp ? cp.label : cpId) + '"? Guards will no longer be able to scan it.')) return;
       btn.disabled = true; btn.textContent = '…';
       try {
-        await apiFetch('/patrol/checkpoints/' + encodeURIComponent(cpId), { method: 'DELETE' });
+        await apiFetch('/admin/checkpoints/' + encodeURIComponent(cpId), { method: 'DELETE' });
         loadCheckpoints();
       } catch (err) {
         alert('Failed: ' + err.message);

@@ -348,7 +348,7 @@
       };
       setHTML('regList', `<div class="empty-state">
         <div class="empty-state-title">${labels[currentFilter]}</div>
-        <div>When a guard registers at <a href="register.html" target="_blank">register.html</a> and verifies their phone, they will appear here.</div>
+        <div>When a guard or client registers at <a href="register.html" target="_blank">register.html</a> and verifies their phone, they will appear here.</div>
       </div>`);
       return;
     }
@@ -359,11 +359,18 @@
       const statusLabel = isApproved ? 'Approved' : (r.rejected ? 'Rejected' : 'Pending');
       const statusClass = isApproved ? 'badge-approved' : (r.rejected ? 'badge-rejected' : 'badge-pending');
       const name = r.name || r.phone || '—';
+      const isClient = (r.role || 'employee') === 'client';
+      const roleLabel = isClient ? 'Client' : 'Guard';
+      const roleBg    = isClient ? '#e8f4fd' : '#e6f4ea';
+      const roleColor = isClient ? '#1565c0' : '#1a7f3c';
 
       return `<div class="reg-card ${isApproved ? 'approved' : ''}" id="card-${esc(r.id)}">
         <div class="reg-avatar">${esc(initials(name))}</div>
         <div class="reg-body">
-          <div class="reg-name">${esc(name)}</div>
+          <div class="reg-name">
+            ${esc(name)}
+            <span style="font-size:10px;font-weight:700;padding:2px 7px;background:${roleBg};color:${roleColor};margin-left:7px;vertical-align:middle;">${roleLabel}</span>
+          </div>
           <div class="reg-meta">
             <span>
               <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .84h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
@@ -373,6 +380,10 @@
               <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               ${esc(r.email || '—')}
             </span>
+            ${isClient && r.society_name ? `<span>
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              ${esc(r.society_name)}${r.unit_number ? ' · ' + esc(r.unit_number) : ''}
+            </span>` : ''}
           </div>
           <div class="reg-time">Registered ${fmtDate(r.created_at)}
             ${r.approved_at ? ' · Approved ' + fmtDate(r.approved_at) : ''}
@@ -413,7 +424,8 @@
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.message || 'Approval failed.');
 
-      toast(`✓ ${name} approved as ${data.employee_id}. Password reset email sent.`);
+      const suffix = data.employee_id ? ` as ${data.employee_id}` : (data.role === 'client' ? ' as a client' : '');
+      toast(`✓ ${name} approved${suffix}. Password reset email sent.`);
       // Refresh data
       loadRegistrations();
     } catch (err) {

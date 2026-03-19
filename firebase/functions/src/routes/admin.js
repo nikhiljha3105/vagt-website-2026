@@ -160,16 +160,19 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
       const registrations = snap.docs.map(doc => {
         const d = doc.data();
         return {
-          id:          doc.id,
-          name:        d.name        || null,
-          phone:       d.phone       || null,
-          email:       d.email       || null,
-          approved:    d.approved    || false,
-          rejected:    d.rejected    || false,
-          approved_at: d.approved_at || null,
-          rejected_at: d.rejected_at || null,
-          created_at:  d.created_at  || null,
-          verified_at: d.verified_at || null,
+          id:           doc.id,
+          role:         d.role         || 'employee',
+          name:         d.name         || null,
+          phone:        d.phone        || null,
+          email:        d.email        || null,
+          society_name: d.society_name || null,
+          unit_number:  d.unit_number  || null,
+          approved:     d.approved     || false,
+          rejected:     d.rejected     || false,
+          approved_at:  d.approved_at  || null,
+          rejected_at:  d.rejected_at  || null,
+          created_at:   d.created_at   || null,
+          verified_at:  d.verified_at  || null,
         };
       });
 
@@ -203,31 +206,48 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
         displayName: reg.name || reg.phone,
       });
 
-      // Grant the employee role (used by backend middleware + Firestore rules)
-      await auth.setCustomUserClaims(reg.firebase_uid, { role: 'employee' });
+      const regRole = reg.role || 'employee';
 
-      // Create employee Firestore document with starting leave balance
-      const empId = await nextEmployeeId(db);
-      await db.collection('employees').doc(reg.firebase_uid).set({
-        name:          reg.name || reg.phone,
-        phone:         reg.phone,
-        email:         reg.email,
-        employee_id:   empId,
-        status:        'active',
-        leave_balance: { casual: 6, sick: 4, earned: 2 }, // Starting allocation — adjust as needed
-        site_ids:      [],   // No site assigned yet — admin assigns via the employees page
-        joined_at:     new Date(),
-      });
+      // Grant role claim (used by backend middleware + Firestore rules)
+      await auth.setCustomUserClaims(reg.firebase_uid, { role: regRole });
 
-      await regRef.update({ approved: true, approved_at: new Date() });
-      await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin', req.user.uid);
+      let responsePayload = { success: true };
+
+      if (regRole === 'client') {
+        // Create client Firestore document
+        await db.collection('clients').doc(reg.firebase_uid).set({
+          name:         reg.name || reg.phone,
+          phone:        reg.phone,
+          email:        reg.email,
+          society_name: reg.society_name || null,
+          unit_number:  reg.unit_number  || null,
+          status:       'active',
+          site_ids:     [],  // admin links sites via admin-clients page
+          joined_at:    new Date(),
+        });
+        await regRef.update({ approved: true, approved_at: new Date() });
+        await logActivity(db, 'registration', `Client ${reg.name} (${reg.society_name || reg.phone}) approved`, 'admin', req.user.uid);
+        responsePayload.role = 'client';
+      } else {
+        // Create employee Firestore document with starting leave balance
+        const empId = await nextEmployeeId(db);
+        await db.collection('employees').doc(reg.firebase_uid).set({
+          name:          reg.name || reg.phone,
+          phone:         reg.phone,
+          email:         reg.email,
+          employee_id:   empId,
+          status:        'active',
+          leave_balance: { casual: 6, sick: 4, earned: 2 },
+          site_ids:      [],
+          joined_at:     new Date(),
+        });
+        await regRef.update({ approved: true, approved_at: new Date() });
+        await logActivity(db, 'registration', `Employee ${empId} (${reg.phone}) approved`, 'admin', req.user.uid);
+        responsePayload.employee_id = empId;
+        responsePayload.role = 'employee';
+      }
 
       // ── Send password reset email via Firebase ─────────────────────────
-      // Firebase's Identity Toolkit sends a password-reset email using the
-      // template configured in Firebase Console → Authentication → Templates.
-      // This is free, requires no third-party service, and the guard will
-      // receive a link to set their own password before first login.
-      // When SMS (MSG91) is ready, add a parallel sendSms() call here.
       try {
         await fetch(
           `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${process.env.FIREBASE_API_KEY || 'AIzaSyB8jOeTk3u6QkXz190qb3Q-I8RiWVuPXv4'}`,
@@ -238,12 +258,11 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
           }
         );
       } catch (emailErr) {
-        // Non-fatal — account is approved regardless. Log and continue.
         console.warn('approval email failed (non-fatal):', emailErr.message);
       }
       // ──────────────────────────────────────────────────────────────────
 
-      return res.json({ success: true, employee_id: empId });
+      return res.json(responsePayload);
     } catch (err) {
       console.error('registrations/approve error:', err);
       return res.status(500).json({ message: 'Failed to approve registration.' });
