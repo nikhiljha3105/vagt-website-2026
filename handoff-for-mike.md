@@ -38,8 +38,17 @@
 4. Wrong email? Error shows "No account found. Create an account →" — links to register.html.
 5. New user clicks "New here?" → register.html → picks Guard or Client → fills form → OTP → waits for admin approval.
 
-**Deploy needed:**
-All changes committed and pushed. Run: `firebase deploy --only hosting,functions --project vagt---services`
+**Deploy needed — CRITICAL:**
+The live site is running an OLD pre-git codebase with `apiKey: "REDACTED_OLD_KEY"` in `assets/js/firebase-config.js` — a placeholder that was never filled in. This is why every login fails with 400. Our git repo has the correct API key and all correct files.
+
+Run from your machine, **from inside the `VAGT New Website Design` folder**:
+```bash
+cd ~/"VAGT New Website Design"       # or wherever the folder lives
+git pull origin claude/review-website-git-dPWyR   # get latest
+firebase deploy --only hosting,functions --project vagt---services
+```
+
+After deploy, use: `hello@vagtservices.com` / `Vagt@2026Admin` (confirmed working — tested live against Firebase Auth directly)
 
 ---
 
