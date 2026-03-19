@@ -10,6 +10,53 @@
 
 ---
 
+## Session 5 — 2026-03-19 (evening)
+
+### Strategic pivot — discussed this session
+
+Nikhil's father raised a key point: **MyGate and NoBroker already own society guest entry and visitor management**. VAGT's defensible edge is on the **professional security operations side**:
+
+- ✅ Beat patrol with GPS/NFC proof-of-presence
+- ✅ Incident management with escalation chains
+- ✅ Audit trails (who was where, when, for how long)
+- ✅ Guard accountability (attendance, OT, leave, performance ranking)
+- ✅ Client-facing compliance reporting
+
+**Next session should begin with a strategic UX/IA session** — map what the platform should prioritise, deprioritise, and potentially cut. A Figma IA diagram was requested to show the clean unified flow.
+
+---
+
+### What was done this session
+
+- **Root cause of 400 errors found and fixed**: `vagtservices.com` was pointing to GitHub Pages (old pre-git codebase with `apiKey: "REDACTED_OLD_KEY"`). Our Firebase codebase lives at `www.vagtservices.com`. ✅
+- **Deploy confirmed working**: `firebase deploy` from correct directory. `www.vagtservices.com` now serves our codebase. ✅
+- **Login confirmed working**: `hello@vagtservices.com` / `Vagt@2026Admin` → lands on Admin Portal. ✅
+- **Apex domain fix**: Added `vagtservices.com` (no www) to Firebase Hosting. DNS A record `199.36.158.100` + TXT `hosting-site=vagt---services` added at GoDaddy. Propagating (ETA 1–2 hrs from ~18:00 IST). ✅
+- **HatsOff seed data**: 33 months of real guard rota (May 2023–Jan 2026) seeded into Firestore:
+  - 22 unique guards with real names, clock numbers, designations
+  - 9,242 attendance log records (P/L/W/O with realistic IST check-in/out times)
+  - 303 monthly payslip records (days worked × daily rate, OT at 1.5×, PF at 12%)
+  - 1 company + 1 site: HatsOff Aviation
+  - Employees list shows 34 total (22 HatsOff + 12 existing from demo seed)
+- **Seed script committed**: `firebase/functions/seed-hatsoff-data.js` ✅
+
+### Login experience — confirmed SINGLE entry point
+
+Only ONE file has a login form: `pages/portal.html`. The different experience seen between `www.vagtservices.com` and `vagt---services.web.app` was browser session cookies (different domains, different sessions) — not different code. Architecture is already unified.
+
+### Dashboard stats showing dashes
+
+Admin portal Overview shows dashes for Active employees, Checked in today, Open tickets, Pending leaves. Data IS in Firestore (Employees page correctly shows 33 active). The dashboard API call for stats may have a query mismatch with the `historical: true` flag on seeded employees. Investigate `/api/admin/stats` or equivalent in `admin.js` next session.
+
+### Figma IA request
+
+Nikhil wants a simple Figma information architecture diagram showing:
+- The single unified flow (index → portal.html → role redirect → portal)
+- What the platform prioritises (beat patrol, incidents, audit) vs deprioritises (guest/society)
+- Use Figma MCP (already connected) next session to build this
+
+---
+
 ## Session 4 — 2026-03-19
 
 ### What was built / fixed
