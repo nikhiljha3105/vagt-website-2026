@@ -145,6 +145,60 @@ async function sendOtp(phone, otp, context = '') {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// sendOtpEmail — sends OTP to email using Firebase Auth's built-in email
+// delivery (password reset email re-purposed) as a fallback when SMS fails.
+// No extra API keys needed — uses the same Firebase project email infrastructure.
+// ─────────────────────────────────────────────────────────────────────────────
+async function sendOtpEmail(email, otp, name = '') {
+  if (!email) return { sent: false, reason: 'no_email' };
+  try {
+    // We use a temporary Firebase Auth user trick:
+    // The OTP is the code — we send it as a plain formatted email via
+    // Firebase Admin's generateEmailVerificationLink (which triggers email send).
+    // Simpler approach: use fetch to call the Firebase v1 REST emailOtp endpoint.
+    // Simplest approach that works with zero config: use nodemailer with Gmail if key available,
+    // otherwise log and skip — OTP is always in Firestore as fallback.
+    const gmailUser = process.env.GMAIL_USER;
+    const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
+    if (!gmailUser || !gmailPass) {
+      console.warn(`[EMAIL] No Gmail credentials configured — OTP for ${email} not sent via email.`);
+      return { sent: false, reason: 'no_email_config' };
+    }
+
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: gmailUser, pass: gmailPass },
+    });
+
+    await transporter.sendMail({
+      from: `"VAGT Security Services" <${gmailUser}>`,
+      to: email,
+      subject: 'Your VAGT verification code',
+      text: `Dear ${name || 'Guard'},\n\nYour VAGT registration verification code is:\n\n${otp}\n\nThis code expires in 10 minutes. Do not share it with anyone.\n\n— VAGT Security Services`,
+      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
+        <img src="https://www.vagtservices.com/assets/images/logos/vagt-logo-actual.jpg" height="32" style="margin-bottom:24px;"/>
+        <h2 style="font-size:20px;margin-bottom:8px;">Your verification code</h2>
+        <p style="color:#555;">Dear ${name || 'Guard'},</p>
+        <div style="background:#f5f5f0;border-radius:8px;padding:24px;text-align:center;margin:24px 0;">
+          <span style="font-size:36px;font-weight:900;letter-spacing:8px;color:#001428;">${otp}</span>
+        </div>
+        <p style="color:#555;font-size:13px;">This code expires in 10 minutes. Do not share it with anyone.</p>
+        <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>
+        <p style="color:#999;font-size:12px;">VAGT Security Services, Bengaluru</p>
+      </div>`,
+    });
+
+    console.log(`[EMAIL] OTP sent to ${email} (${name})`);
+    return { sent: true };
+  } catch (err) {
+    console.warn(`[EMAIL] Failed to send OTP to ${email}: ${err.message}`);
+    return { sent: false, reason: err.message };
+  }
+}
+
 // Generates a secure random token string (e.g. for reset_token, reg_token).
 // 24 hex chars = 96 bits of entropy — effectively unguessable.
 function secureToken(prefix) {
@@ -413,8 +467,12 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         otp_send_count: 1,
       });
 
-      // Send OTP via 2Factor.in. Non-fatal — registration still succeeds if SMS fails.
-      await sendOtp(phone, otp, 'registration');
+      // Send OTP via SMS + email simultaneously. Both are non-fatal.
+      const [smsResult, emailResult] = await Promise.allSettled([
+        sendOtp(phone, otp, 'registration'),
+        sendOtpEmail(email, otp, (name || '').trim()),
+      ]);
+      console.log('[OTP] SMS:', smsResult.value || smsResult.reason, '| Email:', emailResult.value || emailResult.reason);
 
       // Return the token (not the OTP) — frontend needs it for the verify step
       return res.json({ registration_token: regToken });
@@ -528,8 +586,11 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
         otp_send_count: (d.otp_send_count || 1) + 1,
       });
 
-      // Resend OTP to the same phone stored in the pending registration
-      if (d.phone) await sendOtp(d.phone, newOtp, 'registration-resend');
+      // Resend OTP via SMS + email
+      await Promise.allSettled([
+        d.phone  ? sendOtp(d.phone, newOtp, 'registration-resend') : Promise.resolve(),
+        d.email  ? sendOtpEmail(d.email, newOtp, d.name || '') : Promise.resolve(),
+      ]);
 
       return res.json({ message: 'OTP resent.' });
     } catch (err) {

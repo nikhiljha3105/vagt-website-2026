@@ -2,6 +2,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * VAGT Security Services — Cloud Functions Backend
  * File: firebase/functions/src/index.js
+ * Updated: 2026-03-21 — force redeploy to publish TWOFACTOR_API_KEY + email OTP
  * ─────────────────────────────────────────────────────────────────────────────
  *
  * HOW THIS WORKS (read this first):
