@@ -317,6 +317,8 @@
       const snap = await db.collection('clients').doc(uid).get();
       if (!snap.exists) return;
       const d = snap.data();
+      // Progressive profiling: redirect if org_type not set
+      if (!d.org_type) { window.location.href = 'client-profile-setup.html'; return; }
       const first = (d.name || '').split(' ')[0];
       setText('pageGreeting', greeting() + ', ' + first);
       setText('pageSubtitle', d.company_name ? 'Deployment overview for ' + d.company_name + '.' : 'Here\'s your security overview.');

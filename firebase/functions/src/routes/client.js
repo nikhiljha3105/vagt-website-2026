@@ -494,6 +494,35 @@ module.exports = function ({ db, requireAuth, requireClient }) {
     }
   });
 
+  // ── POST /api/client/profile ────────────────────────────────────────────
+  // Client progressive profiling: set org_type and org_role on first login.
+  // Called from client-profile-setup.html after authentication.
+  router.post('/profile', ...guard, async (req, res) => {
+    const uid = req.user.uid;
+    const { org_type, org_role } = req.body;
+
+    if (!org_type) {
+      return res.status(400).json({ message: 'Please select your organisation type.' });
+    }
+    if (!org_role) {
+      return res.status(400).json({ message: 'Please select your role.' });
+    }
+
+    try {
+      await db.collection('clients').doc(uid).update({
+        org_type: org_type,
+        org_role: org_role,
+      });
+
+      await logActivity(db, 'profile', `Client profile set: org=${org_type}, role=${org_role}`, uid);
+
+      return res.status(200).json({ message: 'Profile saved successfully.' });
+    } catch (err) {
+      console.error('client/profile POST error:', err);
+      return res.status(500).json({ message: 'Failed to save profile. Please try again.' });
+    }
+  });
+
   return { router };
 };
 
