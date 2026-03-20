@@ -1,5 +1,30 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-21
+**Last updated:** 2026-03-20
+
+---
+
+## Session 6 — 2026-03-20 (afternoon/evening)
+
+### What was done this session
+
+- **Logo centered and enlarged on auth pages:** Portal and register pages now use 3-column layout (left spacer, centered 48px logo, right spacer). Spec comment blocks updated. ✅
+- **Employee progressive profiling page created:** `pages/employee-profile-setup.html` with role selector grid (10 roles: Security Guard, Security Officer, Facility Officer, Housekeeper, Facility Manager, Electrician, Plumber, Office Boy, Operations Manager, Operations Director). Site input revealed after role selection. ✅
+- **Employee profile endpoint added:** `POST /api/employee/profile` saves role_detail and primary_site to employees doc. ✅
+- **Employee portal redirect check:** Added check in employee-portal.html — if role_detail not set, redirects to employee-profile-setup.html. ✅
+- **Client progressive profiling page created:** `pages/client-profile-setup.html` with two-step flow: Step 1 = org type selector (4 full-width tiles), Step 2 = role dropdown (dynamically populated per org type). Org types: Residential Society, Builder/Developer, Facility Management Company, Corporate/Office. ✅
+- **Client profile endpoint added:** `POST /api/client/profile` saves org_type and org_role to clients doc. ✅
+- **Client portal redirect check:** Added check in client-portal.html — if org_type not set, redirects to client-profile-setup.html. ✅
+- **Incident management audit completed:** Comprehensive audit document created (`client-briefs/incident-management-audit-2026-03.md`) documenting current state, gaps, schema, and priority build order. ✅
+
+### Key findings from incident audit
+
+- **What works:** Guards can file incidents (10 types, 4 severity levels). High/critical incidents trigger activity log with ⚠️ prefix.
+- **What's missing:** Admin page to action incidents, client visibility of incidents, photo attachments, real-time notifications (SMS/email), SLA tracking, escalation.
+- **Priority 1 (critical):** Build admin incident management page (view, filter, change status, add notes).
+- **Priority 2 (critical):** Build client incident visibility page.
+- **Priority 3 (high):** Photo/video attachment support.
+- **Priority 4 (high):** Admin notification (email + SMS via MSG91).
+- **Priority 5 (medium):** SLA tracking + escalation.
 
 ---
 
@@ -130,13 +155,22 @@ Admin currently has no way to export anything — attendance, payroll, guest log
 
 ---
 
-### ⏳ TODO — 2026-03-18 (Mike — please complete all of these)
-- [ ] **Scan the VAGT Google Drive folder** for any new documents added since last session. Download, save to `client-briefs/` or `assets/docs/`, and commit to the repo. Link: https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
-- [ ] **Deploy to Firebase** — `firebase deploy --only hosting,functions,firestore:indexes --project vagt---services` from your machine
-- [ ] **Seed test data** — `node seed-demo-data.js ~/Downloads/<service-account-key>.json` from `firebase/functions/`
-- [ ] **Connect vagtservices.com** — Firebase Console → Hosting → Add custom domain
-- [ ] **Wire SMS via MSG91** — provide API key + DLT sender ID so OTP delivery can be enabled
-- [ ] **Admin patrol log UI** — page needs to be built (API already exists at `/api/admin/patrol`)
+### ⏳ PENDING TODO (Session 6 complete — Mark for Session 7)
+
+**COMPLETED THIS SESSION:**
+- ✅ Logo centered and enlarged on auth pages
+- ✅ Employee progressive profiling page + endpoint
+- ✅ Client progressive profiling page + endpoint
+- ✅ Incident management audit written
+
+**STILL PENDING FROM EARLIER SESSIONS:**
+- [ ] **Deploy to Firebase** — `firebase deploy --only hosting,functions --project vagt---services` (includes logo change, profile pages, incident audit)
+- [ ] **Build admin incident management page** — view/filter/action incidents (Priority 1 from audit)
+- [ ] **Build client incident visibility page** — clients see incidents at their sites (Priority 1 from audit)
+- [ ] **Scan the VAGT Google Drive folder** for new documents. Link: https://drive.google.com/drive/folders/1_P257aST6krZOaojlrOSoicQW8mHsSQf
+- [ ] **Seed test data** — `node seed-hatsoff-data.js` from `firebase/functions/` (if not already done)
+- [ ] **Wire SMS via MSG91** — provide API key + DLT sender ID for OTP + notifications
+- [ ] **Wire photo attachments for incidents** — Cloud Storage upload + signed URLs (Priority 3 from audit)
 - [ ] **Delete old admin account** — `admin@vagtsecurityservices.com` still in Firebase Auth with no claim — remove it
 
 Documents already saved to `client-briefs/` in the repo:
