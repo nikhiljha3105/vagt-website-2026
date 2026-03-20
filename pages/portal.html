@@ -15,15 +15,19 @@
   <div class="portal-login-card">
 
     <div class="portal-login-header">
-      <div style="margin-bottom:20px;">
+      <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
         <img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT Security Services" style="height:34px; opacity:0.95;"/>
+        <button id="langToggle" onclick="toggleLang()"
+          style="background:none; border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-size:11px; font-weight:600; color:var(--text-muted); cursor:pointer; letter-spacing:0.5px;">
+          हिंदी
+        </button>
       </div>
       <div class="portal-login-icon">
         <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
       </div>
       <div class="portal-role-badge" id="roleBadge">VAGT Portal</div>
-      <h2 id="formTitle">Sign in to your account</h2>
-      <p id="formSub">Enter your email and password. We'll take you to your portal automatically.</p>
+      <h2 id="formTitle" data-en="Sign in to your account" data-hi="अपने खाते में साइन इन करें">Sign in to your account</h2>
+      <p id="formSub" data-en="Enter your email and password. We'll take you to your portal automatically." data-hi="अपना ईमेल और पासवर्ड डालें। हम आपको सीधे आपके पोर्टल पर ले जाएंगे।">Enter your email and password. We'll take you to your portal automatically.</p>
     </div>
 
     <div class="portal-login-body">
@@ -33,8 +37,10 @@
 
         <!-- Tab switcher: Email or Guard Keycode -->
         <div id="loginTabs" style="display:flex; margin-bottom:20px; border-bottom:2px solid var(--border);">
-          <button id="tabEmail"   class="login-tab login-tab-active" onclick="switchTab('email')">Email / Password</button>
-          <button id="tabKeycode" class="login-tab"                  onclick="switchTab('keycode')">Guard Keycode</button>
+          <button id="tabEmail"   class="login-tab login-tab-active" onclick="switchTab('email')"
+            data-en="Email / Password" data-hi="ईमेल / पासवर्ड">Email / Password</button>
+          <button id="tabKeycode" class="login-tab"                  onclick="switchTab('keycode')"
+            data-en="Guard Keycode" data-hi="गार्ड कीकोड">Guard Keycode</button>
         </div>
 
         <div id="loginError" class="portal-error" style="display:none;" role="alert"></div>
@@ -43,46 +49,52 @@
         <div id="panelEmail">
           <form id="loginForm" novalidate>
             <div class="form-group" style="margin-bottom:16px;">
-              <label for="loginEmail">Work email</label>
+              <label for="loginEmail" data-en="Work email" data-hi="कार्य ईमेल">Work email</label>
               <input type="email" id="loginEmail" autocomplete="email" required
                      placeholder="name@vagtsecurityservices.com"/>
             </div>
             <div class="form-group" style="margin-bottom:24px;">
-              <label for="loginPass">Password</label>
+              <label for="loginPass" data-en="Password" data-hi="पासवर्ड">Password</label>
               <input type="password" id="loginPass" autocomplete="current-password" required
                      placeholder="••••••••"/>
             </div>
             <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
-                    id="signInBtn">Sign In</button>
+                    id="signInBtn" data-en="Sign In" data-hi="साइन इन करें">Sign In</button>
           </form>
           <div style="text-align:center; margin-top:14px;">
-            <button class="portal-forgot-link" onclick="goToForgot()">Forgot password?</button>
+            <button class="portal-forgot-link" onclick="goToForgot()"
+              data-en="Forgot password?" data-hi="पासवर्ड भूल गए?">Forgot password?</button>
           </div>
         </div>
 
         <!-- Guard Keycode panel -->
         <div id="panelKeycode" style="display:none;">
-          <p style="font-size:12px; color:var(--text-muted); margin:0 0 16px;">
+          <p id="keycodeHint" style="font-size:12px; color:var(--text-muted); margin:0 0 16px;"
+            data-en="Enter the keycode printed on your VAGT access card."
+            data-hi="अपने VAGT एक्सेस कार्ड पर छपा कीकोड डालें।">
             Enter the keycode printed on your VAGT access card.
           </p>
           <form id="keycodeForm" novalidate>
             <div class="form-group" style="margin-bottom:24px;">
-              <label for="keycodeInput">Access Keycode</label>
+              <label for="keycodeInput" data-en="Access Keycode" data-hi="एक्सेस कीकोड">Access Keycode</label>
               <input type="text" id="keycodeInput" autocomplete="off" required
                      placeholder="XXXX-XXXX" maxlength="9"
                      style="text-transform:uppercase; letter-spacing:3px; font-size:20px; font-weight:700; text-align:center;"/>
             </div>
             <div id="geoStatus" style="font-size:11px; color:var(--text-muted); margin-bottom:12px; display:none;"></div>
             <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
-                    id="keycodeBtn">Sign In with Keycode</button>
+                    id="keycodeBtn" data-en="Sign In with Keycode" data-hi="कीकोड से साइन इन करें">Sign In with Keycode</button>
           </form>
         </div>
 
         <div style="text-align:center; margin-top:20px; font-size:12px; color:var(--text-muted);">
-          New here? <a href="register.html" style="color:var(--navy); font-weight:600;">Create your account →</a>
+          <span data-en="New here?" data-hi="नए हैं?">New here?</span>
+          <a href="register.html" style="color:var(--navy); font-weight:600;"
+            data-en="Create your account →" data-hi="अपना खाता बनाएं →">Create your account →</a>
         </div>
         <div style="text-align:center; margin-top:10px;">
-          <a href="../index.html" style="font-size:12px; color:var(--text-muted); text-decoration:none;">← Back to VAGT home</a>
+          <a href="../index.html" style="font-size:12px; color:var(--text-muted); text-decoration:none;"
+            data-en="← Back to VAGT home" data-hi="← VAGT होम पर वापस जाएं">← Back to VAGT home</a>
         </div>
       </div>
 
@@ -92,15 +104,16 @@
         <div id="forgotError"   class="portal-error"       style="display:none;" role="alert"></div>
         <form id="forgotForm" novalidate>
           <div class="form-group" style="margin-bottom:24px;">
-            <label for="forgotEmail">Your work email</label>
+            <label for="forgotEmail" data-en="Your work email" data-hi="आपका कार्य ईमेल">Your work email</label>
             <input type="email" id="forgotEmail" autocomplete="email" required
                    placeholder="name@vagtsecurityservices.com"/>
           </div>
           <button type="submit" class="btn btn-navy" style="width:100%; justify-content:center;"
-                  id="forgotBtn">Send Reset Link</button>
+                  id="forgotBtn" data-en="Send Reset Link" data-hi="रीसेट लिंक भेजें">Send Reset Link</button>
         </form>
         <div style="text-align:center; margin-top:14px;">
-          <button class="portal-forgot-link" onclick="goBackToLogin()">← Back to sign in</button>
+          <button class="portal-forgot-link" onclick="goBackToLogin()"
+            data-en="← Back to sign in" data-hi="← साइन इन पर वापस जाएं">← Back to sign in</button>
         </div>
       </div>
 
@@ -339,8 +352,10 @@
   window.goBackToLogin = function () {
     hide('stepForgot'); show('stepLogin');
     setText('roleBadge', 'VAGT Portal');
-    setText('formTitle', 'Sign in to your account');
-    setText('formSub',   'Enter your email and password. We\'ll take you to your portal automatically.');
+    const hi = currentLang === 'hi';
+    setText('formTitle', hi ? 'अपने खाते में साइन इन करें' : 'Sign in to your account');
+    setText('formSub',   hi ? 'अपना ईमेल और पासवर्ड डालें। हम आपको सीधे आपके पोर्टल पर ले जाएंगे।'
+                             : 'Enter your email and password. We\'ll take you to your portal automatically.');
   };
 
   document.getElementById('forgotForm').addEventListener('submit', async function (e) {
@@ -370,18 +385,46 @@
     });
   });
 
+  // ── Language toggle ───────────────────────────────────────────────────────
+  let currentLang = localStorage.getItem('vagt_lang') || 'en';
+
+  function applyLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('vagt_lang', lang);
+    document.querySelectorAll('[data-en][data-hi]').forEach(el => {
+      el.textContent = el.getAttribute('data-' + lang);
+    });
+    document.getElementById('langToggle').textContent = lang === 'hi' ? 'EN' : 'हिंदी';
+  }
+
+  window.toggleLang = function () {
+    applyLang(currentLang === 'en' ? 'hi' : 'en');
+  };
+
+  // Apply on load if Hindi was previously chosen
+  if (currentLang === 'hi') applyLang('hi');
+
   // ── Error messages ────────────────────────────────────────────────────────
   function friendlyError(code) {
+    const hi = currentLang === 'hi';
     const map = {
-      'auth/invalid-credential':     'Incorrect email or password.',
-      'auth/user-not-found':         'No account found with that email. <a href="register.html" style="color:var(--navy);font-weight:600;">Create an account →</a>',
-      'auth/wrong-password':         'Incorrect password. Please try again.',
-      'auth/invalid-email':          'Please enter a valid email address.',
-      'auth/too-many-requests':      'Too many failed attempts. Please wait a few minutes and try again.',
-      'auth/user-disabled':          'This account has been disabled. Contact your manager.',
-      'auth/network-request-failed': 'Network error. Check your connection and try again.',
+      'auth/invalid-credential':     hi ? 'गलत ईमेल या पासवर्ड।'
+                                        : 'Incorrect email or password.',
+      'auth/user-not-found':         hi ? 'इस ईमेल से कोई खाता नहीं मिला। <a href="register.html" style="color:var(--navy);font-weight:600;">खाता बनाएं →</a>'
+                                        : 'No account found with that email. <a href="register.html" style="color:var(--navy);font-weight:600;">Create an account →</a>',
+      'auth/wrong-password':         hi ? 'गलत पासवर्ड। दोबारा कोशिश करें।'
+                                        : 'Incorrect password. Please try again.',
+      'auth/invalid-email':          hi ? 'कृपया सही ईमेल पता डालें।'
+                                        : 'Please enter a valid email address.',
+      'auth/too-many-requests':      hi ? 'बहुत अधिक कोशिशें हो गईं। कुछ मिनट बाद कोशिश करें।'
+                                        : 'Too many failed attempts. Please wait a few minutes and try again.',
+      'auth/user-disabled':          hi ? 'यह खाता बंद कर दिया गया है। अपने मैनेजर से संपर्क करें।'
+                                        : 'This account has been disabled. Contact your manager.',
+      'auth/network-request-failed': hi ? 'नेटवर्क समस्या। अपना इंटरनेट कनेक्शन जांचें।'
+                                        : 'Network error. Check your connection and try again.',
     };
-    return map[code] || 'Something went wrong. Please try again or contact support.';
+    return map[code] || (hi ? 'कुछ गलत हो गया। दोबारा कोशिश करें।'
+                             : 'Something went wrong. Please try again or contact support.');
   }
 
 })();
