@@ -366,6 +366,8 @@
       const snap = await db.collection('employees').doc(uid).get();
       if (!snap.exists) return;
       const d = snap.data();
+      // Progressive profiling: redirect if role_detail not set
+      if (!d.role_detail) { window.location.href = 'employee-profile-setup.html'; return; }
       const firstName = (d.name || '').split(' ')[0];
       setText('pageGreeting', greeting() + ', ' + firstName);
       setText('pageSubtitle', "Here's your overview for today, " + todayStr() + '.');

@@ -711,6 +711,32 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
     }
   });
 
+  // ── POST /api/employee/profile ───────────────────────────────────────────
+  // Employee progressive profiling: set role_detail and primary_site on first login.
+  // Called from employee-profile-setup.html after authentication.
+  router.post('/employee/profile', ...guard, async (req, res) => {
+    const uid = req.user.uid;
+    const { role_detail, primary_site } = req.body;
+
+    if (!role_detail) {
+      return res.status(400).json({ message: 'Please select a role.' });
+    }
+
+    try {
+      await db.collection('employees').doc(uid).update({
+        role_detail: role_detail,
+        primary_site: primary_site || null,
+      });
+
+      await logActivity(db, 'profile', `Employee profile set: role=${role_detail}`, uid);
+
+      return res.status(200).json({ message: 'Profile saved successfully.' });
+    } catch (err) {
+      console.error('employee/profile POST error:', err);
+      return res.status(500).json({ message: 'Failed to save profile. Please try again.' });
+    }
+  });
+
   return { router };
 };
 
