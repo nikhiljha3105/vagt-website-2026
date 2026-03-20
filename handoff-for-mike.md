@@ -1,5 +1,5 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-19
+**Last updated:** 2026-03-21
 
 ---
 
@@ -10,7 +10,13 @@
 
 ---
 
-## Session 5 — 2026-03-19 (evening)
+## 🔔 REMINDERS FOR NIKHIL
+- **Get login creds from Akhil** for vagtsecurityservices.com — needed to set up 301 redirect to vagtservices.com
+- **2Factor DLT check**: Log into 2factor.in → verify DLT sender ID + approved template. Without DLT, Indian operators silently block all OTPs regardless of API key being valid.
+
+---
+
+## Session 5 — 2026-03-21 (evening)
 
 ### Strategic pivot — discussed this session
 
