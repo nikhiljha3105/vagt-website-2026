@@ -1,3 +1,32 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║  VAGT AUTH PAGE — HEADER SPEC (DO NOT DEVIATE)                      ║
+  ║                                                                      ║
+  ║  All auth pages (portal.html, register.html) MUST share this exact  ║
+  ║  header structure to maintain visual consistency:                   ║
+  ║                                                                      ║
+  ║  <div class="portal-login-header">                                  ║
+  ║    <div style="margin-bottom:20px; display:flex;                     ║
+  ║                justify-content:space-between; align-items:center;"> ║
+  ║      <img [logo] style="height:34px; opacity:0.95;"/>               ║
+  ║      <[pill action button or link]                                   ║
+  ║        style="font-size:11px; font-weight:600;                       ║
+  ║               border:1px solid var(--border);                       ║
+  ║               border-radius:20px; padding:4px 12px; ..."/>          ║
+  ║    </div>                                                            ║
+  ║    <div class="portal-login-icon">[SVG icon]</div>                  ║
+  ║    <div class="portal-role-badge">[page context label]</div>        ║
+  ║    <h2>[primary heading]</h2>                                        ║
+  ║    <p>[subtext]</p>                                                  ║
+  ║  </div>                                                              ║
+  ║                                                                      ║
+  ║  portal.html    → pill = language toggle (हिंदी / EN)               ║
+  ║  register.html  → pill = "Sign in" link back to portal.html         ║
+  ║                                                                      ║
+  ║  Background: .portal-login-wrap { background: #f0f0ec; }            ║
+  ║  Card max-width and padding: defined in main.css (.portal-login-card)║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
