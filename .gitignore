@@ -54,3 +54,10 @@ assets/brochures/*.docx
 # ── Test artifacts ────────────────────────────────────────────────────────────
 tests/__pycache__/
 tests/*.pyc
+
+# Business documents — never commit to git
+VAGT/
+vagt-work-audit-*.md
+*.pages
+*.numbers
+*.xlsm
