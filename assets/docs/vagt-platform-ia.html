@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAGT Platform Information Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0D1F3C 0%, #1a2d4d 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #0D1F3C;
+            margin-bottom: 10px;
+        }
+
+        .header h1 .vagt {
+            font-weight: 700;
+        }
+
+        .header h1 .vagt-g {
+            color: #C41E1E;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .pillar-legend {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        .pillar-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pillar-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .pillar-1 { background: #F5C400; }
+        .pillar-2 { background: #C41E1E; }
+        .pillar-3 { background: #0D1F3C; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-left: auto;
+            align-items: center;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 8px;
+            background: #f0f0ec;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        button {
+            background: #0D1F3C;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #F5C400;
+            color: #0D1F3C;
+        }
+
+        .reset-btn {
+            background: #F5C400;
+            color: #0D1F3C;
+        }
+
+        .reset-btn:hover {
+            background: #0D1F3C;
+            color: #F5C400;
+        }
+
+        .zoom-label {
+            font-size: 12px;
+            color: #666;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(13, 31, 60, 0.95) 0%, rgba(26, 45, 77, 0.95) 100%);
+        }
+
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: grab;
+        }
+
+        svg:active {
+            cursor: grabbing;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .node:hover rect {
+            filter: brightness(1.1);
+        }
+
+        .node rect {
+            transition: filter 0.2s;
+        }
+
+        .node-label {
+            pointer-events: none;
+            font-size: 12px;
+            font-weight: 600;
+            fill: white;
+        }
+
+        .node-desc {
+            pointer-events: none;
+            font-size: 10px;
+            fill: rgba(255, 255, 255, 0.85);
+        }
+
+        .entry-point { fill: #F5C400; }
+        .entry-point:hover { fill: #ffd633; }
+
+        .guard-node { fill: #2E5090; }
+        .guard-node:hover { fill: #3a62b8; }
+
+        .client-node { fill: #6B4C9A; }
+        .client-node:hover { fill: #7a5dab; }
+
+        .admin-node { fill: #C41E1E; }
+        .admin-node:hover { fill: #d63535; }
+
+        .ops-node { fill: #047857; }
+        .ops-node:hover { fill: #059669; }
+
+        .arrow {
+            stroke: rgba(255, 255, 255, 0.4);
+            stroke-width: 1.5;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .swim-lane-bg {
+            fill: rgba(255, 255, 255, 0.02);
+            stroke: rgba(255, 255, 255, 0.08);
+            stroke-width: 1;
+            stroke-dasharray: 5,5;
+        }
+
+        .swim-lane-label {
+            font-size: 14px;
+            font-weight: 700;
+            fill: rgba(255, 255, 255, 0.7);
+            text-anchor: middle;
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 30px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .help-text {
+            color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span class="vagt"><span class="vagt-g">V</span>A<span class="vagt-g">G</span>T</span> Platform Information Architecture</h1>
+        <div class="header-subtitle">Complete user flow for Security Services platform</div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="pillar-legend">
+                <div class="pillar-item">
+                    <div class="pillar-dot pillar-1"></div>
+                    <span>Proof of Presence (NFC, Check-in/out)</span>
+                </div>
+                <div class="pillar-item">
+                    <div class="pillar-dot pillar-2"></div>
+                    <span>Incident Accountability (Filing → Review → Resolution)</span>
+                </div>
+                <div class="pillar-item">
+                    <div class="pillar-dot pillar-3"></div>
+                    <span>Compliance Reporting (Auto-PDF, Analytics)</span>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="zoom-controls">
+                    <button id="zoom-in">+</button>
+                    <span class="zoom-label" id="zoom-label">100%</span>
+                    <button id="zoom-out">−</button>
+                </div>
+                <button class="reset-btn" id="reset-btn">Reset View</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <svg id="diagram" width="4000" height="2800"></svg>
+    </div>
+
+    <div class="footer">
+        <span class="help-text">💡 Tip: Drag to pan • Scroll to zoom • Click nodes for details</span>
+    </div>
+
+    <script>
+        const svg = document.getElementById('diagram');
+        const container = document.querySelector('.canvas-container');
+        const zoomLabel = document.getElementById('zoom-label');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // Zoom & Pan state
+        let zoom = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+
+        // Arrow marker definition
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+        marker.setAttribute('id', 'arrowhead');
+        marker.setAttribute('markerWidth', '10');
+        marker.setAttribute('markerHeight', '10');
+        marker.setAttribute('refX', '8');
+        marker.setAttribute('refY', '3');
+        marker.setAttribute('orient', 'auto');
+        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        polygon.setAttribute('points', '0 0, 10 3, 0 6');
+        polygon.setAttribute('fill', 'rgba(255, 255, 255, 0.4)');
+        marker.appendChild(polygon);
+        defs.appendChild(marker);
+        svg.appendChild(defs);
+
+        // Data structure for nodes
+        const nodes = [
+            // Entry Points (Top)
+            { id: 'public-website', x: 200, y: 100, width: 160, height: 60, label: 'Public Website', desc: 'vagtservices.com', type: 'entry' },
+            { id: 'login', x: 450, y: 100, width: 140, height: 60, label: 'Login Portal', desc: 'portal.html', type: 'entry' },
+            { id: 'register', x: 700, y: 100, width: 140, height: 60, label: 'Register', desc: 'Self-registration', type: 'entry' },
+
+            // Role Detection & Profile Setup
+            { id: 'role-detect', x: 450, y: 220, width: 140, height: 60, label: 'Role Detected', desc: 'By Admin SDK', type: 'entry' },
+            { id: 'emp-profile-setup', x: 150, y: 340, width: 160, height: 60, label: 'Profile Setup', desc: 'Role + Primary Site', type: 'guard' },
+            { id: 'client-profile-setup', x: 450, y: 340, width: 160, height: 60, label: 'Profile Setup', desc: 'Org Type + Role', type: 'client' },
+            { id: 'admin-direct', x: 750, y: 340, width: 160, height: 60, label: 'Admin Portal', desc: 'No setup required', type: 'admin' },
+
+            // Guard Portals
+            { id: 'emp-portal', x: 150, y: 460, width: 160, height: 60, label: 'Employee Dashboard', desc: 'Shift, Check-in, Leave', type: 'guard' },
+            { id: 'emp-schedule', x: 50, y: 600, width: 130, height: 60, label: 'Schedule', desc: 'View shifts', type: 'guard' },
+            { id: 'emp-checkin', x: 200, y: 600, width: 130, height: 60, label: 'Check In/Out', desc: 'Daily attendance', type: 'guard' },
+            { id: 'emp-leaves', x: 350, y: 600, width: 130, height: 60, label: 'Leaves', desc: 'Apply & track', type: 'guard' },
+            { id: 'emp-patrol', x: 50, y: 720, width: 130, height: 60, label: 'NFC Patrol', desc: 'Tap checkpoints', type: 'guard' },
+            { id: 'emp-incidents', x: 200, y: 720, width: 130, height: 60, label: 'Incidents', desc: 'File reports', type: 'guard' },
+            { id: 'emp-guests', x: 350, y: 720, width: 130, height: 60, label: 'Guests', desc: 'Log entry/exit', type: 'guard' },
+
+            // Client Portals
+            { id: 'client-portal', x: 450, y: 460, width: 160, height: 60, label: 'Client Dashboard', desc: 'Live Guard Count', type: 'client' },
+            { id: 'client-patrol', x: 350, y: 600, width: 130, height: 60, label: 'Patrol', desc: 'Coverage view', type: 'client' },
+            { id: 'client-guests', x: 500, y: 600, width: 130, height: 60, label: 'Guests', desc: 'Visitor log', type: 'client' },
+            { id: 'client-complaints', x: 650, y: 600, width: 130, height: 60, label: 'Complaints', desc: 'File & track', type: 'client' },
+            { id: 'client-reports', x: 350, y: 720, width: 130, height: 60, label: 'Reports', desc: 'Monthly PDF', type: 'client' },
+            { id: 'client-invoices', x: 500, y: 720, width: 130, height: 60, label: 'Invoices', desc: 'View & download', type: 'client' },
+
+            // Admin Portals
+            { id: 'admin-portal', x: 750, y: 460, width: 160, height: 60, label: 'Admin Dashboard', desc: 'Overview & stats', type: 'admin' },
+            { id: 'admin-employees', x: 650, y: 600, width: 130, height: 60, label: 'Employees', desc: 'List & approve', type: 'admin' },
+            { id: 'admin-registrations', x: 800, y: 600, width: 130, height: 60, label: 'Registrations', desc: 'Approve pending', type: 'admin' },
+            { id: 'admin-payroll', x: 950, y: 600, width: 130, height: 60, label: 'Payroll', desc: 'Run & export', type: 'admin' },
+            { id: 'admin-leaves', x: 650, y: 720, width: 130, height: 60, label: 'Leaves', desc: 'Approve requests', type: 'admin' },
+            { id: 'admin-incidents', x: 800, y: 720, width: 130, height: 60, label: 'Incidents', desc: 'Review & track', type: 'admin' },
+            { id: 'admin-complaints', x: 950, y: 720, width: 130, height: 60, label: 'Complaints', desc: 'Manage tickets', type: 'admin' },
+            { id: 'admin-guests', x: 650, y: 840, width: 130, height: 60, label: 'Guests', desc: 'All logs', type: 'admin' },
+            { id: 'admin-patrol', x: 800, y: 840, width: 130, height: 60, label: 'Patrol', desc: 'Log overview', type: 'admin' },
+            { id: 'admin-reports', x: 950, y: 840, width: 130, height: 60, label: 'Reports', desc: 'Analytics', type: 'admin' },
+            { id: 'admin-sites', x: 1100, y: 600, width: 130, height: 60, label: 'Sites', desc: 'Manage', type: 'admin' },
+            { id: 'admin-clients', x: 1100, y: 720, width: 130, height: 60, label: 'Clients', desc: 'Manage accounts', type: 'admin' },
+            { id: 'admin-schedule', x: 1100, y: 840, width: 130, height: 60, label: 'Schedule', desc: 'Shift planning', type: 'admin' },
+            { id: 'admin-admins', x: 1250, y: 720, width: 130, height: 60, label: 'Admins', desc: 'Manage accounts', type: 'admin' },
+        ];
+
+        // Flow connections
+        const connections = [
+            // Entry to role detection
+            { from: 'public-website', to: 'login' },
+            { from: 'login', to: 'role-detect' },
+            { from: 'register', to: 'role-detect' },
+
+            // Role detection to profile setup
+            { from: 'role-detect', to: 'emp-profile-setup' },
+            { from: 'role-detect', to: 'client-profile-setup' },
+            { from: 'role-detect', to: 'admin-direct' },
+
+            // Profile setup to portals
+            { from: 'emp-profile-setup', to: 'emp-portal' },
+            { from: 'client-profile-setup', to: 'client-portal' },
+            { from: 'admin-direct', to: 'admin-portal' },
+
+            // Guard sub-pages
+            { from: 'emp-portal', to: 'emp-schedule' },
+            { from: 'emp-portal', to: 'emp-checkin' },
+            { from: 'emp-portal', to: 'emp-leaves' },
+            { from: 'emp-portal', to: 'emp-patrol' },
+            { from: 'emp-portal', to: 'emp-incidents' },
+            { from: 'emp-portal', to: 'emp-guests' },
+
+            // Client sub-pages
+            { from: 'client-portal', to: 'client-patrol' },
+            { from: 'client-portal', to: 'client-guests' },
+            { from: 'client-portal', to: 'client-complaints' },
+            { from: 'client-portal', to: 'client-reports' },
+            { from: 'client-portal', to: 'client-invoices' },
+
+            // Admin sub-pages
+            { from: 'admin-portal', to: 'admin-employees' },
+            { from: 'admin-portal', to: 'admin-registrations' },
+            { from: 'admin-portal', to: 'admin-payroll' },
+            { from: 'admin-portal', to: 'admin-leaves' },
+            { from: 'admin-portal', to: 'admin-incidents' },
+            { from: 'admin-portal', to: 'admin-complaints' },
+            { from: 'admin-portal', to: 'admin-guests' },
+            { from: 'admin-portal', to: 'admin-patrol' },
+            { from: 'admin-portal', to: 'admin-reports' },
+            { from: 'admin-portal', to: 'admin-sites' },
+            { from: 'admin-portal', to: 'admin-clients' },
+            { from: 'admin-portal', to: 'admin-schedule' },
+            { from: 'admin-portal', to: 'admin-admins' },
+
+            // Cross-flow: employees → incidents → admin review
+            { from: 'emp-incidents', to: 'admin-incidents' },
+            // Cross-flow: employees → guests → admin view
+            { from: 'emp-guests', to: 'admin-guests' },
+            // Cross-flow: patrol data
+            { from: 'emp-patrol', to: 'admin-patrol' },
+            { from: 'emp-patrol', to: 'client-patrol' },
+            // Cross-flow: complaints
+            { from: 'client-complaints', to: 'admin-complaints' },
+        ];
+
+        // Helper to find node by ID
+        function findNode(id) {
+            return nodes.find(n => n.id === id);
+        }
+
+        // Transform based on zoom/pan
+        function getTransformedCoords(x, y) {
+            return {
+                x: x * zoom + panX,
+                y: y * zoom + panY
+            };
+        }
+
+        // Draw arrows
+        function drawArrows() {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('id', 'arrows');
+
+            connections.forEach(conn => {
+                const fromNode = findNode(conn.from);
+                const toNode = findNode(conn.to);
+
+                if (fromNode && toNode) {
+                    const from = getTransformedCoords(fromNode.x + fromNode.width / 2, fromNode.y + fromNode.height);
+                    const to = getTransformedCoords(toNode.x + toNode.width / 2, toNode.y);
+
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', from.x);
+                    line.setAttribute('y1', from.y);
+                    line.setAttribute('x2', to.x);
+                    line.setAttribute('y2', to.y);
+                    line.setAttribute('class', 'arrow');
+
+                    g.appendChild(line);
+                }
+            });
+
+            const existing = document.getElementById('arrows');
+            if (existing) existing.remove();
+            svg.appendChild(g);
+        }
+
+        // Draw nodes
+        function drawNodes() {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('id', 'nodes');
+
+            nodes.forEach(node => {
+                const coords = getTransformedCoords(node.x, node.y);
+
+                const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                nodeGroup.setAttribute('class', 'node');
+                nodeGroup.setAttribute('data-id', node.id);
+
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', coords.x);
+                rect.setAttribute('y', coords.y);
+                rect.setAttribute('width', node.width * zoom);
+                rect.setAttribute('height', node.height * zoom);
+                rect.setAttribute('rx', '4');
+                rect.setAttribute('class', `${node.type}-node`);
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', coords.x + (node.width * zoom) / 2);
+                label.setAttribute('y', coords.y + (node.height * zoom) / 2 - 6);
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('class', 'node-label');
+                label.setAttribute('font-size', Math.max(10, 12 * zoom));
+                label.textContent = node.label;
+
+                const desc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                desc.setAttribute('x', coords.x + (node.width * zoom) / 2);
+                desc.setAttribute('y', coords.y + (node.height * zoom) / 2 + 10);
+                desc.setAttribute('text-anchor', 'middle');
+                desc.setAttribute('class', 'node-desc');
+                desc.setAttribute('font-size', Math.max(8, 10 * zoom));
+                desc.textContent = node.desc;
+
+                nodeGroup.appendChild(rect);
+                nodeGroup.appendChild(label);
+                nodeGroup.appendChild(desc);
+
+                nodeGroup.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    alert(`${node.label}\n\n${node.desc}\n\nID: ${node.id}`);
+                });
+
+                g.appendChild(nodeGroup);
+            });
+
+            const existing = document.getElementById('nodes');
+            if (existing) existing.remove();
+            svg.appendChild(g);
+        }
+
+        // Redraw all
+        function redraw() {
+            drawArrows();
+            drawNodes();
+        }
+
+        // Zoom controls
+        zoomInBtn.addEventListener('click', () => {
+            zoom = Math.min(zoom + 0.1, 2);
+            zoomLabel.textContent = Math.round(zoom * 100) + '%';
+            redraw();
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            zoom = Math.max(zoom - 0.1, 0.5);
+            zoomLabel.textContent = Math.round(zoom * 100) + '%';
+            redraw();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            zoomLabel.textContent = '100%';
+            redraw();
+        });
+
+        // Pan & Zoom with mouse
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.05 : 0.05;
+            zoom = Math.max(0.5, Math.min(zoom + delta, 2));
+            zoomLabel.textContent = Math.round(zoom * 100) + '%';
+            redraw();
+        });
+
+        svg.addEventListener('mousedown', (e) => {
+            if (e.target.tagName === 'rect' || e.target.tagName === 'text') return;
+            isDragging = true;
+            dragStartX = e.clientX - panX;
+            dragStartY = e.clientY - panY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            panX = e.clientX - dragStartX;
+            panY = e.clientY - dragStartY;
+            redraw();
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Initial draw
+        redraw();
+    </script>
+</body>
+</html>
