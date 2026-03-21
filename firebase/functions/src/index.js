@@ -352,3 +352,29 @@ exports.expireGuestLogs = functions
     await Promise.all(commits);
     return null;
   });
+
+// ── Scheduled: prune activity_log entries older than 90 days ─────────────────
+// Runs at 02:30 IST daily. Deletes in batches of 499 to stay within Firestore
+// batch limits. Keeps the collection bounded and avoids unbounded storage cost.
+exports.pruneActivityLog = functions
+  .region('asia-south1')
+  .pubsub.schedule('0 21 * * *')   // 21:00 UTC = 02:30 IST
+  .timeZone('Asia/Kolkata')
+  .onRun(async () => {
+    const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days ago
+    const snap = await db.collection('activity_log')
+      .where('timestamp', '<', cutoff)
+      .limit(499)
+      .get();
+
+    if (snap.empty) {
+      console.info('pruneActivityLog: nothing to prune');
+      return null;
+    }
+
+    const batch = db.batch();
+    snap.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    console.info(`pruneActivityLog: deleted ${snap.size} entries older than 90 days`);
+    return null;
+  });
