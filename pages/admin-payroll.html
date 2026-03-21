@@ -163,6 +163,7 @@
       </div>
 
       <div class="toolbar">
+        <button id="exportCSVBtn" class="btn btn-ghost" style="font-size:12px; padding:9px 16px; border:1px solid var(--border); background:var(--white); color:var(--text);">Export CSV</button>
         <div class="spacer"></div>
         <button id="runPayrollBtn" class="btn btn-navy">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" style="margin-right:6px;vertical-align:middle;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
@@ -191,6 +192,7 @@
 
   let currentMonth = todayMonth();
   let activeEmpCount = 0;
+  let currentSlips = [];
 
   function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
   function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
@@ -265,6 +267,7 @@
       }
 
       slips.sort((a, b) => (a.employee_name || '').localeCompare(b.employee_name || ''));
+      currentSlips = slips;
 
       const rows = slips.map(s => `<tr>
         <td>
@@ -294,6 +297,42 @@
       setHTML('tableWrap', '<div style="font-size:13px;color:var(--text-muted);">Could not load payroll data. ' + esc(e.message) + '</div>');
     }
   }
+
+  function downloadCSV(rows, filename) {
+    const csv = rows.map(r => r.map(v => {
+      const val = String(v ?? '');
+      return val.includes(',') || val.includes('"') || val.includes('\n') ? '"' + val.replace(/"/g, '""') + '"' : val;
+    }).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }
+
+  document.getElementById('exportCSVBtn').addEventListener('click', function () {
+    if (!currentSlips.length) {
+      alert('No payslips to export.');
+      return;
+    }
+    const rows = [['Employee ID', 'Name', 'Period', 'Gross Pay', 'Deductions', 'Net Pay', 'Days Worked']];
+    currentSlips.forEach(slip => {
+      rows.push([
+        slip.employee_id || slip.employee_uid || '',
+        slip.employee_name || '',
+        slip.period || '',
+        slip.gross_pay || 0,
+        slip.deductions || 0,
+        slip.net_pay || 0,
+        slip.days_worked || 0
+      ]);
+    });
+    const [year, month] = currentMonth.split('-');
+    downloadCSV(rows, 'vagt-payroll-' + year + '-' + month + '.csv');
+  });
 
   document.getElementById('runPayrollBtn').addEventListener('click', async function () {
     const label = fmtMonth(currentMonth);

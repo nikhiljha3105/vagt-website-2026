@@ -207,6 +207,8 @@
           </select>
         </div>
         <button id="applyFilter" class="btn btn-amber" style="font-size:12px; padding:9px 18px; align-self:flex-end;">Filter</button>
+        <div style="flex:1;"></div>
+        <button id="exportCSVBtn" class="btn btn-ghost" style="font-size:12px; padding:9px 16px; border:1px solid var(--border); background:var(--white); color:var(--text);">Export CSV</button>
       </div>
 
       <div id="empTableWrap">
@@ -424,6 +426,40 @@
       if (row) { const btn = row.querySelector('.action-btn'); if (btn) { btn.disabled = false; btn.textContent = label; } }
     }
   };
+
+  function downloadCSV(rows, filename) {
+    const csv = rows.map(r => r.map(v => {
+      const val = String(v ?? '');
+      return val.includes(',') || val.includes('"') || val.includes('\n') ? '"' + val.replace(/"/g, '""') + '"' : val;
+    }).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }
+
+  document.getElementById('exportCSVBtn').addEventListener('click', function () {
+    const rows = [['Employee ID', 'Name', 'Role', 'Site', 'Status', 'Phone', 'Email', 'Join Date']];
+    allEmployees.forEach(emp => {
+      const joinDate = emp.created_at ? emp.created_at.toDate().toLocaleDateString('en-IN') : '';
+      rows.push([
+        emp.employee_id || '',
+        emp.name || '',
+        emp.role || '',
+        emp.site_id || emp.site_name || '',
+        emp.status || '',
+        emp.phone || '',
+        emp.email || '',
+        joinDate
+      ]);
+    });
+    const today = new Date().toISOString().split('T')[0];
+    downloadCSV(rows, 'vagt-employees-' + today + '.csv');
+  });
 
 })();
 </script>

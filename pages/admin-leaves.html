@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Requests | VAGT Admin Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta name="description" content="VAGT Security Services — secure staff portal. Restricted access."/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .admin-sidebar-profile { padding:14px 20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .admin-sidebar-name  { font-size:13px; font-weight:700; color:var(--white); margin-bottom:2px; }
+    .admin-sidebar-badge { display:inline-block; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:2px 8px; background:var(--amber); color:var(--navy); }
+    #authOverlay { position:fixed; inset:0; background:var(--white); display:flex; align-items:center; justify-content:center; z-index:9999; font-size:13px; color:var(--text-muted); }
+
+    .page-content { padding: 40px 56px; }
+    @media (max-width: 900px) { .page-content { padding: 28px 24px; } }
+
+    .filter-bar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; align-items:flex-end; }
+    .filter-bar label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-faint); display:block; margin-bottom:5px; }
+    .filter-bar select, .filter-bar input[type="date"] { font-size:12px; padding:8px 10px; border:1px solid var(--border); background:var(--white); color:var(--text); outline:none; min-width:130px; }
+
+    .leave-card {
+      background:var(--white); border:1px solid var(--border); padding:20px 22px; margin-bottom:10px;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+    }
+    .leave-card:hover {
+      border-color: var(--amber);
+      box-shadow: 0 2px 8px rgba(13,31,60,0.08);
+      border-left-color: var(--amber);
+    }
+    .leave-header { display:flex; align-items:flex-start; gap:14px; margin-bottom:10px; }
+    .leave-id-col { min-width:0; flex:1; }
+    .leave-type { font-size:14px; font-weight:700; color:var(--navy); margin-bottom:3px; }
+    .leave-meta { font-size:12px; color:var(--text-muted); }
+    .leave-badges { display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; }
+    .badge { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+    .badge-pending { background:rgba(245,196,0,0.20); color:#5a4200; }
+    .badge-approved { background:rgba(0,150,80,0.12); color:#005c30; }
+    .badge-rejected { background:rgba(196,30,30,0.10); color:#7a0000; }
+    .leave-desc { font-size:13px; color:var(--text-mid); line-height:1.6; margin-bottom:12px; }
+    .leave-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .action-btn { font-size:12px; font-weight:600; padding:8px 16px; background:var(--navy); color:var(--white); border:none; cursor:pointer; }
+    .action-btn:hover { background:var(--navy-400); }
+    .action-btn.reject { background:var(--red); }
+    .action-btn.reject:hover { background:rgba(196,30,30,0.8); }
+
+    .toolbar { display:flex; gap:12px; align-items:center; margin-bottom:20px; justify-content:flex-end; }
+
+    .empty-state { text-align:center; padding:40px 20px; color:var(--text-muted); font-size:13px; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VAGT</div><div class="logo-sub">Security Services</div></div>
+      </a>
+    </div>
+    <div class="admin-sidebar-profile">
+      <div class="admin-sidebar-name" id="sidebarName">—</div>
+      <span class="admin-sidebar-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav" aria-label="Admin portal">
+      <div class="nav-group-label">Operations</div>
+      <a href="admin-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="admin-registrations.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        New Registrations
+      </a>
+      <a href="admin-employees.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Employees
+      </a>
+      <a href="admin-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </a>
+      <a href="admin-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="admin-guests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Visitor Log
+      </a>
+      <div class="nav-group-label">Clients</div>
+      <a href="admin-clients.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Clients &amp; Sites
+      </a>
+      <a href="admin-complaints.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Complaints
+      </a>
+      <a href="admin-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Incidents
+      </a>
+      <div class="nav-group-label">Finance &amp; Reports</div>
+      <a href="admin-payroll.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Payroll
+      </a>
+      <a href="admin-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+      </a>
+      <div class="nav-group-label">Settings</div>
+      <a href="admin-admins.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/><line x1="18" y1="14" x2="18" y2="20"/><line x1="15" y1="17" x2="21" y2="17"/></svg>
+        Manage Admins
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="section-label">Admin Portal</div>
+      <h1>Leave Requests</h1>
+      <p>All employee leave requests</p>
+    </div>
+    <div class="page-content">
+
+      <div class="filter-bar">
+        <div>
+          <label>Status</label>
+          <select id="filterStatus">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div>
+          <label>From Date</label>
+          <input type="date" id="filterFromDate"/>
+        </div>
+        <div>
+          <label>To Date</label>
+          <input type="date" id="filterToDate"/>
+        </div>
+        <button id="applyFilter" class="btn btn-amber" style="font-size:12px; padding:9px 18px; align-self:flex-end;">Filter</button>
+        <div style="flex:1;"></div>
+        <button id="exportCSVBtn" class="btn btn-ghost" style="font-size:12px; padding:9px 16px; border:1px solid var(--border); background:var(--white); color:var(--text);">Export CSV</button>
+      </div>
+
+      <div id="leavesWrap">
+        <div style="font-size:13px; color:var(--text-muted);">Loading…</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  let allLeaves = [];
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h;   }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  async function getToken() { return auth.currentUser.getIdToken(); }
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult(true);
+    if (token.claims.role !== 'admin') { window.location.href = 'portal.html'; return; }
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display = '';
+    setText('sidebarName', user.displayName || user.email || 'Admin');
+    loadLeaves();
+  });
+
+  async function loadLeaves() {
+    setHTML('leavesWrap', '<div style="font-size:13px;color:var(--text-muted);">Loading…</div>');
+    try {
+      const snap = await db.collection('leave_requests').orderBy('from_date', 'desc').limit(100).get();
+      allLeaves = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderLeaves(allLeaves);
+    } catch (e) {
+      console.error(e);
+      setHTML('leavesWrap', '<div style="font-size:13px;color:var(--text-muted);">Could not load leave requests.</div>');
+    }
+  }
+
+  function renderLeaves(items) {
+    if (!items.length) {
+      setHTML('leavesWrap', '<div class="empty-state">No leave requests found.</div>');
+      return;
+    }
+    const html = items.map((leave) => {
+      const fromDate = leave.from_date ? leave.from_date.toDate().toLocaleDateString('en-IN') : '—';
+      const toDate = leave.to_date ? leave.to_date.toDate().toLocaleDateString('en-IN') : '—';
+      const status = leave.status || 'pending';
+      return `<div class="leave-card" id="leave-${esc(leave.id)}">
+        <div class="leave-header">
+          <div class="leave-id-col">
+            <div class="leave-type">${esc(leave.leave_type || 'Leave')}</div>
+            <div class="leave-meta">${esc(leave.employee_name || 'Unknown')} · ${fromDate} to ${toDate}</div>
+          </div>
+          <div class="leave-badges">
+            <span class="badge badge-${esc(status)}">${esc(status)}</span>
+          </div>
+        </div>
+        <div class="leave-actions">
+          ${status === 'pending' ? `
+            <button class="action-btn" onclick="approveLeave('${esc(leave.id)}')">Approve</button>
+            <button class="action-btn reject" onclick="rejectLeave('${esc(leave.id)}')">Reject</button>
+          ` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    setHTML('leavesWrap', html);
+  }
+
+  document.getElementById('applyFilter').addEventListener('click', function () {
+    const status = document.getElementById('filterStatus').value;
+    const fromDate = document.getElementById('filterFromDate').value ? new Date(document.getElementById('filterFromDate').value) : null;
+    const toDate = document.getElementById('filterToDate').value ? new Date(document.getElementById('filterToDate').value + 'T23:59:59') : null;
+
+    const filtered = allLeaves.filter(leave => {
+      const matchStatus = !status || leave.status === status;
+      const matchDateFrom = !fromDate || (leave.from_date && leave.from_date.toDate() >= fromDate);
+      const matchDateTo = !toDate || (leave.to_date && leave.to_date.toDate() <= toDate);
+      return matchStatus && matchDateFrom && matchDateTo;
+    });
+    renderLeaves(filtered);
+  });
+
+  function downloadCSV(rows, filename) {
+    const csv = rows.map(r => r.map(v => {
+      const val = String(v ?? '');
+      return val.includes(',') || val.includes('"') || val.includes('\n') ? '"' + val.replace(/"/g, '""') + '"' : val;
+    }).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+  }
+
+  document.getElementById('exportCSVBtn').addEventListener('click', function () {
+    const rows = [['Employee Name', 'Leave Type', 'From Date', 'To Date', 'Days', 'Status', 'Applied On']];
+    allLeaves.forEach(leave => {
+      const fromDate = leave.from_date ? leave.from_date.toDate().toLocaleDateString('en-IN') : '';
+      const toDate = leave.to_date ? leave.to_date.toDate().toLocaleDateString('en-IN') : '';
+      const appliedOn = leave.applied_at ? leave.applied_at.toDate().toLocaleDateString('en-IN') : '';
+      const days = leave.days || '';
+      rows.push([
+        leave.employee_name || '',
+        leave.leave_type || '',
+        fromDate,
+        toDate,
+        days,
+        leave.status || 'pending',
+        appliedOn
+      ]);
+    });
+    const today = new Date().toISOString().split('T')[0];
+    downloadCSV(rows, 'vagt-leaves-' + today + '.csv');
+  });
+
+  window.approveLeave = async function (id) {
+    if (!confirm('Approve this leave request?')) return;
+    try {
+      const token = await getToken();
+      const resp = await fetch('/api/admin/leaves/' + id + '/approve', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      });
+      if (!resp.ok) throw new Error('Server error');
+      const idx = allLeaves.findIndex(l => l.id === id);
+      if (idx >= 0) allLeaves[idx].status = 'approved';
+      renderLeaves(allLeaves);
+    } catch (e) {
+      alert('Failed to approve: ' + e.message);
+    }
+  };
+
+  window.rejectLeave = async function (id) {
+    if (!confirm('Reject this leave request?')) return;
+    try {
+      const token = await getToken();
+      const resp = await fetch('/api/admin/leaves/' + id + '/reject', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      });
+      if (!resp.ok) throw new Error('Server error');
+      const idx = allLeaves.findIndex(l => l.id === id);
+      if (idx >= 0) allLeaves[idx].status = 'rejected';
+      renderLeaves(allLeaves);
+    } catch (e) {
+      alert('Failed to reject: ' + e.message);
+    }
+  };
+
+})();
+</script>
+</body>
+</html>
