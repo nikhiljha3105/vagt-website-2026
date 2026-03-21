@@ -183,7 +183,7 @@ module.exports = function ({ db, requireAuth, requireClient }) {
         // Open or in-progress complaints (unresolved tickets)
         db.collection('complaints').where('client_uid', '==', uid).where('status', 'in', ['open', 'in_progress']).get(),
         // Incidents at client's sites filed this calendar month
-        db.collection('incidents').where('site_client_uid', '==', uid).where('submitted_at', '>=', startOfMonth()).get(),
+        db.collection('incidents').where('client_uid', '==', uid).where('submitted_at', '>=', startOfMonth()).get(),
       ]);
 
       const sites = sitesSnap.docs.map(d => d.data());

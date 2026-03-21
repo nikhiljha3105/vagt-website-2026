@@ -240,7 +240,7 @@
 <script>
 (function () {
   'use strict';
-  firebase.initializeApp(FIREBASE_CONFIG);
+  if (firebase.apps.length === 0) firebase.initializeApp(FIREBASE_CONFIG);
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
@@ -307,7 +307,7 @@
       return;
     }
     const html = items.map((inc) => {
-      const date = inc.submitted_at ? inc.submitted_at.toDate().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+      const date = inc.submitted_at ? inc.submitted_at.toDate().toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
       const status = inc.status || 'submitted';
       const severity = inc.severity || 'medium';
       const isCritical = severity === 'critical';

@@ -101,6 +101,9 @@ service cloud.firestore {
       // Employee can read own
       allow read: if isAnyEmployee()
         && resource.data.employee_uid == request.auth.uid;
+      // Client can read incidents at their sites (client_uid set at incident creation)
+      allow read: if isAnyClient()
+        && resource.data.client_uid == request.auth.uid;
       // Admin can read all
       allow read: if isAdmin();
       // Admin can write all (update status, etc.)

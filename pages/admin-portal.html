@@ -117,6 +117,10 @@
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         Complaints
       </a>
+      <a href="admin-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Incidents
+      </a>
       <div class="nav-group-label">Finance &amp; Reports</div>
       <a href="admin-payroll.html" class="nav-link">
         <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
@@ -234,10 +238,7 @@
     return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   }
   function todayStr() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-  function todayStr() {
+    // Use IST timezone to match Firestore date fields stored as YYYY-MM-DD in IST
     return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
   }
 
@@ -265,7 +266,7 @@
     document.getElementById('portalLayout').style.display = '';
     document.getElementById('navToggle').style.display = '';
     const displayName = user.displayName || user.email || 'Admin';
-    const firstName = displayName.split(' ')[0];
+    const firstName = displayName.split(' ')[0] || 'Admin';
     setText('sidebarName', displayName);
     setText('pageGreeting', greeting() + ', ' + firstName);
     setText('pageSubtitle', new Date().toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' }));
@@ -398,7 +399,7 @@
           <div class="pending-avatar">${esc(initials)}</div>
           <div>
             <div class="pending-name">${esc(empName)}</div>
-            <div class="pending-meta">${LABELS[d.leave_type] || d.leave_type} · ${esc(d.from_date)} – ${esc(d.to_date)} · ${esc(d.reason || '')}</div>
+            <div class="pending-meta">${LABELS[d.leave_type] || d.leave_type} · ${d.from_date && d.from_date.toDate ? d.from_date.toDate().toLocaleDateString('en-IN') : esc(d.from_date)} – ${d.to_date && d.to_date.toDate ? d.to_date.toDate().toLocaleDateString('en-IN') : esc(d.to_date)} · ${esc(d.reason || '')}</div>
           </div>
           <div class="pending-actions">
             <button class="btn-approve" onclick="approveLeave('${doc.id}')">Approve</button>
