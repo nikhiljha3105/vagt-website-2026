@@ -1,5 +1,148 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-20
+**Last updated:** 2026-03-21
+
+---
+
+## Session 7 — 2026-03-21
+
+### What was done this session
+
+#### Bug fixes (admin portal audit)
+
+- **`pages/admin-portal.html`**
+  - Removed duplicate `todayStr()` — first version used local timezone (wrong), second (kept) uses `en-CA` + `Asia/Kolkata` IST (correct).
+  - Fixed `firstName` fallback: `displayName.split(' ')[0] || 'Admin'` — no longer crashes if display name has no spaces.
+  - Fixed Firestore Timestamp rendering in leave dates dashboard widget — was showing raw `Timestamp(seconds=..., nanoseconds=...)` string. Now calls `.toDate().toLocaleDateString('en-IN')` guarded by null/type check.
+
+- **`pages/admin-employees.html`**
+  - Fixed `getIdTokenResult()` → `getIdTokenResult(true)` to force-refresh custom claims on page load. Without this, newly approved guards wouldn't get their role recognised until they cleared cache.
+
+- **`pages/admin-leaves.html`**
+  - Both `approveLeave` and `rejectLeave` had generic `throw new Error('Server error')` on non-OK responses. Fixed both to parse the JSON error body: `const d = await resp.json().catch(() => ({})); throw new Error(d.message || 'Server error')`.
+
+- **`pages/admin-incidents.html`**
+  - Added `firebase.apps.length === 0` guard before `initializeApp()` to prevent double-init crash.
+  - Changed `toLocaleDateString` → `toLocaleString` (replace_all) so incident timestamps show both date and time, not just date.
+
+#### Incidents nav link added to all 14 pages
+
+Python script inserted `<a href="admin-incidents.html" class="nav-link">Incidents</a>` (with shield+warning SVG icon) into **10 admin pages**: admin-portal, admin-registrations, admin-payroll, admin-reports, admin-guests, admin-patrol, admin-sites, admin-clients, admin-admins, admin-schedule.
+
+Same script inserted `<a href="client-incidents.html" class="nav-link">Incidents</a>` into **6 client pages**: client-portal, client-patrol, client-guests, client-reports, client-complaints, client-invoices.
+
+#### `pages/client-incidents.html` — NEW FILE built
+
+Read-only client-facing incident view. Full page:
+- Auth: Firebase Auth + `getIdTokenResult(true)` checks `role === 'client'`. Redirects to `portal.html` if not authenticated.
+- Firestore query: `db.collection('incidents').where('client_uid', '==', uid).orderBy('submitted_at', 'desc').limit(100)`
+- Stat strip: Total, Open, Resolved, High/Critical counts
+- Filter bar: status, severity, date range (default last 30 days)
+- Incident cards with severity-coded left border (`.incident-card.critical`, `.incident-card.high`, `.incident-card.resolved`)
+- Shows admin resolution notes (`admin_notes`) when status is `resolved`
+- `firebase.apps.length === 0` guard on init
+
+#### `firebase/functions/src/routes/client.js` — field name bug fixed
+
+The dashboard incident count query was using `site_client_uid` (field doesn't exist). The actual field name set by `employee.js` at incident creation is `client_uid`. Fixed the where clause — was always returning 0 incidents on the client dashboard. ✅
+
+#### `firebase/firestore.rules` — client read access for incidents
+
+Added rule so clients can read incident documents where `client_uid == request.auth.uid`:
+```
+allow read: if isAnyClient()
+  && resource.data.client_uid == request.auth.uid;
+```
+
+#### All changes committed
+
+Commit: `c8c667a` — "Fix admin portal bugs + build client-incidents.html"
+Branch: `claude/review-website-git-dPWyR`
+
+---
+
+### Shop strategy — discussed and paused commodity build
+
+Nikhil wants to add security products to the shop: bullet camera, IP camera, CCTV monitor, DVR, metal detector, Motorola DP2400e radio (rebranded as "International Brand" not "UK"). Commerce flow agreed:
+- **Indian stocked goods** (cameras, DVR, metal detector): Razorpay checkout (no volume minimum, 2% fee) + bank transfer fallback
+- **International products** (radios): quote-only via WhatsApp — too many variables (USD conversion, conversion fee, margin, shipping, bank charges)
+- **Vendor complaints**: go directly to vendor with Nikhil CC'd — automated, not manual
+
+**Decision to pause commodity build** — market research revealed:
+- Commodity products (Hikvision, CP Plus equivalent cameras, metal detectors) have thin/zero margin at VAGT's volume
+- **STQC mandate (April 2025)**: Only CP Plus, Sparsh, Matrix Comsec, and Prama India are approved for government/regulated sites. Hikvision, Axis, and all others are frozen out.
+- **WPC approval required** for all radio devices sold in India — Motorola DP2400e is compliant but import/resale requires WPC licence
+- **DPDPA** — biometric/facial recognition data must stay in India-based cloud
+
+---
+
+### Market research completed — Notion page created
+
+Full market research doc created in Notion: **"🔬 VAGT Shop — Market Research & Strategy"**
+URL: https://www.notion.so/32a9d914b02f81fc8a6deb5edc8f3d7e
+
+Key findings:
+- Commodity CCTV/metal detectors: 0–5% margin — not worth it
+- Premium niche where clients pay 2x+: **ANPR**, AI video analytics, smart intercoms, access control, LoRa mesh patrol
+- Real opportunity: integrated services with recurring SaaS revenue, not one-time hardware sales
+- Indian competitors (Zicom, Securens, BEL) do hardware resale — VAGT's edge is the software platform + guard management layer
+
+Decision framework captured: build vs resell vs partner matrix, commerce automation requirements, international product handling, vendor complaint routing. All in Notion.
+
+---
+
+### ANPR + Vahan WhatsApp bot — product concept designed
+
+New product concept fully designed this session:
+
+**The problem:** Gated societies with unmanned gates have illegal parking and bike sneaking. ANPR boom barrier solves it, but the pitch needs a free hook.
+
+**The hook — Free WhatsApp vehicle lookup bot:**
+- Society residents WhatsApp any vehicle plate number
+- Bot queries MoRTH Vahan 4.0 database (public under Section 62 Motor Vehicles Act) via commercial API (IDfy/Karza/AuthBridge — ₹2–5 per query)
+- Returns: Owner name, vehicle type, registration state, insurance validity, fitness cert, blacklist status
+- Logs query + number to Firestore `vehicle_lookups` collection
+- Delivered via WhatsApp Business API (Interakt recommended — best India pricing + Firestore webhook support)
+
+**Why free:**
+- Zero cost to resident, zero effort from VAGT after setup
+- Every query is a lead — the person who looks up a plate is exactly who buys ANPR
+- Free tool = word of mouth in society WhatsApp groups
+- When society gets 200 queries/month, the conversation becomes "want to automate this?"
+
+**Revenue model:**
+- Free bot: ₹0, pure lead gen
+- ANPR install: ₹80,000–1,50,000 one-time + ₹3,000–5,000/month maintenance
+- AI analytics add-on: ₹2,000–4,000/month SaaS per camera
+- Smart intercom: ₹15,000–30,000 one-time
+
+**Tech stack:** Firebase Cloud Functions (existing) + IDfy Vahan API + Interakt WhatsApp webhook. Logs to new `vehicle_lookups` Firestore collection. Bot handles unknown commands gracefully with help text.
+
+Full architecture added to Notion page.
+
+---
+
+### Pending from this session (carry forward)
+
+- [ ] **Firebase deploy** — `firebase deploy --only hosting,functions,firestore:rules --project vagt---services` (from Nikhil's machine — includes all Session 7 changes)
+- [ ] **Shop build** (resuming after strategy pause):
+  - Add 6 products: bullet cam, IP cam, CCTV monitor, DVR, metal detector, Motorola DP2400e radio (label: International Brand)
+  - Add enquiry capture modal with Firestore logging to `shop_enquiries`
+  - Update product filter button
+  - Rename "Imported from UK" → "International Brand" on existing items
+- [ ] **Admin shop enquiries dashboard widget** + `admin-shop-enquiries.html` page
+- [ ] **WhatsApp Vahan lookup bot:**
+  - Sign up with IDfy or Karza for Vahan API access (₹2–5/query)
+  - Sign up with Interakt for WhatsApp Business API
+  - Build Cloud Function webhook handler
+  - Log to `vehicle_lookups` Firestore collection
+  - Add Firestore rules for `vehicle_lookups` (public write for bot, admin read)
+  - Pick 3 pilot societies from existing guard contracts for free rollout
+- [ ] **Razorpay signup** — no minimum volume, needs GST + PAN + bank account
+- [ ] **Vahan API provider decision** — IDfy vs Karza vs AuthBridge
+- [ ] **WhatsApp Business API provider** — Interakt vs Wati vs Gupshup
+- [ ] **STQC-compliant camera sourcing** — CP Plus, Sparsh, Matrix Comsec, or Prama India only (Hikvision frozen out April 2025)
+- [ ] **Node 18 → 22 upgrade** — Firebase deadline April 2026 (Node 18 EOL)
+- [ ] From earlier: **SMS/MSG91 DLT registration**, **delete `admin@vagtsecurityservices.com`** from Firebase Auth
 
 ---
 
