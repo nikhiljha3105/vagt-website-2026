@@ -200,28 +200,32 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 /* ── HERO (homepage) ── */
 .hero {
   min-height: 100vh;
-  /* Replace with: background: linear-gradient(rgba(13,31,60,0.82),rgba(13,31,60,0.82)), url('../assets/images/hero-guard.jpg') center/cover; */
-  background-image:
-    radial-gradient(ellipse at 75% 40%, rgba(29,61,107,0.55) 0%, transparent 60%),
-    linear-gradient(155deg, #0D1F3C 0%, #1A3461 55%, #0D1F3C 100%);
+  background: linear-gradient(155deg, #0D1F3C 0%, #1A3461 55%, #0D1F3C 100%);
   position: relative;
   display: flex;
   align-items: center;
   overflow: hidden;
   padding: 80px 56px;
 }
-.hero::before {
-  content: 'VAGT';
+/* Guard photo — right half of hero */
+.hero-photo {
   position: absolute;
-  right: -40px; top: 50%;
-  transform: translateY(-50%);
-  font-size: 300px;
-  font-weight: 900;
-  color: rgba(255,255,255,0.022);
-  letter-spacing: -8px;
-  line-height: 1;
-  user-select: none;
-  pointer-events: none;
+  right: 0; top: 0; bottom: 0;
+  width: 52%;
+  background: url('../assets/images/hero-guards.webp') center/cover no-repeat;
+  z-index: 1;
+}
+.hero-photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, #0D1F3C 0%, rgba(13,31,60,0.75) 35%, rgba(13,31,60,0.15) 100%);
+}
+.hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #0D1F3C 0%, transparent 30%);
 }
 .hero::after {
   content: '';
@@ -230,8 +234,9 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   width: 3px;
   background: linear-gradient(to bottom, transparent, var(--amber), transparent);
   opacity: 0.4;
+  z-index: 3;
 }
-.hero-content { max-width: 600px; position: relative; z-index: 2; }
+.hero-content { max-width: 600px; position: relative; z-index: 2; padding-right: 40px; }
 
 .hero-eyebrow {
   display: inline-flex;
@@ -813,33 +818,63 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   box-shadow: 0 0 0 3px rgba(37,211,102,0.25);
 }
 
-/* ── CLIENT LOGO GRID ── */
-.client-logo-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 2px;
+/* ── CLIENT LOGO MARQUEE ── */
+.logo-marquee-wrap {
+  overflow: hidden;
+  position: relative;
+  margin-top: 48px;
+  padding: 24px 0;
 }
-.client-logo-tile {
-  background: white;
-  display: flex; align-items: center; justify-content: center;
-  padding: 28px 20px; min-height: 90px;
-  transition: box-shadow 0.2s;
+/* Fade edges */
+.logo-marquee-wrap::before,
+.logo-marquee-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
 }
-.client-logo-tile:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-.client-logo-tile img {
-  max-height: 52px; max-width: 140px;
-  width: auto; height: auto; object-fit: contain;
-  filter: grayscale(40%); opacity: 0.8;
-  transition: filter 0.25s, opacity 0.25s;
+.logo-marquee-wrap::before { left: 0;  background: linear-gradient(to right, var(--warm-grey), transparent); }
+.logo-marquee-wrap::after  { right: 0; background: linear-gradient(to left,  var(--warm-grey), transparent); }
+
+.logo-marquee-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: logo-scroll 38s linear infinite;
 }
-.client-logo-tile:hover img { filter: grayscale(0%); opacity: 1; }
-.ey-logo {
+.logo-marquee-track:hover { animation-play-state: paused; }
+.logo-marquee-set {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  padding-right: 56px;
+}
+.lm-logo {
+  height: 38px;
+  max-width: 130px;
+  width: auto;
+  object-fit: contain;
+  filter: grayscale(100%) opacity(0.55);
+  transition: filter 0.3s, opacity 0.3s;
+  flex-shrink: 0;
+}
+.lm-logo:hover { filter: grayscale(0%) opacity(1); }
+.ey-logo.lm-logo {
   font-family: Arial Black, sans-serif;
-  font-size: 30px; font-weight: 900;
-  color: #2E2E38; letter-spacing: -1px;
-  opacity: 0.8; transition: opacity 0.25s;
+  font-size: 28px; font-weight: 900;
+  color: #2E2E38;
+  line-height: 1;
+  filter: opacity(0.55);
+  height: auto;
 }
-.client-logo-tile:hover .ey-logo { opacity: 1; }
+.ey-logo.lm-logo:hover { filter: opacity(1); }
+
+@keyframes logo-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
 
 /* ── CTA STRIP ACTIONS (dual buttons) ── */
 .cta-strip-actions {
