@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Team Leaves | VAGT Employee Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .emp-sidebar-profile { padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    #authOverlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 9999; font-size: 13px; color: var(--text-muted); }
+    .dash-content { padding: 40px 56px; max-width: 900px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 20px; } }
+    .dash-section-title { font-size: 9px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* Toast notification */
+    .toast-msg {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1a7f3c; color: #fff; font-size: 14px; font-weight: 700;
+      padding: 14px 24px; z-index: 9001; box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      white-space: nowrap; pointer-events: none;
+      animation: toastIn 0.2s ease;
+    }
+    .toast-msg.error { background: #c0392b; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex; border-bottom: 2px solid var(--border); margin-bottom: 32px;
+    }
+    .tab {
+      padding: 14px 20px; font-size: 13px; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; border-bottom: 2px solid transparent; transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -2px;
+    }
+    .tab:hover { color: var(--navy); }
+    .tab.active { color: var(--navy); border-bottom-color: var(--navy); }
+
+    /* Leave cards */
+    .leave-card {
+      background: var(--white); border: 1px solid var(--border);
+      padding: 20px; margin-bottom: 16px; border-radius: 4px;
+    }
+    .leave-card-header {
+      display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;
+    }
+    .leave-card-guard {
+      font-size: 14px; font-weight: 700; color: var(--navy); line-height: 1.3; flex: 1;
+    }
+    .leave-card-guard-designation {
+      font-size: 11px; color: var(--text-muted); font-weight: 500; margin-top: 2px;
+    }
+    .leave-status-badge {
+      display: inline-block; font-size: 10px; font-weight: 700; padding: 4px 10px;
+      border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+    }
+    .lsb-pending { background: #fff8e1; color: #f57f17; }
+    .lsb-pending-so { background: #e3f2fd; color: #1565c0; }
+    .lsb-pending-admin { background: #f3e5f5; color: #6a1b9a; }
+    .lsb-approved { background: #e8f5e9; color: #2e7d32; }
+    .lsb-rejected { background: #fce4ec; color: #b71c1c; }
+
+    .leave-card-body {
+      margin: 16px 0; padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .leave-detail {
+      display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px;
+    }
+    .leave-detail-label { color: var(--text-muted); font-weight: 500; }
+    .leave-detail-value { color: var(--navy); font-weight: 600; }
+    .leave-reason {
+      font-size: 12px; color: var(--text); line-height: 1.5; margin-top: 12px; font-style: italic;
+    }
+    .leave-reject-reason {
+      font-size: 12px; color: #b71c1c; margin-top: 12px; padding: 10px; background: #ffebee;
+      border-left: 3px solid #b71c1c;
+    }
+
+    .leave-card-actions {
+      display: flex; gap: 8px; margin-top: 16px;
+    }
+    .action-btn {
+      flex: 1; padding: 10px 14px; font-size: 12px; font-weight: 700;
+      border: 1px solid var(--border); cursor: pointer; transition: all 0.2s;
+    }
+    .action-btn.approve { background: #e8f5e9; color: #2e7d32; border-color: #81c784; }
+    .action-btn.approve:hover { background: #c8e6c9; }
+    .action-btn.sanction { background: #e3f2fd; color: #1565c0; border-color: #64b5f6; }
+    .action-btn.sanction:hover { background: #bbdefb; }
+    .action-btn.reject { background: #ffebee; color: #b71c1c; border-color: #ef9a9a; }
+    .action-btn.reject:hover { background: #ffcdd2; }
+
+    /* Reject reason textarea */
+    .reject-form {
+      margin-top: 12px; padding: 12px; background: #fafafa; border: 1px solid var(--border);
+    }
+    .reject-form-label {
+      display: block; font-size: 11px; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+    }
+    .reject-form textarea {
+      width: 100%; padding: 8px; font-family: var(--font); font-size: 12px;
+      border: 1px solid var(--border); resize: vertical; min-height: 60px;
+    }
+    .reject-form-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .reject-form-actions button {
+      flex: 1; padding: 8px; font-size: 12px; font-weight: 600; cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .reject-form-actions .submit { background: #ffebee; color: #b71c1c; }
+    .reject-form-actions .cancel { background: var(--white); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--text-muted);
+    }
+    .empty-state-icon {
+      font-size: 48px; margin-bottom: 16px; opacity: 0.4;
+    }
+    .empty-state-title {
+      font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+    }
+    .empty-state-msg {
+      font-size: 13px;
+    }
+
+    /* Loading indicator */
+    .loading-msg { text-align: center; padding: 40px; color: var(--text-muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VA<span style="color:var(--red);">G</span>T</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Supervisor portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Attendance
+      </a>
+      <a href="employee-leaves.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        My Leaves
+      </a>
+      <a href="employee-my-profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        My Profile
+      </a>
+      <div class="nav-group-label">Team Management</div>
+      <a href="employee-so-leaves.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Leaves
+      </a>
+      <a href="employee-so-rota.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Team Rota
+      </a>
+      <div class="nav-group-label">Account</div>
+      <a href="employee-my-profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="main">
+    <div class="dash-content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div class="section-label">Team Management</div>
+        <h1>Leave Approvals</h1>
+        <p>Review and action your team's leave requests.</p>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <div class="tab active" data-tab="pending">Needs Your Action</div>
+        <div class="tab" data-tab="actioned">Actioned</div>
+      </div>
+
+      <!-- Pending tab -->
+      <div id="pendingTab">
+        <div class="loading-msg">Loading leave requests…</div>
+      </div>
+
+      <!-- Actioned tab -->
+      <div id="actionedTab" style="display:none;">
+        <div class="loading-msg">Loading leave history…</div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // Init Firebase
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Helpers
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+
+  function showToast(msg, type) {
+    const old = document.querySelector('.toast-msg');
+    if (old) old.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-msg' + (type === 'error' ? ' error' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.remove(); }, 3500);
+  }
+
+  function fmtDateRange(startStr, endStr) {
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    if (start.getTime() === end.getTime()) {
+      return start.toLocaleDateString('en-IN', { month:'short', day:'numeric', year:'numeric' });
+    }
+    return start.toLocaleDateString('en-IN', { month:'short', day:'numeric' }) + ' – ' +
+           end.toLocaleDateString('en-IN', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  function daysBetween(startStr, endStr) {
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  // State
+  let currentUser = null;
+  let allLeaves = [];
+  let currentTab = 'pending';
+
+  // Mobile nav
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // Sign out
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  // Auth guard
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) {
+      window.location.href = 'portal.html';
+      return;
+    }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role !== 'employee' || !token.claims.supervisor_tier) {
+      window.location.href = 'employee-portal.html';
+      return;
+    }
+
+    currentUser = user;
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    if (window.innerWidth < 900) {
+      document.getElementById('navToggle').style.display = '';
+    }
+
+    await loadAll(user);
+  });
+
+  // Tab switching
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('pendingTab').style.display = 'none';
+      document.getElementById('actionedTab').style.display = 'none';
+      this.classList.add('active');
+      currentTab = this.dataset.tab;
+      if (currentTab === 'pending') {
+        document.getElementById('pendingTab').style.display = '';
+      } else {
+        document.getElementById('actionedTab').style.display = '';
+      }
+      renderTab();
+    });
+  });
+
+  // Load all data
+  async function loadAll(user) {
+    try {
+      await Promise.all([loadProfile(user), loadLeaves(user)]);
+      renderTab();
+    } catch (e) {
+      console.error('Load failed:', e);
+      showToast('Could not load leaves. Check your connection.', 'error');
+    }
+  }
+
+  // Profile
+  async function loadProfile(user) {
+    try {
+      const snap = await db.collection('employees').doc(user.uid).get();
+      if (!snap.exists) return;
+      const d = snap.data();
+      setText('sidebarName', d.name || '—');
+      setText('sidebarId',   d.employee_id || '—');
+      setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+    } catch (e) {
+      console.error('Profile load failed:', e);
+    }
+  }
+
+  // Load leaves for team
+  async function loadLeaves(user) {
+    try {
+      const empSnap = await db.collection('employees').doc(user.uid).get();
+      if (!empSnap.exists) return;
+      const siteId = empSnap.data().primary_site;
+      if (!siteId) return;
+
+      const snap = await db.collection('leave_requests')
+        .where('site_id', '==', siteId)
+        .orderBy('created_at', 'desc')
+        .get();
+
+      allLeaves = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+      console.error('Leaves load failed:', e);
+    }
+  }
+
+  // Render appropriate tab
+  function renderTab() {
+    if (currentTab === 'pending') {
+      renderPendingTab();
+    } else {
+      renderActionedTab();
+    }
+  }
+
+  // Pending leaves (for SO action)
+  function renderPendingTab() {
+    const pending = allLeaves.filter(l =>
+      (l.status === 'pending_so_approval' && l.leave_type === 'casual') ||
+      (l.status === 'pending_so_sanction' && ['earned', 'annual'].includes(l.leave_type))
+    );
+
+    const container = document.getElementById('pendingTab');
+    if (pending.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">✓</div>
+          <div class="empty-state-title">No pending leave requests</div>
+          <div class="empty-state-msg">Your team is all set.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    pending.forEach(leave => {
+      const card = createLeaveCard(leave);
+      container.appendChild(card);
+    });
+  }
+
+  // Actioned leaves
+  function renderActionedTab() {
+    const actioned = allLeaves.filter(l =>
+      !['pending_so_approval', 'pending_so_sanction'].includes(l.status) &&
+      !['sick'].includes(l.leave_type)
+    );
+
+    const container = document.getElementById('actionedTab');
+    if (actioned.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-title">No leave history</div>
+          <div class="empty-state-msg">Approved or rejected leaves will appear here.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = '';
+    actioned.forEach(leave => {
+      const card = createLeaveCard(leave, true);
+      container.appendChild(card);
+    });
+  }
+
+  // Create leave card
+  function createLeaveCard(leave, isHistory) {
+    const card = document.createElement('div');
+    card.className = 'leave-card';
+
+    const days = daysBetween(leave.start_date, leave.end_date);
+    const statusKey = {
+      pending_so_approval: 'pending_so',
+      pending_so_sanction: 'pending_so',
+      pending_admin_approval: 'pending_admin',
+      approved: 'approved',
+      rejected: 'rejected',
+      sick_auto: 'approved'
+    }[leave.status] || 'pending';
+
+    const statusLabel = {
+      pending_so: 'Pending SO',
+      pending_admin: 'Pending Admin',
+      approved: 'Approved',
+      rejected: 'Rejected'
+    }[statusKey] || 'Unknown';
+
+    let actionsHtml = '';
+    if (!isHistory) {
+      if (leave.leave_type === 'casual' && leave.status === 'pending_so_approval') {
+        actionsHtml = `
+          <div class="leave-card-actions">
+            <button class="action-btn approve" onclick="approveLeave('${leave.id}')">
+              <svg style="width:12px;height:12px;margin-right:4px;display:inline;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Approve Leave
+            </button>
+            <button class="action-btn reject" onclick="toggleRejectForm('${leave.id}')">
+              <svg style="width:12px;height:12px;margin-right:4px;display:inline;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Reject
+            </button>
+          </div>
+          <div class="reject-form" id="rejectForm_${leave.id}" style="display:none;">
+            <label class="reject-form-label">Rejection Reason (Required)</label>
+            <textarea id="rejectReason_${leave.id}" placeholder="Explain why this leave request is being rejected." minlength="10"></textarea>
+            <div class="reject-form-actions">
+              <button class="submit" onclick="submitReject('${leave.id}')">Reject</button>
+              <button class="cancel" onclick="toggleRejectForm('${leave.id}')">Cancel</button>
+            </div>
+          </div>
+        `;
+      } else if (['earned', 'annual'].includes(leave.leave_type) && leave.status === 'pending_so_sanction') {
+        actionsHtml = `
+          <div class="leave-card-actions">
+            <button class="action-btn sanction" onclick="sanctionLeave('${leave.id}')">
+              <svg style="width:12px;height:12px;margin-right:4px;display:inline;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Sanction Leave
+            </button>
+            <button class="action-btn reject" onclick="toggleRejectForm('${leave.id}')">
+              <svg style="width:12px;height:12px;margin-right:4px;display:inline;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Reject
+            </button>
+          </div>
+          <div class="reject-form" id="rejectForm_${leave.id}" style="display:none;">
+            <label class="reject-form-label">Rejection Reason (Required)</label>
+            <textarea id="rejectReason_${leave.id}" placeholder="Explain why this leave request is being rejected." minlength="10"></textarea>
+            <div class="reject-form-actions">
+              <button class="submit" onclick="submitReject('${leave.id}')">Reject</button>
+              <button class="cancel" onclick="toggleRejectForm('${leave.id}')">Cancel</button>
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      if (leave.status === 'rejected' && leave.reject_reason) {
+        actionsHtml = `<div class="leave-reject-reason"><strong>Rejected:</strong> ${leave.reject_reason}</div>`;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="leave-card-header">
+        <div>
+          <div class="leave-card-guard">${leave.guard_name || 'Unknown'}</div>
+          <div class="leave-card-guard-designation">${leave.designation || '—'}</div>
+        </div>
+        <span class="leave-status-badge lsb-${statusKey}">${statusLabel}</span>
+      </div>
+      <div class="leave-card-body">
+        <div class="leave-detail">
+          <span class="leave-detail-label">Dates</span>
+          <span class="leave-detail-value">${fmtDateRange(leave.start_date, leave.end_date)}</span>
+        </div>
+        <div class="leave-detail">
+          <span class="leave-detail-label">Type</span>
+          <span class="leave-detail-value">${(leave.leave_type || 'unknown').toUpperCase()}</span>
+        </div>
+        <div class="leave-detail">
+          <span class="leave-detail-label">Days</span>
+          <span class="leave-detail-value">${days}</span>
+        </div>
+        ${leave.reason ? `<div class="leave-reason"><strong>Reason:</strong> ${leave.reason}</div>` : ''}
+      </div>
+      ${actionsHtml}
+    `;
+
+    return card;
+  }
+
+  // Toggle reject form
+  window.toggleRejectForm = function (leaveId) {
+    const form = document.getElementById('rejectForm_' + leaveId);
+    if (form) form.style.display = form.style.display === 'none' ? '' : 'none';
+  };
+
+  // Approve leave (casual)
+  window.approveLeave = async function (leaveId) {
+    const btn = event.target.closest('.action-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Approving…';
+    try {
+      const leave = allLeaves.find(l => l.id === leaveId);
+      if (!leave) throw new Error('Leave not found');
+
+      await db.collection('leave_requests').doc(leaveId).update({
+        status: 'approved',
+        approved_by_uid: currentUser.uid,
+        approved_by_name: (await db.collection('employees').doc(currentUser.uid).get()).data().name,
+        approved_at: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // Decrement casual leave balance
+      const empDoc = await db.collection('employees').doc(leave.employee_uid).get();
+      const days = daysBetween(leave.start_date, leave.end_date);
+      const newBal = (empDoc.data().leave_balance?.casual || 0) - days;
+      await db.collection('employees').doc(leave.employee_uid).update({
+        'leave_balance.casual': Math.max(0, newBal)
+      });
+
+      showToast('Leave approved.', '');
+      await new Promise(r => setTimeout(r, 1500));
+      location.reload();
+    } catch (e) {
+      console.error('Approve failed:', e);
+      showToast('Could not approve. Check your connection.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Approve Leave';
+    }
+  };
+
+  // Sanction leave (earned/annual → admin for final approval)
+  window.sanctionLeave = async function (leaveId) {
+    const btn = event.target.closest('.action-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Sanctioning…';
+    try {
+      const leave = allLeaves.find(l => l.id === leaveId);
+      if (!leave) throw new Error('Leave not found');
+
+      await db.collection('leave_requests').doc(leaveId).update({
+        status: 'pending_admin_approval',
+        sanctioned_by_uid: currentUser.uid,
+        sanctioned_by_name: (await db.collection('employees').doc(currentUser.uid).get()).data().name,
+        sanctioned_at: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('Leave sanctioned. Waiting for admin approval.', '');
+      await new Promise(r => setTimeout(r, 1500));
+      location.reload();
+    } catch (e) {
+      console.error('Sanction failed:', e);
+      showToast('Could not sanction. Check your connection.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Sanction Leave';
+    }
+  };
+
+  // Reject leave
+  window.submitReject = async function (leaveId) {
+    const textarea = document.getElementById('rejectReason_' + leaveId);
+    const reason = (textarea.value || '').trim();
+    if (reason.length < 10) {
+      showToast('Please provide a rejection reason (at least 10 characters).', 'error');
+      return;
+    }
+
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '⏳ Rejecting…';
+    try {
+      const leave = allLeaves.find(l => l.id === leaveId);
+      if (!leave) throw new Error('Leave not found');
+
+      await db.collection('leave_requests').doc(leaveId).update({
+        status: 'rejected',
+        rejected_by_uid: currentUser.uid,
+        rejected_by_name: (await db.collection('employees').doc(currentUser.uid).get()).data().name,
+        rejected_at: firebase.firestore.FieldValue.serverTimestamp(),
+        reject_reason: reason
+      });
+
+      showToast('Leave rejected.', '');
+      await new Promise(r => setTimeout(r, 1500));
+      location.reload();
+    } catch (e) {
+      console.error('Reject failed:', e);
+      showToast('Could not reject. Check your connection.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Reject';
+    }
+  };
+
+})();
+</script>
+</body>
+</html>

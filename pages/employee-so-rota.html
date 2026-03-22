@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weekly Rota | VAGT Employee Portal</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <link rel="stylesheet" href="../assets/css/main.css"/>
+  <style>
+    .emp-sidebar-profile { padding: 14px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .emp-sidebar-name { font-size: 13px; font-weight: 700; color: var(--white); line-height: 1.3; margin-bottom: 2px; }
+    .emp-sidebar-id   { font-size: 11px; color: var(--amber); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .emp-sidebar-site { font-size: 10.5px; color: rgba(255,255,255,0.38); line-height: 1.4; }
+    #authOverlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 9999; font-size: 13px; color: var(--text-muted); }
+    .dash-content { padding: 40px 56px; max-width: 1200px; }
+    @media (max-width: 900px) { .dash-content { padding: 28px 20px; } }
+    .dash-section-title { font-size: 9px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px; }
+
+    /* Toast notification */
+    .toast-msg {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1a7f3c; color: #fff; font-size: 14px; font-weight: 700;
+      padding: 14px 24px; z-index: 9001; box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      white-space: nowrap; pointer-events: none;
+      animation: toastIn 0.2s ease;
+    }
+    .toast-msg.error { background: #c0392b; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Week selector */
+    .week-selector {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--white); border: 1px solid var(--border);
+      padding: 16px 24px; margin-bottom: 32px;
+    }
+    .week-nav-btn {
+      background: var(--amber-soft); border: 1px solid rgba(245,196,0,0.3); color: var(--navy);
+      padding: 8px 12px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .week-nav-btn:hover { background: var(--amber); color: var(--white); }
+    .week-range {
+      font-size: 14px; font-weight: 700; color: var(--navy); flex: 1; text-align: center;
+    }
+
+    /* 26-day rule banner */
+    .rule-banner {
+      background: rgba(13,31,60,0.04); border-left: 4px solid var(--navy);
+      padding: 12px 16px; margin-bottom: 24px; font-size: 13px; color: var(--navy); font-weight: 500;
+    }
+
+    /* Rota grid */
+    .rota-grid {
+      background: var(--white); border: 1px solid var(--border); overflow-x: auto; margin-bottom: 24px;
+    }
+    .rota-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .rota-table th {
+      background: var(--navy); color: var(--white); padding: 12px;
+      font-weight: 700; text-align: center; white-space: nowrap;
+    }
+    .rota-table td {
+      padding: 0; border: 1px solid var(--border);
+    }
+    .rota-cell-guard {
+      padding: 12px 16px; background: var(--warm-grey); font-weight: 600; color: var(--navy);
+      min-width: 140px; border-right: 2px solid var(--navy);
+    }
+    .rota-cell-day {
+      width: 60px; text-align: center; cursor: pointer; user-select: none;
+      transition: background 0.2s, color 0.2s;
+      position: relative; padding: 0;
+    }
+    .rota-cell-day-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 48px; font-weight: 700; font-size: 12px;
+    }
+    .rota-cell-day.work { background: var(--navy); color: var(--white); }
+    .rota-cell-day.off { background: var(--amber); color: var(--navy); }
+    .rota-cell-day:hover { opacity: 0.85; }
+
+    /* Error message for 1-day-off rule */
+    .day-off-error {
+      position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+      background: #c0392b; color: var(--white); font-size: 10px; white-space: nowrap;
+      padding: 4px 8px; border-radius: 2px; pointer-events: none;
+      z-index: 10; animation: popUp 0.3s ease;
+    }
+    @keyframes popUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+      to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Review modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex;
+      align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-content {
+      background: var(--white); border-radius: 4px; padding: 32px;
+      max-width: 500px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 20px; }
+    .modal-body { margin-bottom: 24px; }
+    .modal-guard-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .modal-guard-item:last-child { border-bottom: none; }
+    .modal-guard-name { font-size: 13px; font-weight: 600; color: var(--navy); }
+    .modal-guard-offday { font-size: 12px; color: var(--text-muted); }
+    .modal-actions { display: flex; gap: 12px; }
+
+    /* Status pill */
+    .status-pill {
+      display: inline-block; font-size: 10px; font-weight: 700; padding: 4px 12px;
+      border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .status-draft { background: #f3f4f6; color: var(--text-muted); }
+    .status-pending { background: #fef3c7; color: #b45309; }
+    .status-approved { background: #dbeafe; color: #1e40af; }
+    .status-rejected { background: #fee2e2; color: #b91c1c; }
+
+    /* Action buttons */
+    .action-buttons { display: flex; gap: 12px; margin-top: 24px; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VA<span style="color:var(--red);">G</span>T</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+    <nav class="sidebar-nav" aria-label="Supervisor portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Attendance
+      </a>
+      <a href="employee-leaves.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        My Leaves
+      </a>
+      <a href="employee-my-profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        My Profile
+      </a>
+      <div class="nav-group-label">Team Management</div>
+      <a href="employee-so-leaves.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Team Leaves
+      </a>
+      <a href="employee-so-rota.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Team Rota
+      </a>
+      <div class="nav-group-label">Account</div>
+      <a href="employee-my-profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main content ── -->
+  <main class="main">
+    <div class="dash-content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div class="section-label">Team Management</div>
+        <h1>Weekly Rota Builder</h1>
+        <p>Create and submit weekly rotas for your team.</p>
+      </div>
+
+      <!-- 26-day rule banner -->
+      <div class="rule-banner" id="ruleBanner">26-day rule: Check each guard's working days this month</div>
+
+      <!-- Week selector -->
+      <div class="week-selector">
+        <button class="week-nav-btn" id="prevWeekBtn">← Previous</button>
+        <div class="week-range" id="weekRange">—</div>
+        <button class="week-nav-btn" id="nextWeekBtn">Next →</button>
+      </div>
+
+      <!-- Rota grid -->
+      <div class="rota-grid">
+        <table class="rota-table" id="rotaTable">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Guard Name</th>
+              <th>Mon</th>
+              <th>Tue</th>
+              <th>Wed</th>
+              <th>Thu</th>
+              <th>Fri</th>
+              <th>Sat</th>
+              <th>Sun</th>
+            </tr>
+          </thead>
+          <tbody id="rotaTableBody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Status display -->
+      <div id="rotaStatus" style="display:none; margin-bottom:24px;">
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Current Status</div>
+        <div><span class="status-pill" id="rotaStatusPill">—</span></div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="action-buttons">
+        <button id="submitRotaBtn" class="btn btn-amber" style="min-width:200px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Submit for Admin Approval
+        </button>
+        <button id="resetRotaBtn" class="btn btn-ghost">Reset Changes</button>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<!-- Review Modal -->
+<div class="modal-overlay" id="reviewModal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-title">Review Your Rota</div>
+    <div class="modal-body" id="reviewModalBody">
+      <!-- Populated by JS -->
+    </div>
+    <div class="modal-actions">
+      <button id="confirmSubmitBtn" class="btn btn-amber" style="flex:1;">Submit for Admin Approval</button>
+      <button id="cancelSubmitBtn" class="btn btn-ghost" style="flex:1;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // Init Firebase
+  firebase.initializeApp(FIREBASE_CONFIG);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Helpers
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function setHTML(id, h) { const el = document.getElementById(id); if (el) el.innerHTML = h; }
+
+  function showToast(msg, type) {
+    const old = document.querySelector('.toast-msg');
+    if (old) old.remove();
+    const t = document.createElement('div');
+    t.className = 'toast-msg' + (type === 'error' ? ' error' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.remove(); }, 3500);
+  }
+
+  function mondayOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+  }
+
+  function dateToString(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function fmtDateRange(d) {
+    const end = new Date(d);
+    end.setDate(end.getDate() + 6);
+    return d.toLocaleDateString('en-IN', { month:'short', day:'numeric' }) + ' – ' +
+           end.toLocaleDateString('en-IN', { month:'short', day:'numeric', year:'numeric' });
+  }
+
+  // State
+  let currentUser = null;
+  let currentWeekStart = mondayOfWeek(new Date());
+  let guards = [];
+  let rota = {};
+  let currentRotaId = null;
+  let currentRotaStatus = 'draft';
+
+  // Mobile nav
+  document.getElementById('navToggle').addEventListener('click', function () {
+    document.getElementById('sidebar').classList.toggle('open');
+  });
+
+  // Sign out
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  // Auth guard
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) {
+      window.location.href = 'portal.html';
+      return;
+    }
+    const token = await user.getIdTokenResult();
+    if (token.claims.role !== 'employee' || !token.claims.supervisor_tier) {
+      window.location.href = 'employee-portal.html';
+      return;
+    }
+
+    currentUser = user;
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    if (window.innerWidth < 900) {
+      document.getElementById('navToggle').style.display = '';
+    }
+
+    await loadAll(user);
+  });
+
+  // Load all data
+  async function loadAll(user) {
+    try {
+      await Promise.all([loadProfile(user), loadGuards(user)]);
+      renderWeek();
+    } catch (e) {
+      console.error('Load failed:', e);
+      showToast('Could not load rota. Check your connection.', 'error');
+    }
+  }
+
+  // Profile
+  async function loadProfile(user) {
+    try {
+      const snap = await db.collection('employees').doc(user.uid).get();
+      if (!snap.exists) return;
+      const d = snap.data();
+      setText('sidebarName', d.name || '—');
+      setText('sidebarId',   d.employee_id || '—');
+      setText('sidebarSite', d.site_name ? ('Site: ' + d.site_name) : 'No site assigned');
+    } catch (e) {
+      console.error('Profile load failed:', e);
+    }
+  }
+
+  // Load guards for this SO's site
+  async function loadGuards(user) {
+    try {
+      const empSnap = await db.collection('employees').doc(user.uid).get();
+      if (!empSnap.exists) return;
+      const siteId = empSnap.data().primary_site;
+      if (!siteId) return;
+
+      const snap = await db.collection('employees')
+        .where('primary_site', '==', siteId)
+        .where('employee_id', '!=', '')
+        .orderBy('employee_id')
+        .get();
+
+      guards = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+      await loadRotaForWeek(siteId, currentWeekStart);
+    } catch (e) {
+      console.error('Guards load failed:', e);
+    }
+  }
+
+  // Load rota for week
+  async function loadRotaForWeek(siteId, weekStart) {
+    try {
+      const weekStr = dateToString(weekStart);
+      const snap = await db.collection('rotas')
+        .where('site_id', '==', siteId)
+        .where('week_start', '==', weekStr)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        // New rota — init all guards with 'work'
+        currentRotaId = null;
+        currentRotaStatus = 'draft';
+        rota = {};
+        guards.forEach(g => {
+          rota[g.uid] = { mon: 'work', tue: 'work', wed: 'work', thu: 'work', fri: 'work', sat: 'work', sun: 'work' };
+        });
+        document.getElementById('rotaStatus').style.display = 'none';
+      } else {
+        const doc = snap.docs[0];
+        currentRotaId = doc.id;
+        currentRotaStatus = doc.data().status || 'draft';
+        rota = doc.data().schedule || {};
+        guards.forEach(g => {
+          if (!rota[g.uid]) {
+            rota[g.uid] = { mon: 'work', tue: 'work', wed: 'work', thu: 'work', fri: 'work', sat: 'work', sun: 'work' };
+          }
+        });
+        // Show status if not draft
+        if (currentRotaStatus !== 'draft') {
+          setText('rotaStatusPill', currentRotaStatus.replace('_', ' ').toUpperCase());
+          document.getElementById('rotaStatusPill').className = 'status-pill status-' + currentRotaStatus;
+          document.getElementById('rotaStatus').style.display = '';
+        } else {
+          document.getElementById('rotaStatus').style.display = 'none';
+        }
+      }
+    } catch (e) {
+      console.error('Rota load failed:', e);
+    }
+  }
+
+  // Render week
+  function renderWeek() {
+    setText('weekRange', fmtDateRange(currentWeekStart));
+
+    const tbody = document.getElementById('rotaTableBody');
+    tbody.innerHTML = '';
+
+    guards.forEach(guard => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td class="rota-cell-guard">${guard.name || guard.employee_id}</td>`;
+
+      const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+      const guardRota = rota[guard.uid] || {};
+
+      days.forEach(day => {
+        const cell = document.createElement('td');
+        const status = guardRota[day] || 'work';
+        cell.className = 'rota-cell-day ' + status;
+        cell.innerHTML = `<div class="rota-cell-day-toggle">${status === 'work' ? 'W' : 'O'}</div>`;
+        cell.dataset.guardUid = guard.uid;
+        cell.dataset.day = day;
+        cell.addEventListener('click', () => toggleDay(guard.uid, day, cell));
+        row.appendChild(cell);
+      });
+
+      tbody.appendChild(row);
+    });
+  }
+
+  // Toggle day (work ↔ off)
+  function toggleDay(guardUid, day, cell) {
+    const current = rota[guardUid][day];
+    const newVal = current === 'work' ? 'off' : 'work';
+
+    // Check 1-day-off rule
+    if (newVal === 'off') {
+      const offDays = Object.entries(rota[guardUid]).filter(([d, s]) => s === 'off' && d !== day);
+      if (offDays.length > 0) {
+        showInlineError(cell, 'Each guard can have only 1 day off per week. Remove the current off day first.');
+        return;
+      }
+    }
+
+    rota[guardUid][day] = newVal;
+    cell.className = 'rota-cell-day ' + newVal;
+    cell.querySelector('.rota-cell-day-toggle').textContent = newVal === 'work' ? 'W' : 'O';
+  }
+
+  function showInlineError(cell, msg) {
+    const old = cell.querySelector('.day-off-error');
+    if (old) old.remove();
+    const err = document.createElement('div');
+    err.className = 'day-off-error';
+    err.textContent = msg;
+    cell.appendChild(err);
+    setTimeout(() => err.remove(), 4000);
+  }
+
+  // Week nav
+  document.getElementById('prevWeekBtn').addEventListener('click', function () {
+    currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+    currentWeekStart = new Date(currentWeekStart);
+    renderWeek();
+  });
+
+  document.getElementById('nextWeekBtn').addEventListener('click', function () {
+    currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+    currentWeekStart = new Date(currentWeekStart);
+    renderWeek();
+  });
+
+  // Submit
+  document.getElementById('submitRotaBtn').addEventListener('click', function () {
+    const body = document.getElementById('reviewModalBody');
+    body.innerHTML = '';
+    guards.forEach(g => {
+      const offDays = Object.entries(rota[g.uid])
+        .filter(([d, s]) => s === 'off')
+        .map(([d]) => d.toUpperCase());
+      const offDay = offDays.length > 0 ? offDays[0] : 'None';
+      const div = document.createElement('div');
+      div.className = 'modal-guard-item';
+      div.innerHTML = `
+        <div class="modal-guard-name">${g.name || g.employee_id}</div>
+        <div class="modal-guard-offday">Off: <strong>${offDay}</strong></div>
+      `;
+      body.appendChild(div);
+    });
+    document.getElementById('reviewModal').style.display = '';
+  });
+
+  document.getElementById('cancelSubmitBtn').addEventListener('click', function () {
+    document.getElementById('reviewModal').style.display = 'none';
+  });
+
+  document.getElementById('confirmSubmitBtn').addEventListener('click', async function () {
+    document.getElementById('confirmSubmitBtn').disabled = true;
+    document.getElementById('confirmSubmitBtn').textContent = 'Submitting…';
+    try {
+      const siteSnap = await db.collection('employees').doc(currentUser.uid).get();
+      const siteId = siteSnap.data().primary_site;
+      const weekEnd = new Date(currentWeekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      const rotaData = {
+        site_id: siteId,
+        week_start: dateToString(currentWeekStart),
+        week_end: dateToString(weekEnd),
+        status: 'submitted',
+        submitted_by_uid: currentUser.uid,
+        submitted_by_name: siteSnap.data().name || 'Unknown',
+        submitted_at: firebase.firestore.FieldValue.serverTimestamp(),
+        schedule: rota,
+        guard_names: Object.fromEntries(guards.map(g => [g.uid, g.name || g.employee_id])),
+      };
+
+      if (currentRotaId) {
+        await db.collection('rotas').doc(currentRotaId).update(rotaData);
+      } else {
+        await db.collection('rotas').add(rotaData);
+      }
+
+      document.getElementById('reviewModal').style.display = 'none';
+      showToast('Rota submitted for admin approval.', '');
+      setTimeout(() => location.reload(), 2000);
+    } catch (e) {
+      console.error('Submit failed:', e);
+      showToast('Could not submit rota. Check your connection.', 'error');
+    } finally {
+      document.getElementById('confirmSubmitBtn').disabled = false;
+      document.getElementById('confirmSubmitBtn').textContent = 'Submit for Admin Approval';
+    }
+  });
+
+  document.getElementById('resetRotaBtn').addEventListener('click', function () {
+    if (confirm('Reset all changes to this week\'s rota?')) {
+      location.reload();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
