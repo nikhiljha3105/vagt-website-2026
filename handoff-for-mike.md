@@ -1,5 +1,120 @@
 # VAGT Website — Handoff Notes
-**Last updated:** 2026-03-21
+**Last updated:** 2026-03-22
+
+---
+
+## Session 8 — 2026-03-22
+
+### What was done this session
+
+#### Critical bug fix — employee-profile-setup.html (and portal.html, register.html)
+
+Nested HTML comment bug: `<!-- left spacer -->` inside an outer `<!-- spec block -->` causes the outer comment to close early at the `-->` of the inner tag. Everything from that line to the real `-->` renders as raw visible text on the live page. guard001@vagttest.com was hitting profile-setup.html after login and seeing a wall of template spec text instead of the page.
+
+Fix: replaced `<!-- left spacer -->` with `[left spacer]` (no angle brackets) in the spec blocks on all three affected files. Same fix applied to `portal.html` and `register.html` — the Hindi/EN language pill was always in the HTML but was invisible because the broken comment was hiding the entire header section.
+
+Commits: `52ee0d1`, `7e51e1e`
+
+#### Public website copy fixes (from .pages feedback doc)
+
+All changes on `index.html` and inner pages:
+
+- CTA button: `"Book Your Free Site Walk-Through"` → `"Request a Site Audit"`
+- Stats strip: `~10` → `9+`, removed "2hr Response guarantee" stat
+- Hero subline rewritten to drop FM-vendor framing
+- Email site-wide: `info@vagtsecurityservices.com` → `info@vagtservices.com` (16 replacements across 8 files — vagtservices.com confirmed owned by Nikhil)
+- `pages/facilities.html` heading: `"MNC-grade process discipline"` → `"Run like a corporate operation"` + updated sub
+- `pages/shop.html`: all `"Imported from UK"` → `"International Brand"`, `"UK-Grade Quality"` → `"International Quality"`
+
+#### Hero logo G — fixed
+
+The `G` in the hero wordmark was small (0.58em), faded amber (rgba(245,196,0,0.3)), and lowercase. Root cause: `.hb-g` CSS class had `font-size: 0.58em` + `color: rgba(245,196,0,0.3)` + `vertical-align` overrides. Fixed: changed HTML `g` → `G`, removed all size/position/colour overrides from `.hb-g`, set `color: var(--red)` only.
+
+Also removed the pronunciation tagline `[ vaht ] — the g stands guard, silently.` from all 7 public pages (sidebar and hero).
+
+#### Nikhil Kumar Jha removed from About page
+
+Removed entire person-card block (~10 lines) from `pages/about.html`.
+
+#### Major public website redesign — sidebar → top nav
+
+The sidebar nav was identified as an admin-dashboard pattern wrong for a marketing site. Used a Python script to:
+- Strip `<button class="mobile-nav-toggle">`, `<div class="layout">`, `<aside class="sidebar">` from all 7 public pages
+- Inject `<header class="top-nav">` + mobile slide-out drawer nav + JS (scroll transparency, mobile toggle)
+- Add `padding-top: 68px` to `<main>` on non-hero pages
+- Strip old sidebar JS, add new scroll+mobile nav JS
+
+Portal, employee, admin, and client pages left untouched (sidebar correct there).
+
+New CSS: `.top-nav`, `.top-nav.nav-solid`, `.mobile-nav-overlay`, `.mobile-nav-drawer` — ~100 lines. Nav starts transparent, becomes `rgba(13,31,60,0.97)` + `backdrop-filter: blur(12px)` after `scrollY > 60`.
+
+#### Hero photo added
+
+Photos had been supplied but never used. Found in `VAGT/` subfolder of workspace:
+- `VAGT security.webp` → copied to `assets/images/hero-guards.webp` (event night, guards at venue)
+- `VAGT.jpg` → copied to `assets/images/guards-patrol.jpg` (two guards walking, VAGT logo on back)
+
+Added `.hero-photo` div to index.html — absolutely positioned, covers right 52% of hero, with left-to-right gradient mask blending into navy. On mobile: full width at 22% opacity, bottom-to-top gradient so text is always readable.
+
+Also added a cinematic photo break section between Services and Trust Signals sections:
+```html
+<div class="photo-break">
+  <img src="assets/images/guards-patrol.jpg" ...>
+  <div class="photo-break-caption">VAGT guards deployed across Bengaluru...</div>
+</div>
+```
+
+#### Client logo marquee — 15 logos
+
+Only 4 logos existed (EY, HatsOff, DS-Max, Quinbay). Found 15 client logo images in `VAGT/Client Info/` folder. Copied all to `assets/images/logos/`. Replaced the static 4-logo grid with a CSS infinite-scroll marquee (duplicate logo sets + `translateX(-50%)` animation). Marquee pauses on hover.
+
+Major enterprise clients now prominently visible: Accenture, Amazon, Flipkart, Mphasis, Thomson Reuters, E2Open.
+
+Social proof text updated to lead with the big names. Client section sub now calls them out explicitly.
+
+#### Design polish — CSS
+
+- `.service-icon`: `border-radius: 10px` (was sharp square)
+- `.btn`: `border-radius: 6px`, smooth `box-shadow` transition
+- `.btn-sm`: `border-radius: 6px` consistent
+- `.btn-amber`: gold glow shadow `0 4px 14px rgba(245,196,0,0.35)` — more visual weight on primary CTA
+- `.section-label` colour: `var(--amber)` → `var(--text-muted)` (amber reserved for line accent `::before` only)
+- `.section-title` font size: `clamp(24px, 2.8vw, 36px)` → `clamp(28px, 3.2vw, 42px)`
+- `.section` / `.section-sm`: `max-width: 1320px; margin: 0 auto` — content stays centred on wide monitors
+- `.card`: `border-radius: 12px`, improved hover shadow
+- Hero mobile: `hero-content` `padding-right: 0` on mobile; `hero-photo` opacity 22%; gradient changed to vertical for better text contrast
+- Footer: cleaner opacity hierarchy, better `flex-wrap` gap
+
+#### Commits this session
+
+| Commit | Description |
+|--------|-------------|
+| `7e51e1e` | Fix critical profile-setup bug and apply post-demo copy feedback |
+| `e6302b3` | Remove Nikhil Kumar Jha from About page team section |
+| `64a2ca6` | Fix hero G: uppercase, red, full-size — remove all pronunciation taglines |
+| `52ee0d1` | Add guard photo to hero, full client logo marquee, fix auth page comment bugs |
+| `2845931` | Major redesign: top nav replaces sidebar on all public pages |
+| `b8d936e` | Design polish: button rounding, icon radius, amber CTA lift, hero mobile fix |
+
+---
+
+### ⚠️ DEPLOY REQUIRED — Nikhil must run this
+
+All session 8 changes are committed and pushed to `claude/review-website-git-dPWyR` but **NOT yet live**. Nothing needs functions or Firestore rules — hosting only:
+
+```bash
+firebase deploy --only hosting --project vagt---services
+```
+
+Run from inside the `VAGT New Website Design` folder on your machine.
+
+---
+
+### Pending from this session
+
+- [ ] **Shop product images** — shop page shows outline SVG placeholder icons, no real product photography. Six products need actual images.
+- [ ] **Google Drive photos** — Nikhil may have more photos on Drive but Drive tool can only read Google Docs (not images). Drop photos directly into the workspace folder and they'll be picked up next session.
+- [ ] All previous pending items from Session 7 carry forward (Finance OCR, Node 18→22, SMS/MSG91, WhatsApp Vahan bot, Gate automation, Shop build, Razorpay signup)
 
 ---
 
