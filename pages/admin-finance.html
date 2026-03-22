@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance — VAGT Admin Portal</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    /* ── Tabs ── */
+    .tab-bar {
+      display: flex; gap: 0; border-bottom: 2px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      padding: 10px 22px; font-size: 13px; font-weight: 700;
+      color: var(--text-muted); background: none; border: none;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      cursor: pointer; transition: color 0.15s, border-color 0.15s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .tab-btn svg { width: 14px; height: 14px; }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--navy); }
+    .tab-btn:hover:not(.active) { color: var(--navy); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Upload zone ── */
+    .upload-zone {
+      border: 2px dashed var(--border); padding: 32px 24px;
+      text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+      background: var(--white); margin-bottom: 24px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--navy); background: rgba(13,31,60,0.03);
+    }
+    .upload-zone-icon { margin-bottom: 12px; }
+    .upload-zone-icon svg { width: 36px; height: 36px; stroke: var(--text-muted); }
+    .upload-zone-title { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .upload-zone-sub   { font-size: 12px; color: var(--text-muted); }
+    #docFile { display: none; }
+
+    /* ── Document list ── */
+    .doc-filters {
+      display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;
+    }
+    .doc-filters select, .doc-filters input[type="text"] {
+      padding: 8px 12px; border: 1.5px solid var(--border); background: var(--white);
+      font-size: 13px; color: var(--navy); font-family: inherit;
+    }
+    .doc-filters select:focus, .doc-filters input:focus { outline: none; border-color: var(--navy); }
+    .doc-count { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-left: auto; }
+
+    .doc-table-wrap { overflow-x: auto; }
+    .doc-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .doc-table th {
+      text-align: left; padding: 10px 14px;
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-muted);
+      border-bottom: 2px solid var(--border); background: var(--surface);
+    }
+    .doc-table td {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .doc-table tr:hover td { background: rgba(13,31,60,0.02); cursor: pointer; }
+
+    .doc-status {
+      display: inline-block; padding: 2px 9px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .doc-status.complete    { background: rgba(22,163,74,0.12); color: #15803d; }
+    .doc-status.incomplete  { background: rgba(245,196,0,0.2);  color: #92400e; }
+    .doc-status.processing  { background: rgba(59,130,246,0.12); color: #1d4ed8; }
+
+    .doc-type-badge {
+      display: inline-block; padding: 2px 8px; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      background: rgba(13,31,60,0.07); color: var(--navy);
+    }
+
+    /* ── Document detail modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 200;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); width: 100%; max-width: 720px;
+      max-height: 90vh; overflow-y: auto; position: relative;
+    }
+    .modal-header {
+      padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0;
+      background: var(--white); z-index: 1;
+    }
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--navy); }
+    .modal-close {
+      width: 32px; height: 32px; border: none; background: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); border-radius: 4px;
+    }
+    .modal-close:hover { background: var(--surface); color: var(--navy); }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px; align-items: center; position: sticky; bottom: 0;
+      background: var(--white);
+    }
+    .modal-save-status { font-size: 12px; font-weight: 600; margin-left: auto; }
+    .modal-save-status.ok  { color: #16a34a; }
+    .modal-save-status.err { color: var(--red); }
+
+    .modal-two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+    }
+    @media (max-width: 540px) { .modal-two-col { grid-template-columns: 1fr; } }
+
+    .modal-field { display: flex; flex-direction: column; gap: 5px; }
+    .modal-field label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.7px; color: var(--text-muted);
+    }
+    .modal-field input, .modal-field select, .modal-field textarea {
+      padding: 9px 11px; border: 1.5px solid var(--border);
+      font-size: 13.5px; color: var(--navy); font-family: inherit;
+      background: var(--white); transition: border-color 0.15s;
+    }
+    .modal-field input:focus, .modal-field select:focus, .modal-field textarea:focus {
+      outline: none; border-color: var(--navy);
+    }
+    .modal-field textarea { resize: vertical; min-height: 70px; }
+    .modal-field-full { grid-column: 1 / -1; }
+
+    /* ── Receipt image preview ── */
+    .receipt-preview {
+      width: 100%; max-height: 280px; object-fit: contain;
+      border: 1px solid var(--border); margin-bottom: 16px; display: none;
+    }
+    .receipt-preview.visible { display: block; }
+
+    /* ── OCR hint banner ── */
+    .ocr-hint {
+      padding: 10px 14px; background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.2);
+      font-size: 12px; color: #1d4ed8; margin-bottom: 16px; line-height: 1.5;
+    }
+    .ocr-hint strong { font-weight: 700; }
+
+    /* ── Change log ── */
+    .change-log { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .change-log-title {
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.7px; color: var(--text-muted); margin-bottom: 12px;
+    }
+    .change-entry {
+      display: flex; gap: 10px; padding: 8px 0;
+      border-bottom: 1px solid var(--border); font-size: 12px;
+    }
+    .change-entry:last-child { border-bottom: none; }
+    .change-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--amber); flex-shrink: 0; margin-top: 4px;
+    }
+    .change-text { flex: 1; color: var(--navy); line-height: 1.5; }
+    .change-time { color: var(--text-muted); font-size: 11px; white-space: nowrap; }
+
+    /* ── Inventory tab ── */
+    .inv-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; gap: 12px; flex-wrap: wrap;
+    }
+    .inv-category-tabs {
+      display: flex; gap: 8px;
+    }
+    .inv-cat-btn {
+      padding: 6px 16px; font-size: 12px; font-weight: 700;
+      border: 1.5px solid var(--border); background: var(--white);
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .inv-cat-btn.active {
+      background: var(--navy); color: var(--white); border-color: var(--navy);
+    }
+
+    .inv-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 28px;
+    }
+    .inv-card {
+      background: var(--white); border: 1px solid var(--border);
+      padding: 16px;
+    }
+    .inv-card-name { font-size: 13px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+    .inv-card-unit { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
+    .inv-stock-row { display: flex; align-items: center; justify-content: space-between; }
+    .inv-stock-num {
+      font-size: 28px; font-weight: 900; color: var(--navy); line-height: 1;
+    }
+    .inv-stock-num.low { color: var(--red); }
+    .inv-stock-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .inv-reorder { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+    .inv-reorder.alert { color: var(--red); font-weight: 700; }
+    .inv-adjust-btn {
+      margin-top: 12px; width: 100%; padding: 7px; font-size: 12px;
+      font-weight: 700; border: 1.5px solid var(--border); background: var(--white);
+      color: var(--navy); cursor: pointer; transition: all 0.15s;
+    }
+    .inv-adjust-btn:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+    .inv-add-btn {
+      padding: 8px 18px; font-size: 12px; font-weight: 700;
+      background: var(--amber); border: none; color: var(--navy); cursor: pointer;
+    }
+
+    /* ── Adjust stock modal ── */
+    .adjust-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 300;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .adjust-modal.open { display: flex; }
+    .adjust-box {
+      background: var(--white); width: 100%; max-width: 380px; padding: 28px;
+    }
+    .adjust-box h3 { font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 20px; }
+    .adjust-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 16px; }
+    .adjust-row label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.7px; color: var(--text-muted);
+    }
+    .adjust-row input, .adjust-row select, .adjust-row textarea {
+      padding: 9px 11px; border: 1.5px solid var(--border);
+      font-size: 14px; color: var(--navy); font-family: inherit; background: var(--white);
+    }
+    .adjust-row input:focus, .adjust-row select:focus, .adjust-row textarea:focus {
+      outline: none; border-color: var(--navy);
+    }
+    .adjust-btns { display: flex; gap: 10px; margin-top: 6px; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center; padding: 48px 24px; color: var(--text-muted);
+    }
+    .empty-state svg { width: 40px; height: 40px; stroke: var(--border); margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--navy); }
+    .empty-state span { font-size: 12.5px; }
+
+    /* ── Add document modal ── */
+    .new-doc-modal {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 250;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .new-doc-modal.open { display: flex; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap"><img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT" class="logo-img"></div>
+        <div class="logo-text-block"><div class="logo-wordmark">VA<span style="color:var(--red);">G</span>T</div><div class="logo-sub">Security Services</div></div>
+      </a>
+    </div>
+    <div class="admin-sidebar-profile">
+      <div class="admin-sidebar-name" id="sidebarName">—</div>
+      <span class="admin-sidebar-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav" aria-label="Admin portal">
+      <div class="nav-group-label">Operations</div>
+      <a href="admin-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="admin-registrations.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+        New Registrations
+      </a>
+      <a href="admin-employees.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Employees
+      </a>
+      <a href="admin-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Schedule
+      </a>
+      <a href="admin-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="admin-guests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Visitor Log
+      </a>
+      <div class="nav-group-label">Clients</div>
+      <a href="admin-clients.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Clients &amp; Sites
+      </a>
+      <a href="admin-complaints.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Complaints
+      </a>
+      <a href="admin-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Incidents
+      </a>
+      <div class="nav-group-label">Finance &amp; Reports</div>
+      <a href="admin-payroll.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        Payroll
+      </a>
+      <a href="admin-finance.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        Finance &amp; Inventory
+      </a>
+      <a href="admin-reports.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Reports
+      </a>
+      <div class="nav-group-label">Settings</div>
+      <a href="admin-admins.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/><line x1="18" y1="14" x2="18" y2="20"/><line x1="15" y1="17" x2="21" y2="17"/></svg>
+        Manage Admins
+      </a>
+      <a href="admin-my-profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        My Profile
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <div class="page-header">
+      <div class="section-label">Finance &amp; Reports</div>
+      <h1>Finance &amp; Inventory</h1>
+      <p>Capture receipts and bills. Track guard uniform and facility stock.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="documents">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Documents
+        <span id="tabDocCount" style="font-size:10px;background:var(--amber);color:var(--navy);padding:1px 6px;margin-left:2px;font-weight:800;"></span>
+      </button>
+      <button class="tab-btn" data-tab="inventory">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Inventory
+      </button>
+    </div>
+
+    <!-- ══ Documents tab ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-documents">
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-zone-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="upload-zone-title">Upload receipt, bill, or invoice</div>
+        <div class="upload-zone-sub">Tap or drag a photo here — JPG, PNG, WebP, PDF. Data is extracted automatically.</div>
+        <input type="file" id="docFile" accept="image/*,application/pdf">
+      </div>
+
+      <!-- Filters -->
+      <div class="doc-filters">
+        <select id="filterStatus">
+          <option value="">All statuses</option>
+          <option value="complete">Complete</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="processing">Processing</option>
+        </select>
+        <select id="filterType">
+          <option value="">All types</option>
+          <option value="receipt">Receipt</option>
+          <option value="bill">Bill</option>
+          <option value="invoice">Invoice</option>
+        </select>
+        <select id="filterCategory">
+          <option value="">All categories</option>
+          <option value="guard_uniform">Guard Uniform</option>
+          <option value="facility">Facility</option>
+          <option value="payroll">Payroll</option>
+          <option value="travel">Travel</option>
+          <option value="equipment">Equipment</option>
+          <option value="utilities">Utilities</option>
+          <option value="other">Other</option>
+        </select>
+        <input type="text" id="filterSearch" placeholder="Search vendor or ref…" style="min-width:180px;">
+        <span class="doc-count" id="docCount"></span>
+      </div>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Vendor</th>
+              <th>Ref / Invoice #</th>
+              <th>Category</th>
+              <th style="text-align:right;">Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="docTableBody">
+            <tr><td colspan="7"><div class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <p>No documents yet</p><span>Upload your first receipt above to get started.</span>
+            </div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ Inventory tab ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-inventory">
+
+      <div class="inv-header">
+        <div class="inv-category-tabs">
+          <button class="inv-cat-btn active" data-cat="guard_uniform">Guard Uniforms</button>
+          <button class="inv-cat-btn" data-cat="facility">Facility Items</button>
+        </div>
+        <button class="inv-add-btn" id="addItemBtn">+ Add Item</button>
+      </div>
+
+      <div class="inv-grid" id="invGrid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+          <p>No items yet</p><span>Add your first inventory item to start tracking stock.</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div><!-- /layout -->
+
+<!-- ══ Document detail modal ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="docModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Document Details</div>
+      <button class="modal-close" id="modalClose">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <img id="modalReceiptImg" class="receipt-preview" alt="Receipt image">
+      <div class="ocr-hint" id="ocrHint" style="display:none;">
+        <strong>Data extracted automatically.</strong> Review and correct anything that looks wrong, then click Save. Fields in orange were flagged as low confidence.
+      </div>
+      <div class="modal-two-col">
+        <div class="modal-field">
+          <label>Document Type</label>
+          <select id="mType">
+            <option value="receipt">Receipt</option>
+            <option value="bill">Bill</option>
+            <option value="invoice">Invoice</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Status</label>
+          <select id="mStatus">
+            <option value="incomplete">Incomplete — needs review</option>
+            <option value="complete">Complete</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>Date</label>
+          <input type="date" id="mDate">
+        </div>
+        <div class="modal-field">
+          <label>Amount (₹)</label>
+          <input type="number" id="mAmount" placeholder="e.g. 2500" min="0" step="0.01">
+        </div>
+        <div class="modal-field">
+          <label>Vendor / Supplier</label>
+          <input type="text" id="mVendor" placeholder="e.g. Uniform World, Bengaluru" maxlength="120">
+        </div>
+        <div class="modal-field">
+          <label>Invoice / Ref Number</label>
+          <input type="text" id="mRef" placeholder="e.g. INV-20240315" maxlength="80">
+        </div>
+        <div class="modal-field">
+          <label>Category</label>
+          <select id="mCategory">
+            <option value="guard_uniform">Guard Uniform</option>
+            <option value="facility">Facility</option>
+            <option value="payroll">Payroll</option>
+            <option value="travel">Travel</option>
+            <option value="equipment">Equipment</option>
+            <option value="utilities">Utilities</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="modal-field">
+          <label>GST Number (vendor)</label>
+          <input type="text" id="mGst" placeholder="e.g. 29AABCT1332L1ZV" maxlength="20">
+        </div>
+        <div class="modal-field modal-field-full">
+          <label>Notes</label>
+          <textarea id="mNotes" placeholder="Any additional notes…"></textarea>
+        </div>
+      </div>
+
+      <div class="change-log" id="changeLog" style="display:none;">
+        <div class="change-log-title">Change Log</div>
+        <div id="changeLogEntries"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+      <button class="btn btn-ghost" id="modalDeleteBtn" style="color:var(--red);border-color:var(--red);">Delete</button>
+      <span class="modal-save-status" id="modalSaveStatus"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Adjust stock modal ════════════════════════════════════════════════════ -->
+<div class="adjust-modal" id="adjustModal">
+  <div class="adjust-box">
+    <h3 id="adjustTitle">Adjust Stock</h3>
+    <div class="adjust-row">
+      <label>Transaction Type</label>
+      <select id="adjustType">
+        <option value="purchase">Purchase (add stock)</option>
+        <option value="issue">Issue to employee / site (remove)</option>
+        <option value="return">Return (add back)</option>
+        <option value="adjustment">Manual adjustment</option>
+      </select>
+    </div>
+    <div class="adjust-row">
+      <label>Quantity</label>
+      <input type="number" id="adjustQty" placeholder="e.g. 10" min="1" step="1">
+    </div>
+    <div class="adjust-row">
+      <label>Unit Price (₹, optional)</label>
+      <input type="number" id="adjustPrice" placeholder="Price per unit" min="0" step="0.01">
+    </div>
+    <div class="adjust-row">
+      <label>Issued To (optional)</label>
+      <input type="text" id="adjustIssuedTo" placeholder="Employee name or site">
+    </div>
+    <div class="adjust-row">
+      <label>Notes</label>
+      <textarea id="adjustNotes" placeholder="Reason for adjustment…" style="min-height:60px;"></textarea>
+    </div>
+    <div class="adjust-btns">
+      <button class="btn btn-primary" id="adjustSaveBtn">Save</button>
+      <button class="btn btn-ghost" id="adjustCancelBtn">Cancel</button>
+      <span style="font-size:12px;font-weight:600;color:var(--text-muted);margin-left:auto;" id="adjustStatus"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ Add inventory item modal ══════════════════════════════════════════════ -->
+<div class="adjust-modal" id="addItemModal">
+  <div class="adjust-box" style="max-width:420px;">
+    <h3>Add Inventory Item</h3>
+    <div class="adjust-row">
+      <label>Item Name</label>
+      <input type="text" id="newItemName" placeholder="e.g. Security Guard Shirt" maxlength="80">
+    </div>
+    <div class="adjust-row">
+      <label>Category</label>
+      <select id="newItemCat">
+        <option value="guard_uniform">Guard Uniform</option>
+        <option value="facility">Facility Item</option>
+      </select>
+    </div>
+    <div class="adjust-row">
+      <label>Unit</label>
+      <select id="newItemUnit">
+        <option value="piece">Piece</option>
+        <option value="pair">Pair</option>
+        <option value="set">Set</option>
+        <option value="bottle">Bottle</option>
+        <option value="packet">Packet</option>
+        <option value="kg">Kg</option>
+        <option value="litre">Litre</option>
+        <option value="roll">Roll</option>
+      </select>
+    </div>
+    <div class="adjust-row">
+      <label>Opening Stock</label>
+      <input type="number" id="newItemStock" placeholder="0" min="0" step="1" value="0">
+    </div>
+    <div class="adjust-row">
+      <label>Reorder Level (alert when below)</label>
+      <input type="number" id="newItemReorder" placeholder="e.g. 5" min="0" step="1" value="5">
+    </div>
+    <div class="adjust-btns">
+      <button class="btn btn-primary" id="newItemSaveBtn">Add Item</button>
+      <button class="btn btn-ghost" id="newItemCancelBtn">Cancel</button>
+      <span style="font-size:12px;font-weight:600;color:var(--text-muted);margin-left:auto;" id="newItemStatus"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (firebase.apps.length === 0) firebase.initializeApp(FIREBASE_CONFIG);
+  const auth    = firebase.auth();
+  const db      = firebase.firestore();
+  const storage = firebase.storage();
+
+  const DOCS_COL = 'financial_documents';
+  const LOG_COL  = 'document_changes';
+  const INV_COL  = 'inventory_items';
+  const TXN_COL  = 'inventory_transactions';
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtAmt(n) {
+    if (!n && n !== 0) return '—';
+    return '₹' + Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+  function fmtDate(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+  function fmtDateTime(ts) {
+    if (!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleString('en-IN');
+  }
+
+  // ── Image compression (receipts — max 1200px for OCR quality) ─────────────
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      const canvas = document.createElement('canvas');
+      const img    = new Image();
+      img.onload = function () {
+        const MAX = 1200;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        else if (h > MAX)     { w = Math.round(w * MAX / h); h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function (b) { b ? resolve(b) : reject(new Error('Compression failed')); }, 'image/webp', 0.82);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  let currentUser = null;
+  let currentUserName = '';
+
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult(true);
+    if (token.claims.role !== 'admin') { window.location.href = 'portal.html'; return; }
+    currentUser = user;
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display    = '';
+    // Get display name
+    const adminSnap = await db.collection('admins').doc(user.uid).get().catch(() => null);
+    currentUserName = (adminSnap && adminSnap.data() && adminSnap.data().name) || user.displayName || 'Admin';
+    setText('sidebarName', currentUserName);
+    setupNav();
+    loadDocuments();
+    loadInventory('guard_uniform');
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  // ── Tab switching ─────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ══════════════════════════════════════════════════════════════════════════
+  //  DOCUMENTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  let allDocs = [];
+
+  async function loadDocuments() {
+    try {
+      const snap = await db.collection(DOCS_COL).orderBy('created_at', 'desc').limit(200).get();
+      allDocs = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+      renderDocTable(allDocs);
+      setText('tabDocCount', allDocs.length > 0 ? allDocs.length : '');
+    } catch (e) {
+      console.error('loadDocuments:', e);
+    }
+  }
+
+  function renderDocTable(docs) {
+    const tbody = document.getElementById('docTableBody');
+    const filters = getDocFilters();
+    const filtered = docs.filter(function (d) {
+      if (filters.status   && d.status   !== filters.status)   return false;
+      if (filters.type     && d.type     !== filters.type)     return false;
+      if (filters.category && d.category !== filters.category) return false;
+      if (filters.search) {
+        const q = filters.search.toLowerCase();
+        const haystack = ((d.vendor_name || '') + ' ' + (d.ref_number || '')).toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+    setText('docCount', filtered.length + ' document' + (filtered.length === 1 ? '' : 's'));
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' +
+        '<p>No documents match these filters</p><span>Try clearing the filters above.</span></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = filtered.map(function (d) {
+      return '<tr data-id="' + esc(d.id) + '">' +
+        '<td>' + esc(fmtDate(d.date || d.created_at)) + '</td>' +
+        '<td><span class="doc-type-badge">' + esc(d.type || 'receipt') + '</span></td>' +
+        '<td>' + esc(d.vendor_name || '—') + '</td>' +
+        '<td style="font-size:12px;color:var(--text-muted);">' + esc(d.ref_number || '—') + '</td>' +
+        '<td style="font-size:12px;">' + esc((d.category || '').replace('_', ' ')) + '</td>' +
+        '<td style="text-align:right;font-weight:700;">' + esc(fmtAmt(d.amount)) + '</td>' +
+        '<td><span class="doc-status ' + esc(d.status || 'incomplete') + '">' + esc(d.status || 'incomplete') + '</span></td>' +
+        '</tr>';
+    }).join('');
+    tbody.querySelectorAll('tr[data-id]').forEach(function (row) {
+      row.addEventListener('click', function () { openDocModal(row.dataset.id); });
+    });
+  }
+
+  function getDocFilters() {
+    return {
+      status:   document.getElementById('filterStatus').value,
+      type:     document.getElementById('filterType').value,
+      category: document.getElementById('filterCategory').value,
+      search:   document.getElementById('filterSearch').value.trim(),
+    };
+  }
+
+  ['filterStatus', 'filterType', 'filterCategory'].forEach(function (id) {
+    document.getElementById(id).addEventListener('change', function () { renderDocTable(allDocs); });
+  });
+  document.getElementById('filterSearch').addEventListener('input', function () { renderDocTable(allDocs); });
+
+  // ── Upload flow ───────────────────────────────────────────────────────────
+  const uploadZone = document.getElementById('uploadZone');
+  const docFile    = document.getElementById('docFile');
+
+  uploadZone.addEventListener('click', function () { docFile.click(); });
+  uploadZone.addEventListener('dragover',  function (e) { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+  uploadZone.addEventListener('dragleave', function ()  { uploadZone.classList.remove('drag-over'); });
+  uploadZone.addEventListener('drop', function (e) {
+    e.preventDefault(); uploadZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleFileUpload(file);
+  });
+  docFile.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (file) handleFileUpload(file);
+    e.target.value = '';
+  });
+
+  async function handleFileUpload(file) {
+    const isImage = file.type.startsWith('image/');
+    const isPdf   = file.type === 'application/pdf';
+    if (!isImage && !isPdf) { alert('Please upload an image or PDF.'); return; }
+
+    // Show upload progress in the zone
+    const origHTML = uploadZone.innerHTML;
+    uploadZone.innerHTML = '<div style="padding:8px;font-size:13px;font-weight:600;color:var(--navy);">Uploading… please wait</div>';
+    uploadZone.style.pointerEvents = 'none';
+
+    try {
+      let blob = file;
+      if (isImage) {
+        blob = await compressImage(file);
+      }
+      const ext     = isImage ? 'webp' : 'pdf';
+      const uid     = currentUser.uid;
+      const ts      = Date.now();
+      const path    = 'financial_documents/' + uid + '/' + ts + '.' + ext;
+      const ref     = storage.ref(path);
+      const ct      = isImage ? 'image/webp' : 'application/pdf';
+      await ref.put(blob, { contentType: ct });
+      const url = await ref.getDownloadURL();
+
+      // Create Firestore doc — status: 'processing' (OCR pending) or 'incomplete'
+      const docRef = await db.collection(DOCS_COL).add({
+        status:       'incomplete',   // will be 'processing' when OCR is wired
+        type:         'receipt',
+        vendor_name:  '',
+        ref_number:   '',
+        date:         null,
+        amount:       null,
+        category:     'other',
+        gst_number:   '',
+        notes:        '',
+        image_url:    url,
+        image_path:   path,
+        created_at:   firebase.firestore.FieldValue.serverTimestamp(),
+        created_by:   uid,
+        created_by_name: currentUserName,
+      });
+
+      // Log creation
+      await logChange(docRef.id, 'created', null, null, null, 'Document uploaded');
+
+      await loadDocuments();
+      // Open modal immediately so user can fill in details
+      openDocModal(docRef.id);
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Upload failed: ' + err.message);
+    } finally {
+      uploadZone.innerHTML = origHTML;
+      uploadZone.style.pointerEvents = '';
+      // Re-attach events after innerHTML reset
+      uploadZone.addEventListener('click', function () { docFile.click(); });
+    }
+  }
+
+  // ── Document modal ────────────────────────────────────────────────────────
+  let currentDocId = null;
+
+  async function openDocModal(docId) {
+    currentDocId = docId;
+    const snap = await db.collection(DOCS_COL).doc(docId).get();
+    if (!snap.exists) { alert('Document not found.'); return; }
+    const d = snap.data();
+
+    setText('modalTitle', (d.type || 'Document') + ' — ' + (d.vendor_name || 'Unnamed'));
+    document.getElementById('mType').value     = d.type     || 'receipt';
+    document.getElementById('mStatus').value   = d.status   || 'incomplete';
+    document.getElementById('mVendor').value   = d.vendor_name || '';
+    document.getElementById('mRef').value      = d.ref_number  || '';
+    document.getElementById('mCategory').value = d.category    || 'other';
+    document.getElementById('mGst').value      = d.gst_number  || '';
+    document.getElementById('mNotes').value    = d.notes       || '';
+    document.getElementById('mAmount').value   = d.amount != null ? d.amount : '';
+
+    if (d.date) {
+      const dateObj = d.date.toDate ? d.date.toDate() : new Date(d.date);
+      document.getElementById('mDate').value = dateObj.toISOString().split('T')[0];
+    } else {
+      document.getElementById('mDate').value = '';
+    }
+
+    // Image preview
+    const imgEl = document.getElementById('modalReceiptImg');
+    if (d.image_url && !d.image_url.endsWith('.pdf')) {
+      imgEl.src = d.image_url;
+      imgEl.classList.add('visible');
+    } else {
+      imgEl.classList.remove('visible');
+    }
+
+    // OCR hint
+    document.getElementById('ocrHint').style.display = d.ocr_applied ? 'block' : 'none';
+
+    // Change log
+    await loadChangeLog(docId);
+
+    document.getElementById('docModal').classList.add('open');
+  }
+
+  async function loadChangeLog(docId) {
+    const logEl = document.getElementById('changeLog');
+    const entriesEl = document.getElementById('changeLogEntries');
+    try {
+      const snap = await db.collection(LOG_COL)
+        .where('document_id', '==', docId)
+        .orderBy('timestamp', 'desc')
+        .limit(20)
+        .get();
+      if (snap.empty) { logEl.style.display = 'none'; return; }
+      logEl.style.display = 'block';
+      entriesEl.innerHTML = snap.docs.map(function (e) {
+        const d = e.data();
+        let text = d.description || '';
+        if (d.field_name && d.old_value != null) {
+          text = '<strong>' + esc(d.field_name) + '</strong>: ' +
+            esc(String(d.old_value)) + ' → ' + esc(String(d.new_value || ''));
+        }
+        return '<div class="change-entry">' +
+          '<div class="change-dot"></div>' +
+          '<div class="change-text">' + text + ' <span style="color:var(--text-muted);">by ' + esc(d.actor_name || 'Admin') + '</span></div>' +
+          '<div class="change-time">' + esc(fmtDateTime(d.timestamp)) + '</div>' +
+          '</div>';
+      }).join('');
+    } catch (e) {
+      logEl.style.display = 'none';
+    }
+  }
+
+  document.getElementById('modalClose').addEventListener('click', closeDocModal);
+  document.getElementById('docModal').addEventListener('click', function (e) {
+    if (e.target === this) closeDocModal();
+  });
+
+  function closeDocModal() {
+    document.getElementById('docModal').classList.remove('open');
+    currentDocId = null;
+  }
+
+  document.getElementById('modalSaveBtn').addEventListener('click', async function () {
+    if (!currentDocId) return;
+    const btn    = document.getElementById('modalSaveBtn');
+    const status = document.getElementById('modalSaveStatus');
+    btn.disabled = true; btn.textContent = 'Saving…'; status.textContent = '';
+
+    // Snapshot current values for change log
+    const prevSnap = await db.collection(DOCS_COL).doc(currentDocId).get();
+    const prev     = prevSnap.data() || {};
+
+    const newData = {
+      type:        document.getElementById('mType').value,
+      status:      document.getElementById('mStatus').value,
+      vendor_name: document.getElementById('mVendor').value.trim(),
+      ref_number:  document.getElementById('mRef').value.trim(),
+      category:    document.getElementById('mCategory').value,
+      gst_number:  document.getElementById('mGst').value.trim(),
+      notes:       document.getElementById('mNotes').value.trim(),
+      amount:      parseFloat(document.getElementById('mAmount').value) || null,
+      date:        document.getElementById('mDate').value
+        ? firebase.firestore.Timestamp.fromDate(new Date(document.getElementById('mDate').value))
+        : null,
+      updated_at:  firebase.firestore.FieldValue.serverTimestamp(),
+      updated_by:  currentUser.uid,
+    };
+
+    try {
+      await db.collection(DOCS_COL).doc(currentDocId).update(newData);
+
+      // Log each changed field
+      const tracked = ['type','status','vendor_name','ref_number','category','amount','gst_number'];
+      for (const field of tracked) {
+        const oldVal = prev[field];
+        const newVal = newData[field];
+        if (String(oldVal || '') !== String(newVal || '')) {
+          await logChange(currentDocId, 'field_edited', field, oldVal, newVal, null);
+        }
+      }
+
+      status.className = 'modal-save-status ok';
+      status.textContent = 'Saved ✓';
+      setText('modalTitle', (newData.type || 'Document') + ' — ' + (newData.vendor_name || 'Unnamed'));
+      await loadDocuments();
+      await loadChangeLog(currentDocId);
+    } catch (err) {
+      status.className = 'modal-save-status err';
+      status.textContent = 'Save failed.';
+      console.error(err);
+    }
+    btn.disabled = false; btn.textContent = 'Save';
+  });
+
+  document.getElementById('modalDeleteBtn').addEventListener('click', async function () {
+    if (!currentDocId) return;
+    if (!confirm('Delete this document? This cannot be undone.')) return;
+    try {
+      await db.collection(DOCS_COL).doc(currentDocId).delete();
+      closeDocModal();
+      await loadDocuments();
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+    }
+  });
+
+  // ── Change log helper ─────────────────────────────────────────────────────
+  async function logChange(docId, action, fieldName, oldVal, newVal, description) {
+    try {
+      await db.collection(LOG_COL).add({
+        document_id:  docId,
+        action:       action,
+        field_name:   fieldName  || null,
+        old_value:    oldVal     != null ? String(oldVal) : null,
+        new_value:    newVal     != null ? String(newVal) : null,
+        description:  description || null,
+        actor_uid:    currentUser.uid,
+        actor_name:   currentUserName,
+        timestamp:    firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    } catch (e) { console.warn('logChange failed:', e); }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  //  INVENTORY
+  // ══════════════════════════════════════════════════════════════════════════
+
+  let currentInvCat  = 'guard_uniform';
+  let allInventory   = [];
+  let adjustItemId   = null;
+  let adjustItemName = '';
+
+  // Seed default guard uniform items if none exist
+  const UNIFORM_DEFAULTS = [
+    { name: 'Security Shirt (Full Sleeve)',  unit: 'piece', reorder_level: 10 },
+    { name: 'Security Trousers',             unit: 'piece', reorder_level: 10 },
+    { name: 'Leather Belt',                  unit: 'piece', reorder_level: 5  },
+    { name: 'Lanyard',                       unit: 'piece', reorder_level: 10 },
+    { name: 'Cap / Beret',                   unit: 'piece', reorder_level: 10 },
+    { name: 'Safety Shoes',                  unit: 'pair',  reorder_level: 5  },
+    { name: 'Winter Jacket',                 unit: 'piece', reorder_level: 5  },
+  ];
+  const FACILITY_DEFAULTS = [
+    { name: 'Floor Mop',      unit: 'piece', reorder_level: 3 },
+    { name: 'Broom',          unit: 'piece', reorder_level: 3 },
+    { name: 'Dustpan',        unit: 'piece', reorder_level: 3 },
+    { name: 'Cleaning Cloth', unit: 'piece', reorder_level: 5 },
+    { name: 'Phenyl (litre)', unit: 'litre', reorder_level: 4 },
+    { name: 'Liquid Soap',    unit: 'bottle',reorder_level: 3 },
+    { name: 'Garbage Bags',   unit: 'roll',  reorder_level: 2 },
+  ];
+
+  document.querySelectorAll('.inv-cat-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.inv-cat-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentInvCat = btn.dataset.cat;
+      renderInventory();
+    });
+  });
+
+  async function loadInventory(cat) {
+    try {
+      const snap = await db.collection(INV_COL).get();
+      allInventory = snap.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+
+      // Seed defaults if guard_uniform category is empty
+      const hasUniforms  = allInventory.some(function (i) { return i.category === 'guard_uniform'; });
+      const hasFacility  = allInventory.some(function (i) { return i.category === 'facility'; });
+
+      const seedBatch = db.batch();
+      let seeded = 0;
+      if (!hasUniforms) {
+        UNIFORM_DEFAULTS.forEach(function (item) {
+          const ref = db.collection(INV_COL).doc();
+          seedBatch.set(ref, Object.assign({}, item, {
+            category: 'guard_uniform', current_stock: 0,
+            created_at: new Date(), created_by: currentUser.uid,
+          }));
+          seeded++;
+        });
+      }
+      if (!hasFacility) {
+        FACILITY_DEFAULTS.forEach(function (item) {
+          const ref = db.collection(INV_COL).doc();
+          seedBatch.set(ref, Object.assign({}, item, {
+            category: 'facility', current_stock: 0,
+            created_at: new Date(), created_by: currentUser.uid,
+          }));
+          seeded++;
+        });
+      }
+      if (seeded > 0) {
+        await seedBatch.commit();
+        const snap2 = await db.collection(INV_COL).get();
+        allInventory = snap2.docs.map(function (d) { return Object.assign({ id: d.id }, d.data()); });
+      }
+
+      renderInventory();
+    } catch (e) { console.error('loadInventory:', e); }
+  }
+
+  function renderInventory() {
+    const grid  = document.getElementById('invGrid');
+    const items = allInventory.filter(function (i) { return i.category === currentInvCat; });
+    if (items.length === 0) {
+      grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>' +
+        '<p>No items yet</p><span>Click "+ Add Item" to add your first item.</span></div>';
+      return;
+    }
+    grid.innerHTML = items.map(function (item) {
+      const stock    = item.current_stock || 0;
+      const reorder  = item.reorder_level || 0;
+      const isLow    = stock <= reorder;
+      return '<div class="inv-card">' +
+        '<div class="inv-card-name">' + esc(item.name) + '</div>' +
+        '<div class="inv-card-unit">per ' + esc(item.unit || 'piece') + '</div>' +
+        '<div class="inv-stock-row">' +
+          '<div>' +
+            '<div class="inv-stock-num' + (isLow ? ' low' : '') + '">' + stock + '</div>' +
+            '<div class="inv-stock-label">in stock</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="inv-reorder' + (isLow ? ' alert' : '') + '">' +
+          (isLow && stock === 0 ? '⚠ Out of stock' : isLow ? '⚠ Low — reorder level: ' + reorder : 'Reorder at: ' + reorder) +
+        '</div>' +
+        '<button class="inv-adjust-btn" data-id="' + esc(item.id) + '" data-name="' + esc(item.name) + '">Adjust Stock</button>' +
+        '</div>';
+    }).join('');
+
+    grid.querySelectorAll('.inv-adjust-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        openAdjustModal(btn.dataset.id, btn.dataset.name);
+      });
+    });
+  }
+
+  // ── Adjust stock modal ────────────────────────────────────────────────────
+  function openAdjustModal(itemId, itemName) {
+    adjustItemId   = itemId;
+    adjustItemName = itemName;
+    setText('adjustTitle', 'Adjust Stock — ' + itemName);
+    document.getElementById('adjustType').value     = 'purchase';
+    document.getElementById('adjustQty').value      = '';
+    document.getElementById('adjustPrice').value    = '';
+    document.getElementById('adjustIssuedTo').value = '';
+    document.getElementById('adjustNotes').value    = '';
+    setText('adjustStatus', '');
+    document.getElementById('adjustModal').classList.add('open');
+  }
+
+  document.getElementById('adjustCancelBtn').addEventListener('click', function () {
+    document.getElementById('adjustModal').classList.remove('open');
+  });
+
+  document.getElementById('adjustSaveBtn').addEventListener('click', async function () {
+    const btn     = document.getElementById('adjustSaveBtn');
+    const status  = document.getElementById('adjustStatus');
+    const qty     = parseInt(document.getElementById('adjustQty').value, 10);
+    const type    = document.getElementById('adjustType').value;
+    const price   = parseFloat(document.getElementById('adjustPrice').value) || null;
+    const issueTo = document.getElementById('adjustIssuedTo').value.trim();
+    const notes   = document.getElementById('adjustNotes').value.trim();
+
+    if (!qty || qty < 1) { status.textContent = 'Enter a valid quantity.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      // Calculate stock delta
+      const delta = (type === 'issue') ? -qty : qty;
+
+      // Atomic increment
+      await db.collection(INV_COL).doc(adjustItemId).update({
+        current_stock: firebase.firestore.FieldValue.increment(delta),
+        updated_at: new Date(),
+      });
+
+      // Log the transaction
+      await db.collection(TXN_COL).add({
+        item_id:          adjustItemId,
+        item_name:        adjustItemName,
+        transaction_type: type,
+        quantity:         qty,
+        delta:            delta,
+        unit_price:       price,
+        total_amount:     price ? price * qty : null,
+        issued_to:        issueTo || null,
+        notes:            notes   || null,
+        recorded_by:      currentUser.uid,
+        recorded_by_name: currentUserName,
+        timestamp:        firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Refresh inventory in memory
+      const updSnap = await db.collection(INV_COL).doc(adjustItemId).get();
+      allInventory = allInventory.map(function (i) {
+        if (i.id === adjustItemId) return Object.assign({ id: i.id }, updSnap.data());
+        return i;
+      });
+      renderInventory();
+
+      document.getElementById('adjustModal').classList.remove('open');
+    } catch (err) {
+      status.textContent = 'Failed: ' + err.message;
+      console.error(err);
+    }
+    btn.disabled = false; btn.textContent = 'Save';
+  });
+
+  // ── Add inventory item ────────────────────────────────────────────────────
+  document.getElementById('addItemBtn').addEventListener('click', function () {
+    document.getElementById('newItemName').value   = '';
+    document.getElementById('newItemCat').value    = currentInvCat;
+    document.getElementById('newItemUnit').value   = 'piece';
+    document.getElementById('newItemStock').value  = '0';
+    document.getElementById('newItemReorder').value= '5';
+    setText('newItemStatus', '');
+    document.getElementById('addItemModal').classList.add('open');
+  });
+
+  document.getElementById('newItemCancelBtn').addEventListener('click', function () {
+    document.getElementById('addItemModal').classList.remove('open');
+  });
+
+  document.getElementById('newItemSaveBtn').addEventListener('click', async function () {
+    const btn    = document.getElementById('newItemSaveBtn');
+    const status = document.getElementById('newItemStatus');
+    const name   = document.getElementById('newItemName').value.trim();
+    if (!name) { status.textContent = 'Item name is required.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Adding…';
+    try {
+      const ref = await db.collection(INV_COL).add({
+        name:          name,
+        category:      document.getElementById('newItemCat').value,
+        unit:          document.getElementById('newItemUnit').value,
+        current_stock: parseInt(document.getElementById('newItemStock').value, 10) || 0,
+        reorder_level: parseInt(document.getElementById('newItemReorder').value, 10) || 5,
+        created_at:    new Date(),
+        created_by:    currentUser.uid,
+      });
+      allInventory.push({ id: ref.id, name, category: document.getElementById('newItemCat').value,
+        unit: document.getElementById('newItemUnit').value,
+        current_stock: parseInt(document.getElementById('newItemStock').value, 10) || 0,
+        reorder_level: parseInt(document.getElementById('newItemReorder').value, 10) || 5 });
+      renderInventory();
+      document.getElementById('addItemModal').classList.remove('open');
+    } catch (err) {
+      status.textContent = 'Failed: ' + err.message;
+    }
+    btn.disabled = false; btn.textContent = 'Add Item';
+  });
+
+  // ── Mobile nav ────────────────────────────────────────────────────────────
+  function setupNav() {
+    const toggle  = document.getElementById('navToggle');
+    const sidebar = document.getElementById('sidebar');
+    const layout  = document.getElementById('portalLayout');
+    toggle.addEventListener('click', function () {
+      sidebar.classList.toggle('open'); layout.classList.toggle('nav-open');
+    });
+    document.querySelectorAll('.nav-link').forEach(function (a) {
+      a.addEventListener('click', function () {
+        sidebar.classList.remove('open'); layout.classList.remove('nav-open');
+      });
+    });
+  }
+
+}());
+</script>
+</body>
+</html>

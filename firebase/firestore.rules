@@ -222,5 +222,30 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+
+    // ─── financial_documents/{docId} ─────────────────────────────────────────
+    // Admin only — full read/write.
+    match /financial_documents/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── document_changes/{changeId} ─────────────────────────────────────────
+    // Admin only — audit log for financial document edits.
+    match /document_changes/{changeId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── inventory_items/{itemId} ─────────────────────────────────────────────
+    // Admin only — guard uniform and facility stock catalogue.
+    match /inventory_items/{itemId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── inventory_transactions/{txnId} ──────────────────────────────────────
+    // Admin only — stock movement log.
+    match /inventory_transactions/{txnId} {
+      allow read, write: if isAdmin();
+    }
+
   }
 }
