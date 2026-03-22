@@ -3,6 +3,152 @@
 
 ---
 
+## Session 8 (continued) — 2026-03-22
+
+### What was done in this continuation
+
+#### OpenClaw — evaluated and declined
+
+User asked "should I install openclaw?" Assessment: not suitable for VAGT. OpenClaw is a vulnerability scanner/DAST tool for web apps — adds dev overhead, overkill for this stack, and doesn't address VAGT's real risks (Firebase rules, function hardening, SMS OTP exposure). No action taken.
+
+#### Pay structure — ingested and committed
+
+File: `Revised DA- Security Staff - 2026-2027.xlsx` (uploaded by Nikhil).
+
+Extracted and committed both the original Excel and a full markdown extract:
+- `client-briefs/security-staff-da-pay-structure-2026-27.xlsx` — original file
+- `client-briefs/security-staff-pay-structure-2026-27.md` — full extract: CTC table, Block breakdowns, statutory rates
+
+Key numbers for payslip calculation:
+| Role | CTC/month |
+|------|-----------|
+| Security Officer (SO) | ₹30,112 |
+| Fire Officer (FO) | ₹30,163 |
+| Security Guard Grade-I | ₹25,119 |
+Security Guard Grade-II slightly lower. PF: 13% of Basic+DA. ESI: 3.25% of Gross. Bonus: fixed ₹584/month. Service charges: 6.5%. 5 National Festival Holidays.
+
+Commit: `d6cb862`
+
+#### HatsOff employee data — canonical roster
+
+Root problems found: CLK numbers reused across people (CLK 285 was Arumugam then Ranjan Barik; CLK 439 was Prashanta Behra then Goutam Mallick); name spelling variants (ARNAV vs ARNAB Nandi; PRASHANTA B vs PRASHANTA BEHRA); CLK 813 and CLK 8 are the same person Kempa Raju.
+
+Fix in `firebase/functions/seed-hatsoff-data.js`:
+- Replaced `DESIG_MAP` with `CANONICAL_ROSTER` keyed by CLK (or composite key `285_arumugam`, `285_ranjan`, etc.)
+- Added `RAW_NAME_TO_KEY` reverse lookup for name variants
+- Added `empDocId(vagtId)` helper: `VAGT-0001` → `emp_vagt_0001`
+- Added `resolveRosterKey(rawName, clkNo)` — CLK-first lookup, name fallback
+- All 10 active employees from the 2026-27 pay structure get sequential `VAGT-XXXX` IDs
+- Leave balances seeded: `{ casual: 12, sick: 7, earned: 0, national_holiday: 5 }`
+- Historical / inactive guards preserved with `status: 'inactive'`
+
+**Still needs**: Run `node firebase/functions/seed-hatsoff-data.js /path/to/serviceAccountKey.json` from Nikhil's machine to apply to Firestore.
+
+#### SO/FM supervisor tier — full feature build
+
+**What it is**: Security Officers and Facility Managers get a `supervisor_tier: true` custom claim (granted by admin). This unlocks team management capabilities for their site.
+
+**Architecture decisions**:
+- Team is site-based — all guards at the SO's `primary_site` report to them (no manual assignment)
+- `supervisor_tier_requested: true` stored at profile setup; admin grants the actual claim via `POST /api/admin/employees/:uid/set-supervisor`
+- Leave statuses: `pending_so_approval` → SO approves (casual/sick) → `approved`; `pending_so_sanction` → SO sanctions (annual) → `pending_admin_approval` → admin final
+
+**Files changed** (commit `270e205`):
+
+`firebase/functions/seed-hatsoff-data.js` — canonical roster (above)
+
+`pages/employee-profile-setup.html` — three-step family → designation → site flow:
+- Step A: 3 family tiles (Security / Facility Management / Operations & Management)
+- Step B: Industry-standard designation chips per family; supervisor roles shown with ★ amber chips
+- Step C: Site input + submit
+- POST body now includes `role_family`, `designation`, `supervisor_tier`, `primary_site`
+
+`firebase/functions/src/routes/employee.js` — new endpoints:
+- `GET /api/supervisor/team-leaves` — leaves for guards at SO's site
+- `POST /api/supervisor/leave/:id/approve` — casual/sick, decrements balance
+- `POST /api/supervisor/leave/:id/sanction` — annual → pending_admin_approval
+- `POST /api/supervisor/leave/:id/reject` — requires reason ≥5 chars
+- `GET /api/supervisor/team-roster` — active guards at site
+- `POST /api/supervisor/rota` — create/update rota doc `{site_id}_{week_start}`
+
+`firebase/functions/src/routes/admin.js` — new endpoints:
+- `GET /api/admin/rotas` — list with status/site_id filter
+- `POST /api/admin/rotas/:id/approve`
+- `POST /api/admin/rotas/:id/reject` — requires reason
+- `POST /api/admin/employees/:uid/set-supervisor` — grants/revokes claim
+
+**New pages** (built by agent, committed separately):
+- `pages/employee-so-rota.html` — weekly rota builder (Mon-Sun × guards grid, 1-day-off enforcement, submit for admin approval)
+- `pages/employee-so-leaves.html` — SO leave inbox with Approve / Sanction / Reject tabs
+
+**Rota rules**: 1 day off per 6 working = 26 working days per 30. SO picks which day off per guard. SO submits rota → admin approves. Rota doc ID: `{site_id}_{week_start}`.
+
+#### Registration — role family step added
+
+Commit: `a49bfb2`
+
+`pages/register.html` — new Step 0 before personal details:
+- 3 family tiles (Security / Facility Management / Operations & Management) with SVG icons
+- Designation chips rendered per family (same lists as profile-setup)
+- Supervisor-tier designations shown with ★ amber chip styling
+- Continue disabled until a designation is selected
+- `role_family`, `designation`, `supervisor_tier_requested` sent in the register API call
+
+`firebase/functions/src/routes/auth.js` — `/employee/register`:
+- Now accepts and stores `role_family`, `designation`, `supervisor_tier_requested` in `pending_registrations`
+- Validates `role_family` against known values
+
+**Admin effect**: When reviewing pending registrations, admin can now see what type of person is requesting approval (Security Guard vs Security Officer vs Facility Manager etc.) — was previously blank.
+
+#### Landing page — leadership section fixed
+
+Commit: `9a45f35`
+
+The dark navy "trust signals" strip had no heading — visitors saw `11 yrs / 25 yrs / 20 yrs / BSF` with no context. Added:
+- Label: `THE TEAM BEHIND VAGT`
+- Subtitle: `Not a startup. Not outsourced. Leadership with decades of real-world experience.`
+- `BSF` tile resized (26px vs 34px) so it doesn't look like a broken number stat
+
+#### Sidebar overlay bug — fixed
+
+Commit: `e1d6998` (from previous context)
+
+`.main { margin-left: var(--sidebar-w); }` was accidentally removed during the sidebar→topnav conversion. Portal pages were rendering content behind the fixed sidebar. Restored. Responsive breakpoint already handles mobile (`--sidebar-w: 0px` at ≤900px).
+
+#### DNS — vagtservices.com
+
+GoDaddy forwarding is now correctly set up:
+- `A @ 15.197.225.128` and `A @ 3.33.251.168` — GoDaddy Anycast IPs (auto-managed, can't edit, correct)
+- `CNAME www → vagt---services.web.app` — Firebase
+- Apex `vagtservices.com` redirects to `https://www.vagtservices.com` which resolves to Firebase
+
+Confirm in GoDaddy forwarding settings: destination is `https://www.vagtservices.com`, type `Permanent (301)`.
+
+---
+
+### Commits this continuation
+
+| Commit | Description |
+|--------|-------------|
+| `e1d6998` | CSS: restore sidebar margin-left (overlay fix) |
+| `8e9b1c8` | Handoff update: Session 8 notes |
+| `d6cb862` | Ingest pay structure Excel + markdown extract |
+| `270e205` | SO/FM supervisor tier: canonical roster, profile-setup, leave/rota endpoints |
+| `9a45f35` | Fix landing page: add context to leadership credentials section |
+| `a49bfb2` | Registration: add role family + designation step |
+
+---
+
+### ⚠️ Actions still required
+
+- [ ] **Deploy hosting** → `firebase deploy --only hosting --project vagt---services` (picks up all landing page + register changes)
+- [ ] **Deploy functions** → `firebase deploy --only functions --project vagt---services` (picks up auth.js, employee.js, admin.js SO tier endpoints)
+- [ ] **Re-seed HatsOff data** → `node firebase/functions/seed-hatsoff-data.js /path/to/serviceAccountKey.json` from machine
+- [ ] **Admin approval page** — `pages/admin-registrations.html` should display `role_family` + `designation` when showing pending registrations (field is now in Firestore, just needs to surface in the UI)
+- [ ] **vagtservices.com** — confirm GoDaddy forwarding destination is `https://www.vagtservices.com` with 301; allow up to 1 hour for propagation
+
+---
+
 ## Session 8 — 2026-03-22
 
 ### What was done this session
