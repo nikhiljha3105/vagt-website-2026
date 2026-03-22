@@ -39,12 +39,157 @@ const SITE_ID    = 'site_hatsoff_aviation';
 const COMPANY_ID = 'company_hatsoff_aviation';
 const CLIENT_ID  = 'client_hatsoff_aviation';
 
-// Designation labels
-const DESIG_MAP = {
-  'FO': 'Field Officer',
-  'SO': 'Security Officer',
-  'SG': 'Security Guard',
+// ─── Canonical guard roster (source of truth) ────────────────────────────────
+// Keyed by CLK number. Where a CLK slot was reused by different people over time,
+// we create separate records (clk_slot_person tracks the individual).
+// Active guards = those present in the Jan-26 muster roll.
+const CANONICAL_ROSTER = {
+  // ── Currently active (Jan-26) ──────────────────────────────────────────────
+  '321': {
+    canonical_name: 'Lal Singh K',    raw_names: ['LAL SINGH K'],
+    desig_code: 'SO',  designation: 'Security Officer',
+    role_family: 'security',          grade: 'Security Officer',
+    vagt_id: 'VAGT-0001',             supervisor_tier: true,
+    status: 'active',
+  },
+  '427': {
+    canonical_name: 'Abhilash BR',    raw_names: ['ABHILASH BR'],
+    desig_code: 'FO',  designation: 'Fire Officer',
+    role_family: 'security',          grade: 'Fire Officer',
+    vagt_id: 'VAGT-0002',
+    status: 'active',
+  },
+  '454': {
+    canonical_name: 'Sandeep S',      raw_names: ['SANDEEP S'],
+    desig_code: 'FO',  designation: 'Fire Officer',
+    role_family: 'security',          grade: 'Fire Officer',
+    vagt_id: 'VAGT-0003',
+    status: 'active',
+  },
+  '868': {
+    canonical_name: 'Arnab Nandi',    raw_names: ['ARNAB NANDI', 'ARNAV NANDI', 'A NANDI'],
+    desig_code: 'FO',  designation: 'Fire Officer',
+    role_family: 'security',          grade: 'Fire Officer',
+    vagt_id: 'VAGT-0004',
+    status: 'active',
+  },
+  '8': {
+    canonical_name: 'Kempa Raju',     raw_names: ['KEMPA RAJU'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0005',
+    status: 'active',
+  },
+  '813': {
+    // Same person as CLK 8 — old CLK number (KEMPA RAJU). Historical only.
+    canonical_name: 'Kempa Raju',     raw_names: ['KEMPA RAJU'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0005',             // same VAGT ID — same person
+    status: 'historical',
+  },
+  '9': {
+    canonical_name: 'Vikram BV',      raw_names: ['VIKRAM BV', 'VIKRAM'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0006',
+    status: 'active',
+  },
+  '98': {
+    canonical_name: 'Sambhu Manna',   raw_names: ['SAMBHU MANNA'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0007',
+    status: 'active',
+  },
+  '285_arumugam': {
+    canonical_name: 'Arumugam',       raw_names: ['ARUMUGAM'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0008',             clk_no: '285',
+    status: 'active',
+  },
+  '439_prashanta': {
+    canonical_name: 'Prashanta Behra', raw_names: ['PRASHANTA BEHRA', 'PRASHANTA B'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-II',
+    role_family: 'security',           grade: 'Security Guard Grade-II',
+    vagt_id: 'VAGT-0009',              clk_no: '439',
+    status: 'active',
+  },
+  '799': {
+    canonical_name: 'Mohan Raj P',    raw_names: ['MOHAN RAJ P'],
+    desig_code: 'SG',  designation: 'Additional Security Guard',
+    role_family: 'security',          grade: 'Additional Security Guard',
+    vagt_id: 'VAGT-0010',
+    status: 'active',
+  },
+  // ── Historical / departed guards ──────────────────────────────────────────
+  '7': {
+    canonical_name: 'Shree Kumar',    raw_names: ['SHREE KUMAR'],
+    desig_code: 'FO',  designation: 'Fire Officer',
+    role_family: 'security',          grade: 'Fire Officer',
+    vagt_id: 'VAGT-0011',
+    status: 'inactive',
+  },
+  '245': {
+    canonical_name: 'Suresh',         raw_names: ['SURESH'],
+    desig_code: 'FO',  designation: 'Fire Officer',
+    role_family: 'security',          grade: 'Fire Officer',
+    vagt_id: 'VAGT-0012',
+    status: 'inactive',
+  },
+  '16_hussain': {
+    canonical_name: 'Hussain Saikh',  raw_names: ['HUSSAIN SAIKH'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0013',             clk_no: '16',
+    status: 'inactive',
+  },
+  '16_subesh': {
+    canonical_name: 'Subesh Mandal',  raw_names: ['SUBESH MANDAL'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0014',             clk_no: '16',
+    status: 'inactive',
+  },
+  '285_ranjan': {
+    canonical_name: 'Ranjan Barik',   raw_names: ['RANJAN BARIK'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0015',             clk_no: '285',
+    status: 'inactive',
+  },
+  '439_goutam': {
+    canonical_name: 'Goutam Mallick', raw_names: ['GOUTAM MALLICK'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0016',             clk_no: '439',
+    status: 'inactive',
+  },
+  '429': {
+    canonical_name: 'Sanjiv Kumar',   raw_names: ['SANJIV KUMAR'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0017',
+    status: 'inactive',
+  },
+  'joytirmoy': {
+    canonical_name: 'Joytirmoy',      raw_names: ['JOYTIRMOY'],
+    desig_code: 'SG',  designation: 'Security Guard Grade-I',
+    role_family: 'security',          grade: 'Security Guard Grade-I',
+    vagt_id: 'VAGT-0018',             clk_no: null,
+    status: 'inactive',
+  },
 };
+
+// Reverse map: raw name → roster key (for attendance log attribution)
+const RAW_NAME_TO_KEY = {};
+Object.entries(CANONICAL_ROSTER).forEach(([key, g]) => {
+  g.raw_names.forEach(n => {
+    // Don't overwrite if already mapped (prefer active/later record)
+    if (!RAW_NAME_TO_KEY[n] || g.status === 'active') RAW_NAME_TO_KEY[n] = key;
+  });
+});
 
 // Sheet name → { year, month (1-12) }
 const SHEET_MONTH_MAP = {
@@ -85,12 +230,29 @@ const SHEET_MONTH_MAP = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Stable UUID from guard name (consistent across runs) */
-function guardUid(name) {
-  return 'hist_' + crypto.createHash('sha256')
-    .update(name.trim().toUpperCase())
-    .digest('hex')
-    .slice(0, 20);
+/** Stable Firestore doc ID from VAGT employee ID (e.g. "VAGT-0001" → "emp_vagt_0001") */
+function empDocId(vagtId) {
+  return 'emp_' + vagtId.toLowerCase().replace('-', '_');
+}
+
+/** Resolve a raw name from the rota to a roster key */
+function resolveRosterKey(rawName, clkNo) {
+  const upper = rawName.trim().toUpperCase();
+  // Try CLK-based lookup first (most reliable)
+  const clkStr = String(clkNo);
+  if (CANONICAL_ROSTER[clkStr]) return clkStr;
+  // CLK slots reused — try active person first, then inactive
+  const clkActive = Object.keys(CANONICAL_ROSTER).find(k =>
+    (CANONICAL_ROSTER[k].clk_no === clkStr || k.startsWith(clkStr + '_')) &&
+    CANONICAL_ROSTER[k].status === 'active'
+  );
+  if (clkActive) return clkActive;
+  const clkAny = Object.keys(CANONICAL_ROSTER).find(k =>
+    CANONICAL_ROSTER[k].clk_no === clkStr || k.startsWith(clkStr + '_')
+  );
+  if (clkAny) return clkAny;
+  // Fall back to name matching
+  return RAW_NAME_TO_KEY[upper] || null;
 }
 
 /** Random int between min and max inclusive */
@@ -130,8 +292,8 @@ async function commitBatch(ops) {
 // ─── Parse Rota ──────────────────────────────────────────────────────────────
 function parseRota() {
   const wb = XLSX.readFile(ROTA_FILE);
-  const guards = {};   // uid → guard meta
-  const months = [];   // { year, month, rows: [{ uid, name, days: ['P'|'L'|'W/O'|null], daysWorked, ot }] }
+  // months → attendance rows only; employee docs come from CANONICAL_ROSTER
+  const months = [];
 
   for (const sheetName of wb.SheetNames) {
     const ym = SHEET_MONTH_MAP[sheetName];
@@ -145,45 +307,44 @@ function parseRota() {
     for (const row of data) {
       const sn   = row[0];
       const clNo = row[1];
-      const desig= row[2];
       const name = row[3];
       if (!Number.isInteger(sn) || !name || typeof name !== 'string') continue;
       if (name.trim() === 'DESIG') continue;
 
-      const uid = guardUid(name);
-      const dayVals = row.slice(4, 35).map(v => v === null ? null : String(v).trim());
-      const totalDays = ym.month === 2
-        ? daysInMonth(ym.year, ym.month)
-        : (row[35] !== null && Number.isInteger(row[35]) ? null : null);
+      const clkStr     = clNo != null ? String(Math.round(clNo)) : null;
+      const rosterKey  = resolveRosterKey(name.trim().toUpperCase(), clkStr || '');
+      if (!rosterKey) {
+        console.warn(`  ⚠ unresolved guard: "${name.trim()}" CLK=${clkStr} (${sheetName})`);
+        continue;
+      }
+      const guard = CANONICAL_ROSTER[rosterKey];
+      const docId = empDocId(guard.vagt_id);
 
+      const dayVals    = row.slice(4, 35).map(v => v === null ? null : String(v).trim());
       const daysWorked = typeof row[35] === 'number' ? row[35] : null;
       const ot         = typeof row[36] === 'number' ? row[36] : 0;
 
-      if (!guards[uid]) {
-        guards[uid] = {
-          uid,
-          name:        name.trim(),
-          designation: DESIG_MAP[String(desig).trim()] || String(desig).trim(),
-          desig_code:  String(desig).trim(),
-          clk_no:      clNo ? String(clNo) : null,
-          first_seen:  `${ym.year}-${String(ym.month).padStart(2,'0')}`,
-        };
-      }
-
-      monthRows.push({ uid, name: name.trim(), days: dayVals, daysWorked, ot });
+      monthRows.push({
+        docId,
+        vagtId:       guard.vagt_id,
+        name:         guard.canonical_name,
+        days:         dayVals,
+        daysWorked,
+        ot,
+      });
     }
 
     months.push({ year: ym.year, month: ym.month, sheetName, rows: monthRows });
   }
 
-  return { guards, months };
+  return { months };
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function main() {
   console.log('📋 Parsing HatsOff rota (33 months)…');
-  const { guards, months } = parseRota();
-  console.log(`   Found ${Object.keys(guards).length} unique guards across ${months.length} months`);
+  const { months } = parseRota();
+  console.log(`   Parsed ${months.length} months of attendance data`);
 
   // ── 1. Company ─────────────────────────────────────────────────────────────
   console.log('\n🏢 Writing company & site…');
@@ -211,35 +372,58 @@ async function main() {
   }];
   await commitBatch(siteOps);
 
-  // ── 3. Employees ───────────────────────────────────────────────────────────
-  console.log('\n👷 Writing employee records…');
-  const empOps = Object.values(guards).map(g => {
-    // Derive a realistic join date from first_seen
-    const [fyStr, fmStr] = g.first_seen.split('-');
-    const joinedAt = new Date(parseInt(fyStr), parseInt(fmStr) - 1, 1);
+  // ── 3. Employees (from canonical roster) ───────────────────────────────────
+  console.log('\n👷 Writing employee records from canonical roster…');
 
-    return {
-      ref: db.collection('employees').doc(g.uid),
+  // De-duplicate: CLK 813 and CLK 8 are same person (VAGT-0005), skip the '813' entry
+  // as it shares a VAGT ID with '8'. Use a Set of vagt_ids already written.
+  const writtenVagtIds = new Set();
+  const empOps = [];
+
+  Object.entries(CANONICAL_ROSTER).forEach(([key, g]) => {
+    if (writtenVagtIds.has(g.vagt_id)) {
+      console.log(`   ↩ Skipping duplicate CLK key "${key}" (${g.canonical_name} already written as ${g.vagt_id})`);
+      return;
+    }
+    writtenVagtIds.add(g.vagt_id);
+
+    const docId = empDocId(g.vagt_id);
+    // Realistic join date: VAGT-0001 to 0010 = May 2023 (first rota month);
+    // later VAGT IDs get later join dates
+    const idNum    = parseInt(g.vagt_id.replace('VAGT-', ''), 10);
+    const joinYear = idNum <= 10 ? 2023 : 2022;
+    const joinMon  = idNum <= 5  ? 5    : (idNum <= 10 ? 6 : 1);
+    const joinedAt = new Date(joinYear, joinMon - 1, 1);
+
+    empOps.push({
+      ref: db.collection('employees').doc(docId),
       data: {
-        name:          g.name,
-        designation:   g.designation,
-        desig_code:    g.desig_code,
-        employee_id:   g.clk_no ? `CLK-${g.clk_no}` : `HIST-${g.uid.slice(5,9).toUpperCase()}`,
-        clk_no:        g.clk_no || null,
-        phone:         null,
-        email:         null,
-        site_ids:      [SITE_ID],
-        primary_site:  SITE_ID,
-        status:        'active',
-        historical:    true,   // flag — no Firebase Auth account
-        leave_balance: { casual: 6, sick: 4, earned: 2 },
-        joined_at:     admin.firestore.Timestamp.fromDate(joinedAt),
-        created_at:    admin.firestore.Timestamp.fromDate(new Date()),
+        name:            g.canonical_name,
+        designation:     g.designation,
+        grade:           g.grade,
+        desig_code:      g.desig_code,
+        role_family:     g.role_family,
+        employee_id:     g.vagt_id,
+        clk_no:          g.clk_no || (Object.keys(CANONICAL_ROSTER).find(k => k === key) || '').replace(/_.*/,'') || null,
+        phone:           null,
+        email:           null,
+        site_ids:        [SITE_ID],
+        primary_site:    SITE_ID,
+        status:          g.status,
+        supervisor_tier: g.supervisor_tier || false,
+        historical:      true,   // no Firebase Auth account
+        // Leave balance per 2026-27 pay structure:
+        // 5 National/Festival Holidays (NFH) + 12 Casual + 7 Sick + accrued Earned
+        leave_balance:   { casual: 12, sick: 7, earned: 0, national_holiday: 5 },
+        joined_at:       admin.firestore.Timestamp.fromDate(joinedAt),
+        created_at:      admin.firestore.Timestamp.fromDate(new Date()),
       },
-    };
+    });
   });
+
   await commitBatch(empOps);
-  console.log(`   ✓ ${empOps.length} employees written`);
+  const activeCount = empOps.filter(e => e.data.status === 'active').length;
+  console.log(`   ✓ ${empOps.length} employee records written (${activeCount} active, ${empOps.length - activeCount} historical/inactive)`);
 
   // ── 4. Attendance logs ─────────────────────────────────────────────────────
   console.log('\n📅 Writing attendance logs…');
@@ -249,17 +433,18 @@ async function main() {
   for (const { year, month, rows } of months) {
     const daysInMo = daysInMonth(year, month);
 
-    for (const { uid, name, days, daysWorked, ot } of rows) {
+    for (const { docId, vagtId, name, days, daysWorked, ot } of rows) {
       for (let dayIdx = 0; dayIdx < daysInMo; dayIdx++) {
         const code = days[dayIdx] || null;
         if (code === null) continue;  // month had fewer days at this index
 
         const day    = dayIdx + 1;
         const ds     = dateStr(year, month, day);
-        const logId  = `${uid}_${ds}`;
+        const logId  = `${docId}_${ds}`;
 
         let logData = {
-          employee_uid:  uid,
+          employee_uid:  docId,
+          employee_id:   vagtId,
           employee_name: name,
           site_id:       SITE_ID,
           site_name:     SITE_NAME,

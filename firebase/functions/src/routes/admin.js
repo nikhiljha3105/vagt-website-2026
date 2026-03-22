@@ -1193,6 +1193,100 @@ module.exports = function ({ db, auth, requireAuth, requireAdmin }) {
     }
   });
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // ROTA MANAGEMENT — admin approves / rejects SO-submitted weekly rotas
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // GET /api/admin/rotas — list rotas (filter by status, site)
+  router.get('/rotas', ...adminGuard, async (req, res) => {
+    try {
+      let q = db.collection('rotas').orderBy('submitted_at', 'desc').limit(100);
+      if (req.query.status) q = q.where('status', '==', req.query.status);
+      if (req.query.site_id) q = q.where('site_id', '==', req.query.site_id);
+      const snap = await q.get();
+      const rotas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return res.json({ rotas });
+    } catch (err) {
+      console.error('admin/rotas GET error:', err);
+      return res.status(500).json({ message: 'Failed to fetch rotas.' });
+    }
+  });
+
+  // POST /api/admin/rotas/:id/approve
+  router.post('/rotas/:id/approve', ...adminGuard, async (req, res) => {
+    const rotaRef = db.collection('rotas').doc(req.params.id);
+    try {
+      const snap = await rotaRef.get();
+      if (!snap.exists) return res.status(404).json({ message: 'Rota not found.' });
+      if (snap.data().status !== 'submitted') {
+        return res.status(400).json({ message: 'Only submitted rotas can be approved.' });
+      }
+      await rotaRef.update({
+        status:          'approved',
+        approved_by_uid:  req.user.uid,
+        approved_at:      admin.firestore.Timestamp.now(),
+      });
+      await logActivity(db, 'rota', `Rota ${req.params.id} approved`, 'admin', req.user.uid);
+      return res.json({ message: 'Rota approved.' });
+    } catch (err) {
+      console.error('admin/rotas/approve error:', err);
+      return res.status(500).json({ message: 'Failed to approve rota.' });
+    }
+  });
+
+  // POST /api/admin/rotas/:id/reject
+  router.post('/rotas/:id/reject', ...adminGuard, async (req, res) => {
+    const { reason } = req.body || {};
+    if (!reason || reason.trim().length < 5) {
+      return res.status(400).json({ message: 'Please provide a rejection reason.' });
+    }
+    const rotaRef = db.collection('rotas').doc(req.params.id);
+    try {
+      const snap = await rotaRef.get();
+      if (!snap.exists) return res.status(404).json({ message: 'Rota not found.' });
+      await rotaRef.update({
+        status:          'rejected',
+        reject_reason:    reason.trim(),
+        rejected_by_uid:  req.user.uid,
+        rejected_at:      admin.firestore.Timestamp.now(),
+      });
+      await logActivity(db, 'rota', `Rota ${req.params.id} rejected: ${reason.trim()}`, 'admin', req.user.uid);
+      return res.json({ message: 'Rota rejected.' });
+    } catch (err) {
+      console.error('admin/rotas/reject error:', err);
+      return res.status(500).json({ message: 'Failed to reject rota.' });
+    }
+  });
+
+  // LEAVE: approve SO-sanctioned annual leave (pending_admin_approval)
+  // POST /api/admin/leaves/:id/approve already exists — extend it to handle
+  // pending_admin_approval status in addition to 'pending'.
+  // (The existing route is checked above; this comment is for documentation.)
+
+  // SUPERVISOR TIER: grant or revoke supervisor_tier custom claim
+  // POST /api/admin/employees/:uid/set-supervisor
+  router.post('/employees/:uid/set-supervisor', ...adminGuard, async (req, res) => {
+    const { grant } = req.body || {};
+    const targetUid = req.params.uid;
+    try {
+      const current = await auth.getUser(targetUid);
+      const claims  = current.customClaims || {};
+      await auth.setCustomUserClaims(targetUid, { ...claims, supervisor_tier: grant === true });
+      await db.collection('employees').doc(targetUid).update({
+        supervisor_tier: grant === true,
+        supervisor_tier_granted_by: req.user.uid,
+        supervisor_tier_updated_at: admin.firestore.Timestamp.now(),
+      });
+      await logActivity(db, 'admin',
+        `Supervisor tier ${grant ? 'granted to' : 'revoked from'} ${targetUid}`,
+        'admin', req.user.uid);
+      return res.json({ message: `Supervisor tier ${grant ? 'granted' : 'revoked'}.` });
+    } catch (err) {
+      console.error('set-supervisor error:', err);
+      return res.status(500).json({ message: 'Failed to update supervisor tier.' });
+    }
+  });
+
   return { router };
 };
 

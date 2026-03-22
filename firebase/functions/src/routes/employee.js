@@ -712,11 +712,12 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
   });
 
   // ── POST /api/employee/profile ───────────────────────────────────────────
-  // Employee progressive profiling: set role_detail and primary_site on first login.
-  // Called from employee-profile-setup.html after authentication.
+  // Employee progressive profiling: set designation, role_family, supervisor_tier.
+  // Called from employee-profile-setup.html on first login.
+  // supervisor_tier is stored as a request (admin grants the actual custom claim).
   router.post('/employee/profile', ...guard, async (req, res) => {
     const uid = req.user.uid;
-    const { role_detail, primary_site } = req.body;
+    const { role_detail, role_family, designation, supervisor_tier, primary_site } = req.body;
 
     if (!role_detail) {
       return res.status(400).json({ message: 'Please select a role.' });
@@ -724,16 +725,235 @@ module.exports = function ({ db, requireAuth, requireEmployee, actionLimiter }) 
 
     try {
       await db.collection('employees').doc(uid).update({
-        role_detail: role_detail,
-        primary_site: primary_site || null,
+        role_detail:           role_detail,
+        role_family:           role_family   || null,
+        designation:           designation   || role_detail,
+        supervisor_tier_requested: supervisor_tier === true,  // actual grant is via admin
+        primary_site:          primary_site  || null,
+        profile_complete:      true,
       });
 
-      await logActivity(db, 'profile', `Employee profile set: role=${role_detail}`, uid);
+      await logActivity(db, 'profile',
+        `Profile set: ${designation || role_detail} (${role_family || 'unknown'})${supervisor_tier ? ' [supervisor requested]' : ''}`,
+        uid);
 
       return res.status(200).json({ message: 'Profile saved successfully.' });
     } catch (err) {
       console.error('employee/profile POST error:', err);
       return res.status(500).json({ message: 'Failed to save profile. Please try again.' });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SUPERVISOR ROUTES — requires supervisor_tier custom claim
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  const supervisor = [
+    async (req, res, next) => {
+      if (!req.user) return res.status(401).json({ message: 'Not authenticated.' });
+      const claims = req.user.custom_claims || {};
+      if (claims.supervisor_tier !== true && claims.role !== 'admin') {
+        return res.status(403).json({ message: 'Supervisor access required.' });
+      }
+      next();
+    },
+  ];
+
+  // ── GET /api/supervisor/team-leaves ──────────────────────────────────────
+  // Returns all leave requests for guards at the supervisor's primary site.
+  router.get('/supervisor/team-leaves', ...guard, ...supervisor, async (req, res) => {
+    try {
+      const empSnap = await db.collection('employees').doc(req.user.uid).get();
+      if (!empSnap.exists) return res.status(404).json({ message: 'Your profile was not found.' });
+      const siteId = empSnap.data().primary_site;
+      if (!siteId) return res.status(400).json({ message: 'No site assigned to your profile.' });
+
+      const snap = await db.collection('leave_requests')
+        .where('site_id', '==', siteId)
+        .orderBy('created_at', 'desc')
+        .limit(200)
+        .get();
+
+      const leaves = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return res.json({ leaves, site_id: siteId });
+    } catch (err) {
+      console.error('supervisor/team-leaves error:', err);
+      return res.status(500).json({ message: 'Could not load leaves. Check your connection.' });
+    }
+  });
+
+  // ── POST /api/supervisor/leave/:id/approve ────────────────────────────────
+  // SO approves a casual/sick leave request. Admin is notified via activity log.
+  router.post('/supervisor/leave/:id/approve', ...guard, ...supervisor, async (req, res) => {
+    const leaveRef = db.collection('leave_requests').doc(req.params.id);
+    try {
+      const snap = await leaveRef.get();
+      if (!snap.exists) return res.status(404).json({ message: 'Leave request not found.' });
+      const leave = snap.data();
+
+      if (!['pending', 'pending_so_approval'].includes(leave.status)) {
+        return res.status(400).json({ message: 'This leave is not waiting for your approval.' });
+      }
+      if (!['casual', 'sick'].includes(leave.leave_type)) {
+        return res.status(400).json({ message: 'Annual/earned leave must be sanctioned, not approved directly.' });
+      }
+
+      const now = admin.firestore.Timestamp.now();
+      await leaveRef.update({
+        status:         'approved',
+        so_approved_by: req.user.uid,
+        so_approved_at: now,
+        updated_at:     now,
+      });
+
+      // Decrement leave balance
+      const days = leave.days_requested || 1;
+      const balField = `leave_balance.${leave.leave_type}`;
+      await db.collection('employees').doc(leave.employee_uid).update({
+        [balField]: admin.firestore.FieldValue.increment(-days),
+      });
+
+      await logActivity(db, 'leave',
+        `SO approved ${leave.leave_type} leave for ${leave.employee_name} (${days} day${days > 1 ? 's' : ''})`,
+        req.user.uid);
+
+      return res.json({ message: 'Leave approved.' });
+    } catch (err) {
+      console.error('supervisor/leave/approve error:', err);
+      return res.status(500).json({ message: 'Could not approve leave. Try again.' });
+    }
+  });
+
+  // ── POST /api/supervisor/leave/:id/sanction ───────────────────────────────
+  // SO sanctions earned/annual leave → moves to pending_admin_approval.
+  router.post('/supervisor/leave/:id/sanction', ...guard, ...supervisor, async (req, res) => {
+    const leaveRef = db.collection('leave_requests').doc(req.params.id);
+    try {
+      const snap = await leaveRef.get();
+      if (!snap.exists) return res.status(404).json({ message: 'Leave request not found.' });
+      const leave = snap.data();
+
+      if (!['pending', 'pending_so_sanction'].includes(leave.status)) {
+        return res.status(400).json({ message: 'This leave is not waiting for your sanction.' });
+      }
+
+      const now = admin.firestore.Timestamp.now();
+      await leaveRef.update({
+        status:         'pending_admin_approval',
+        so_sanctioned_by: req.user.uid,
+        so_sanctioned_at: now,
+        updated_at:     now,
+      });
+
+      await logActivity(db, 'leave',
+        `SO sanctioned ${leave.leave_type} leave for ${leave.employee_name} — pending admin approval`,
+        req.user.uid);
+
+      return res.json({ message: 'Leave sanctioned and sent to admin for final approval.' });
+    } catch (err) {
+      console.error('supervisor/leave/sanction error:', err);
+      return res.status(500).json({ message: 'Could not sanction leave. Try again.' });
+    }
+  });
+
+  // ── POST /api/supervisor/leave/:id/reject ─────────────────────────────────
+  router.post('/supervisor/leave/:id/reject', ...guard, ...supervisor, async (req, res) => {
+    const { reason } = req.body || {};
+    if (!reason || reason.trim().length < 5) {
+      return res.status(400).json({ message: 'Please provide a reason for rejecting (at least 5 characters).' });
+    }
+    const leaveRef = db.collection('leave_requests').doc(req.params.id);
+    try {
+      const snap = await leaveRef.get();
+      if (!snap.exists) return res.status(404).json({ message: 'Leave request not found.' });
+
+      const now = admin.firestore.Timestamp.now();
+      await leaveRef.update({
+        status:           'rejected',
+        rejected_by:      req.user.uid,
+        rejected_at:      now,
+        rejection_reason: reason.trim(),
+        updated_at:       now,
+      });
+
+      await logActivity(db, 'leave',
+        `SO rejected leave for ${snap.data().employee_name}: ${reason.trim()}`,
+        req.user.uid);
+
+      return res.json({ message: 'Leave rejected.' });
+    } catch (err) {
+      console.error('supervisor/leave/reject error:', err);
+      return res.status(500).json({ message: 'Could not reject leave. Try again.' });
+    }
+  });
+
+  // ── GET /api/supervisor/team-roster ──────────────────────────────────────
+  // Returns all employees at the supervisor's primary site (for rota builder).
+  router.get('/supervisor/team-roster', ...guard, ...supervisor, async (req, res) => {
+    try {
+      const empSnap = await db.collection('employees').doc(req.user.uid).get();
+      if (!empSnap.exists) return res.status(404).json({ message: 'Your profile was not found.' });
+      const siteId = empSnap.data().primary_site;
+      if (!siteId) return res.status(400).json({ message: 'No site assigned to your profile.' });
+
+      const snap = await db.collection('employees')
+        .where('primary_site', '==', siteId)
+        .where('status', '==', 'active')
+        .get();
+
+      const guards = snap.docs
+        .filter(d => d.id !== req.user.uid)  // exclude the SO themselves
+        .map(d => ({
+          uid:         d.id,
+          name:        d.data().name,
+          designation: d.data().designation || d.data().role_detail,
+          employee_id: d.data().employee_id,
+        }));
+
+      return res.json({ guards, site_id: siteId });
+    } catch (err) {
+      console.error('supervisor/team-roster error:', err);
+      return res.status(500).json({ message: 'Could not load team roster. Try again.' });
+    }
+  });
+
+  // ── POST /api/supervisor/rota ─────────────────────────────────────────────
+  // Submit a weekly rota for admin approval.
+  router.post('/supervisor/rota', ...guard, ...supervisor, async (req, res) => {
+    const { week_start, week_end, schedule, guard_names } = req.body || {};
+    if (!week_start || !week_end || !schedule) {
+      return res.status(400).json({ message: 'week_start, week_end, and schedule are required.' });
+    }
+
+    try {
+      const empSnap = await db.collection('employees').doc(req.user.uid).get();
+      if (!empSnap.exists) return res.status(404).json({ message: 'Your profile was not found.' });
+      const { primary_site, name } = empSnap.data();
+
+      const docRef = db.collection('rotas').doc(`${primary_site}_${week_start}`);
+      await docRef.set({
+        site_id:          primary_site,
+        week_start,
+        week_end,
+        status:           'submitted',
+        submitted_by_uid:  req.user.uid,
+        submitted_by_name: name || '—',
+        submitted_at:      admin.firestore.Timestamp.now(),
+        schedule:          schedule,
+        guard_names:       guard_names || {},
+        approved_by_uid:   null,
+        approved_at:       null,
+        reject_reason:     null,
+      }, { merge: true });
+
+      await logActivity(db, 'rota',
+        `Rota submitted for week ${week_start} → ${week_end} at site ${primary_site}`,
+        req.user.uid);
+
+      return res.json({ message: 'Rota submitted for admin approval.', rota_id: docRef.id });
+    } catch (err) {
+      console.error('supervisor/rota POST error:', err);
+      return res.status(500).json({ message: 'Could not submit rota. Try again.' });
     }
   });
 
