@@ -120,6 +120,10 @@
         <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/><line x1="18" y1="14" x2="18" y2="20"/><line x1="15" y1="17" x2="21" y2="17"/></svg>
         Manage Admins
       </a>
+      <a href="admin-my-profile.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        My Profile
+      </a>
     </nav>
     <div class="sidebar-footer">
       <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
@@ -350,13 +354,27 @@
         headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
         body:    JSON.stringify({ month: currentMonth }),
       });
-      const data = await resp.json();
-      if (!resp.ok) { alert('Failed: ' + (data.message || resp.statusText)); return; }
-      alert('Payroll complete. ' + data.generated + ' slips generated.');
+      let data = {};
+      try { data = await resp.json(); } catch (_) {}
+      if (!resp.ok) {
+        const detail = data.message || resp.statusText || 'Unknown error';
+        const code   = resp.status;
+        let tip = '';
+        if (code === 401 || code === 403) tip = '\n\nSession may have expired — sign out and back in, then retry.';
+        if (code === 404) tip = '\n\nEndpoint not found. Deploy latest code: firebase deploy --only functions';
+        if (code >= 500) tip = '\n\nServer error. Check Firebase Functions logs in GCP Console.';
+        alert('Payroll failed (' + code + '): ' + detail + tip);
+        return;
+      }
+      const count = data.generated || 0;
+      if (count === 0) {
+        alert('Payroll ran but 0 slips generated. Check: employees need status "active" in Firestore, and must not already have slips for this period.');
+      } else {
+        alert('Done. ' + count + ' payslip' + (count === 1 ? '' : 's') + ' generated for ' + fmtMonth(currentMonth) + '.');
+      }
       loadPayroll();
     } catch (e) {
-      alert('Network error: ' + e.message);
-    } finally {
+      alert('Could not reach the server. ' + e.message);
       this.disabled = false;
       setText('runPayrollBtn', '');
       document.getElementById('runPayrollBtn').innerHTML =

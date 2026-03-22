@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — VAGT Employee Portal</title>
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <style>
+    /* ── Page-specific layout ── */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 700px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Avatar card ── */
+    .avatar-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 16px;
+      cursor: pointer;
+    }
+    .avatar-img {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      background: var(--navy);
+      display: block;
+    }
+    .avatar-initials {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 28px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 1px;
+    }
+    .avatar-upload-btn {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 28px;
+      height: 28px;
+      background: var(--amber);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--white);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+      transition: background 0.15s;
+    }
+    .avatar-upload-btn:hover { background: var(--navy); }
+    .avatar-upload-btn svg { width: 13px; height: 13px; stroke: var(--navy); }
+    .avatar-upload-btn:hover svg { stroke: var(--white); }
+    .avatar-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .avatar-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .avatar-tap-hint {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+    #photoFile { display: none; }
+
+    /* ── Info card ── */
+    .info-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 28px 28px 24px;
+    }
+    .info-card-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--navy);
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .field-row {
+      margin-bottom: 18px;
+    }
+    .field-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .field-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      background: var(--white);
+      font-size: 14px;
+      color: var(--navy);
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .field-input:focus {
+      outline: none;
+      border-color: var(--navy);
+    }
+    .field-readonly {
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .readonly-section {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .readonly-section-title {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .readonly-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    @media (max-width: 500px) {
+      .readonly-grid { grid-template-columns: 1fr; }
+    }
+    .readonly-item .field-label { margin-bottom: 4px; }
+
+    /* ── Save row ── */
+    .save-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .save-status {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .save-status.ok   { color: #16a34a; }
+    .save-status.err  { color: var(--red); }
+
+    /* ── Upload progress overlay ── */
+    .upload-progress {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--amber-soft);
+      border: 1px solid rgba(245,196,0,0.25);
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 12px;
+    }
+    .upload-progress.visible { display: flex; }
+  </style>
+</head>
+<body>
+
+<div id="authOverlay">Checking access…</div>
+
+<button class="mobile-nav-toggle" id="navToggle" aria-label="Open navigation" style="display:none;">
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2">
+    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+  </svg>
+</button>
+
+<div class="layout" id="portalLayout" style="display:none;">
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <a href="../index.html" class="logo-link">
+        <div class="logo-img-wrap">
+          <img src="../assets/images/logos/vagt-logo-actual.jpg" alt="VAGT" class="logo-img">
+        </div>
+        <div class="logo-text-block">
+          <div class="logo-wordmark">VA<span style="color:var(--red);">G</span>T</div>
+          <div class="logo-sub">Security Services</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="emp-sidebar-profile">
+      <div class="emp-sidebar-name" id="sidebarName">—</div>
+      <div class="emp-sidebar-id"   id="sidebarId">—</div>
+      <div class="emp-sidebar-site" id="sidebarSite">—</div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Employee portal">
+      <div class="nav-group-label">My Portal</div>
+      <a href="employee-portal.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </a>
+      <a href="employee-schedule.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        My Schedule
+      </a>
+      <a href="employee-leaves.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Apply for Leave
+      </a>
+      <a href="employee-guests.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Guest Log
+      </a>
+      <a href="employee-patrol.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Beat Patrol
+      </a>
+      <a href="employee-incidents.html" class="nav-link">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Incident Reports
+      </a>
+      <div class="nav-group-label">Account</div>
+      <a href="employee-my-profile.html" class="nav-link active">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg>
+        My Profile
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button id="signOutBtn" class="btn btn-ghost portal-signout" style="margin:0 20px 12px;">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <div class="page-header">
+      <div class="section-label">Account</div>
+      <h1>My Profile</h1>
+      <p>Update your name, contact number, and profile photo.</p>
+    </div>
+
+    <div class="profile-grid">
+
+      <!-- Avatar card -->
+      <div class="avatar-card">
+        <div class="avatar-wrap" id="avatarWrap" title="Click to change photo">
+          <div class="avatar-initials" id="avatarInitials">—</div>
+          <img id="avatarImg" class="avatar-img" src="" alt="Profile photo" style="display:none;">
+          <div class="avatar-upload-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+        </div>
+        <input type="file" id="photoFile" accept="image/*">
+        <div class="avatar-name" id="avatarName">—</div>
+        <div class="avatar-sub" id="avatarId">—</div>
+        <p class="avatar-tap-hint">Tap the photo to change it</p>
+        <div class="upload-progress" id="uploadProgress">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          <span id="uploadProgressText">Uploading…</span>
+        </div>
+      </div>
+
+      <!-- Edit card -->
+      <div class="info-card">
+        <div class="info-card-title">Personal Details</div>
+
+        <div class="field-row">
+          <div class="field-label">Full Name</div>
+          <input type="text" id="fieldName" class="field-input" placeholder="Your full name" maxlength="80">
+        </div>
+        <div class="field-row">
+          <div class="field-label">Phone Number</div>
+          <input type="tel" id="fieldPhone" class="field-input" placeholder="10-digit mobile number" maxlength="15">
+        </div>
+        <div class="field-row">
+          <div class="field-label">Email</div>
+          <div class="field-readonly" id="fieldEmail">—</div>
+        </div>
+
+        <div class="readonly-section">
+          <div class="readonly-section-title">Your Assignment</div>
+          <div class="readonly-grid">
+            <div class="readonly-item">
+              <div class="field-label">Employee ID</div>
+              <div class="field-readonly" id="roEmployeeId">—</div>
+            </div>
+            <div class="readonly-item">
+              <div class="field-label">Role</div>
+              <div class="field-readonly" id="roRole">—</div>
+            </div>
+            <div class="readonly-item">
+              <div class="field-label">Primary Site</div>
+              <div class="field-readonly" id="roSite">—</div>
+            </div>
+            <div class="readonly-item">
+              <div class="field-label">Account Status</div>
+              <div class="field-readonly" id="roStatus">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <button class="btn btn-primary" id="saveBtn">Save Changes</button>
+          <span class="save-status" id="saveStatus"></span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div><!-- /layout -->
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
+<script src="../assets/js/firebase-config.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (firebase.apps.length === 0) firebase.initializeApp(FIREBASE_CONFIG);
+  const auth    = firebase.auth();
+  const db      = firebase.firestore();
+  const storage = firebase.storage();
+
+  function setText(id, t) { const el = document.getElementById(id); if (el) el.textContent = t; }
+
+  // ── Image compression ─────────────────────────────────────────────────────
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      const canvas = document.createElement('canvas');
+      const img    = new Image();
+      img.onload = function () {
+        const MAX = 400;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        else if (h > MAX)     { w = Math.round(w * MAX / h); h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function (blob) {
+          if (blob) resolve(blob);
+          else reject(new Error('Compression failed'));
+        }, 'image/webp', 0.85);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  // ── Avatar helpers ────────────────────────────────────────────────────────
+  function setAvatarPhoto(url) {
+    const img  = document.getElementById('avatarImg');
+    const init = document.getElementById('avatarInitials');
+    img.src = url;
+    img.style.display = 'block';
+    init.style.display = 'none';
+  }
+
+  function setAvatarInitials(name) {
+    const init  = document.getElementById('avatarInitials');
+    const img   = document.getElementById('avatarImg');
+    const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+    const text  = parts.length >= 2
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : (parts[0] || '?')[0].toUpperCase();
+    init.textContent = text;
+    init.style.display = 'flex';
+    img.style.display  = 'none';
+  }
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = 'portal.html'; return; }
+    const token = await user.getIdTokenResult(true);
+    if (token.claims.role !== 'employee') { window.location.href = 'portal.html'; return; }
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('portalLayout').style.display = '';
+    document.getElementById('navToggle').style.display    = '';
+    loadProfile(user.uid, user.email);
+    setupNav();
+  });
+
+  document.getElementById('signOutBtn').addEventListener('click', function () {
+    auth.signOut().then(function () { window.location.href = 'portal.html'; });
+  });
+
+  // ── Load profile ──────────────────────────────────────────────────────────
+  let currentUid = null;
+
+  async function loadProfile(uid, email) {
+    currentUid = uid;
+    try {
+      const snap = await db.collection('employees').doc(uid).get();
+      if (!snap.exists) return;
+      const d = snap.data();
+
+      // Sidebar
+      setText('sidebarName', d.name || '—');
+      setText('sidebarId',   d.employee_id || '—');
+      setText('sidebarSite', d.site_name ? 'Site: ' + d.site_name : 'No site assigned');
+
+      // Avatar
+      if (d.photo_url) setAvatarPhoto(d.photo_url);
+      else             setAvatarInitials(d.name || '');
+      setText('avatarName', d.name || '—');
+      setText('avatarId',   d.employee_id || '—');
+
+      // Editable fields
+      document.getElementById('fieldName').value  = d.name  || '';
+      document.getElementById('fieldPhone').value = d.phone || '';
+      setText('fieldEmail', email || '—');
+
+      // Read-only
+      setText('roEmployeeId', d.employee_id  || '—');
+      setText('roRole',       d.role_detail  || 'Not set');
+      setText('roSite',       d.site_name    || 'Not assigned');
+      setText('roStatus',     d.status       || 'Active');
+    } catch (e) {
+      console.error('Profile load error:', e);
+    }
+  }
+
+  // ── Photo upload ──────────────────────────────────────────────────────────
+  document.getElementById('avatarWrap').addEventListener('click', function () {
+    document.getElementById('photoFile').click();
+  });
+
+  document.getElementById('photoFile').addEventListener('change', async function (e) {
+    const file = e.target.files[0];
+    if (!file || !currentUid) return;
+    const prog     = document.getElementById('uploadProgress');
+    const progText = document.getElementById('uploadProgressText');
+    prog.classList.add('visible');
+    progText.textContent = 'Compressing…';
+    try {
+      const blob = await compressImage(file);
+      progText.textContent = 'Uploading…';
+      const ref  = storage.ref('profile_photos/' + currentUid + '.webp');
+      await ref.put(blob, { contentType: 'image/webp' });
+      const url  = await ref.getDownloadURL();
+      await db.collection('employees').doc(currentUid).update({ photo_url: url });
+      setAvatarPhoto(url);
+      progText.textContent = 'Photo updated ✓';
+      setTimeout(function () { prog.classList.remove('visible'); }, 2000);
+    } catch (err) {
+      progText.textContent = 'Upload failed — try again';
+      console.error('Photo upload error:', err);
+      setTimeout(function () { prog.classList.remove('visible'); }, 3000);
+    }
+    e.target.value = '';
+  });
+
+  // ── Save changes ──────────────────────────────────────────────────────────
+  document.getElementById('saveBtn').addEventListener('click', async function () {
+    if (!currentUid) return;
+    const btn    = document.getElementById('saveBtn');
+    const status = document.getElementById('saveStatus');
+    const name   = document.getElementById('fieldName').value.trim();
+    const phone  = document.getElementById('fieldPhone').value.trim();
+
+    if (!name) { status.className = 'save-status err'; status.textContent = 'Name cannot be empty.'; return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+    status.textContent = '';
+    try {
+      await db.collection('employees').doc(currentUid).update({ name: name, phone: phone });
+      setText('sidebarName', name);
+      setText('avatarName',  name);
+      setAvatarInitials(name);
+      // Refresh photo if they have one
+      const snap = await db.collection('employees').doc(currentUid).get();
+      if (snap.data().photo_url) setAvatarPhoto(snap.data().photo_url);
+      status.className   = 'save-status ok';
+      status.textContent = 'Changes saved ✓';
+    } catch (err) {
+      status.className   = 'save-status err';
+      status.textContent = 'Save failed. Try again.';
+      console.error('Save error:', err);
+    }
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  });
+
+  // ── Mobile nav ────────────────────────────────────────────────────────────
+  function setupNav() {
+    const toggle  = document.getElementById('navToggle');
+    const sidebar = document.getElementById('sidebar');
+    const layout  = document.getElementById('portalLayout');
+    toggle.addEventListener('click', function () {
+      sidebar.classList.toggle('open');
+      layout.classList.toggle('nav-open');
+    });
+    document.querySelectorAll('.nav-link').forEach(function (a) {
+      a.addEventListener('click', function () {
+        sidebar.classList.remove('open');
+        layout.classList.remove('nav-open');
+      });
+    });
+  }
+
+}());
+</script>
+</body>
+</html>
