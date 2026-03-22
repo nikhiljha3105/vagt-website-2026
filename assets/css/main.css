@@ -264,10 +264,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 }
 .hb-va { color: var(--white); }
 .hb-g  {
-  color: rgba(245,196,0,0.3);
-  font-size: 0.58em;
-  letter-spacing: -3px;
-  vertical-align: 0.12em;
+  color: var(--red);
 }
 .hb-t  { color: var(--white); }
 .hero-pron-note {
