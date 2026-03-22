@@ -121,9 +121,59 @@ Full architecture added to Notion page.
 
 ---
 
+### Built later in Session 7 (same date)
+
+#### My Profile pages — all three portals
+
+- `pages/employee-my-profile.html` — Guard can edit name, phone, upload profile photo
+- `pages/client-my-profile.html` — Client can edit name, phone, upload profile photo, view org read-only
+- `pages/admin-my-profile.html` — Admin can edit display name, upload profile photo, change password via reset flow
+
+Photo upload: Canvas → WebP 85% quality, max 400px → Firebase Storage `profile_photos/{uid}.webp` → URL saved to Firestore doc. No backend changes needed (Firestore rules already allow users to write their own doc).
+
+My Profile nav link added to all 26 portal pages via Python script.
+
+Also: `admin-payroll.html` — improved Run Payroll error messages. Now shows HTTP status code + actionable hint (404 = not deployed, 500 = check logs).
+
+#### Finance & Inventory — admin-finance.html (NEW)
+
+Full finance management page for admin portal:
+- **Documents tab**: Upload receipts/bills/invoices. Client-side WebP compression (max 1200px, 82% quality — 4MB → ~120KB). Image stored in Firebase Storage. Status: complete / incomplete / processing. Filter by status/type/category/search. Click document → detail modal → edit all fields → change log tracks every field edit (actor, old value, new value, timestamp).
+- **Inventory tab**: Guard Uniforms + Facility Items. Auto-seeds 7+7 default items (stock=0) on first load. Adjust Stock modal: purchase/issue/return/adjustment. Atomic increment, full transaction log. Reorder alerts when stock ≤ reorder level. Add custom items on the fly.
+
+New Firestore collections: `financial_documents`, `document_changes`, `inventory_items`, `inventory_transactions`. Admin-only rules added to `firestore.rules`.
+
+Finance & Inventory nav link added to all 14 admin pages.
+
+**OCR pipeline ready to wire (Phase 2):**
+- After upload, call Cloud Function `POST /api/admin/finance/extract` with storage URL
+- Cloud Function calls Gemini 1.5 Flash → returns structured fields
+- Set `status: 'processing'` → `status: 'complete'/'incomplete'` based on confidence
+- Needs: Gemini API enabled in GCP Console + `GEMINI_API_KEY` in Functions config
+
+#### Gate Automation product strategy captured
+
+Documented in Notion (https://www.notion.so/32a9d914b02f81fc8a6deb5edc8f3d7e):
+- FAAC (Italian, #1 globally, UK subsidiary in Basingstoke) → approach for South India distribution rights via UK entity
+- Paxton Access (UK, pure British) → complementary brand for access control layer
+- VAGT's own team installs → needs FAAC factory certification before first commercial install
+- Phase 2: gate events → Firestore `gate_events` → client portal widget (~4-6 hours dev, starts after first install)
+
+#### Version tag
+
+`v0.7.0-pre-finance-profile` — pushed to origin before this build started. Clean rollback point.
+
+---
+
 ### Pending from this session (carry forward)
 
-- [ ] **Firebase deploy** — `firebase deploy --only hosting,functions,firestore:rules --project vagt---services` (from Nikhil's machine — includes all Session 7 changes)
+- [ ] **Firebase deploy** — `firebase deploy --only hosting,functions,firestore:rules --project vagt---services` (from Nikhil's machine — all Session 7 changes including profile pages, finance tool, Firestore rules)
+- [ ] **Finance OCR wiring (Phase 2)**:
+  - Enable Gemini API in GCP Console (same project)
+  - Add `GEMINI_API_KEY` to Firebase Functions config
+  - Build `POST /api/admin/finance/extract` Cloud Function
+  - Wire to finance page upload flow
+- [ ] **iCloud backup script**: cron job to export Firestore + Storage → iCloud Drive monthly
 - [ ] **Shop build** (resuming after strategy pause):
   - Add 6 products: bullet cam, IP cam, CCTV monitor, DVR, metal detector, Motorola DP2400e radio (label: International Brand)
   - Add enquiry capture modal with Firestore logging to `shop_enquiries`
@@ -133,14 +183,10 @@ Full architecture added to Notion page.
 - [ ] **WhatsApp Vahan lookup bot:**
   - Sign up with IDfy or Karza for Vahan API access (₹2–5/query)
   - Sign up with Interakt for WhatsApp Business API
-  - Build Cloud Function webhook handler
-  - Log to `vehicle_lookups` Firestore collection
-  - Add Firestore rules for `vehicle_lookups` (public write for bot, admin read)
+  - Build Cloud Function webhook handler + `vehicle_lookups` Firestore collection + rules
   - Pick 3 pilot societies from existing guard contracts for free rollout
+- [ ] **Gate automation**: Email FAAC UK (faac.co.uk) + Paxton Access (paxton.co.uk) for India distribution rights. Use UK entity.
 - [ ] **Razorpay signup** — no minimum volume, needs GST + PAN + bank account
-- [ ] **Vahan API provider decision** — IDfy vs Karza vs AuthBridge
-- [ ] **WhatsApp Business API provider** — Interakt vs Wati vs Gupshup
-- [ ] **STQC-compliant camera sourcing** — CP Plus, Sparsh, Matrix Comsec, or Prama India only (Hikvision frozen out April 2025)
 - [ ] **Node 18 → 22 upgrade** — Firebase deadline April 2026 (Node 18 EOL)
 - [ ] From earlier: **SMS/MSG91 DLT registration**, **delete `admin@vagtsecurityservices.com`** from Firebase Auth
 
