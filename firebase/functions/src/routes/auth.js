@@ -431,12 +431,18 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
   // IMPORTANT: The password entered here is validated for length but NOT stored.
   // The guard sets their real password later via a reset link sent on admin approval.
   router.post('/employee/register', authLimiter, async (req, res) => {
-    const { phone, email, password, name } = req.body || {};
+    const { phone, email, password, name, role_family, designation, supervisor_tier_requested } = req.body || {};
     if (!phone || !email || !password) {
       return res.status(400).json({ message: 'phone, email, and password are required.' });
     }
     if (password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+    }
+
+    // Validate role fields if provided
+    const VALID_FAMILIES = ['security', 'facility', 'operations'];
+    if (role_family && !VALID_FAMILIES.includes(role_family)) {
+      return res.status(400).json({ message: 'Invalid role_family.' });
     }
 
     try {
@@ -458,13 +464,16 @@ module.exports = function ({ db, auth, authLimiter, loginLimiter }) {
       await db.collection('pending_registrations').doc(regToken).set({
         phone,
         email,
-        name:           (name || '').trim().slice(0, 100) || null,
+        name:                       (name || '').trim().slice(0, 100) || null,
+        role_family:                role_family || null,
+        designation:                designation  ? designation.trim().slice(0, 80)  : null,
+        supervisor_tier_requested:  supervisor_tier_requested === true,
         otp,
-        expires_at:     expiresAt,
-        verified:       false,
-        created_at:     now,
-        otp_sent_at:    now,
-        otp_send_count: 1,
+        expires_at:                 expiresAt,
+        verified:                   false,
+        created_at:                 now,
+        otp_sent_at:                now,
+        otp_send_count:             1,
       });
 
       // Send OTP via SMS + email simultaneously. Both are non-fatal.
